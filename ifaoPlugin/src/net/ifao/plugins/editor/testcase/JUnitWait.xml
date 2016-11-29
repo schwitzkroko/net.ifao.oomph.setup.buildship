@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--XML-Beispieldatei von XMLSpy generiert v2005 rel. 3 U (http://www.altova.com)-->
+<SWT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\Swt.xsd" package="net.ifao.plugins.editor.testcase">
+	<Shell name="Execute JUnit" background="COLOR_WIDGET_BACKGROUND" modal="false">
+		<Composite numColumns="2" fill="FULL">
+			<Label text="Package:"/>
+			<Text name="Package" fill="HORIZONTAL" enabled="false"/>
+			<Label text="Testcase:"/>
+			<Text name="Testcase" fill="HORIZONTAL" enabled="false"/>
+			<Text colSpan="2" name="Detail" fill="FULL"/>
+			<Composite colSpan="2" numColumns="3" fill="HORIZONTAL">
+				<Button name="ExamDiff" enabled="false" image="examdiff.gif"/>
+				<Composite fill="FULL"/>
+				<Button name="OK" text="  OK  " enabled="false"/>
+			</Composite>
+		</Composite>
+	</Shell>
+</SWT>

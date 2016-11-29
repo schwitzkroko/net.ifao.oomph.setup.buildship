@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--XML-Beispieldatei von XMLSpy generiert v2005 rel. 3 U (http://www.altova.com)-->
+<SWT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\Swt.xsd" package="net.ifao.tools.plugins.dialog">
+	<Shell name="Select" background="COLOR_LIST_BACKGROUND">
+		<Composite numColumns="2" fill="HORIZONTAL" background="COLOR_LIST_BACKGROUND">
+			<Composite fill="FULL" background="COLOR_LIST_BACKGROUND">
+				<Label name="Header"  text="Enter your text" font="HEADER_FONT"/>
+				<Label name="Type" text="..." />
+			</Composite>
+			<Canvas image="testcase_big.png"/>
+		</Composite>
+		<Composite border="SHADOW_ETCHED_OUT" fill="FULL" background="COLOR_WIDGET_BACKGROUND">
+				<Text name="Input" fill="FULL" border="BORDER"/>
+		</Composite>
+		<Composite numColumns="2" fill="HORIZONTAL" background="COLOR_WIDGET_BACKGROUND">
+			<Composite fill="FULL">
+			</Composite>
+			<Composite numColumns="2">
+				<Button name="Finish" text="  OK  " enabled="false" fill="HORIZONTAL"/>
+				<Button name="Cancel" text="  Cancel  " fill="HORIZONTAL"/>
+			</Composite>
+		</Composite>
+	</Shell>
+</SWT>
