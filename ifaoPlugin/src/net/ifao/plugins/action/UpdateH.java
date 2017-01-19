@@ -32,30 +32,7 @@ public class UpdateH
                IFile file = iProject.getFile("/lib/build/UpdateFromH.bat");
 
                if (file != null && file.exists()) {
-                  IFile fileCvs = iProject.getFile("/CVS/Entries");
-                  if (fileCvs != null && fileCvs.exists()) {
-                     String sName = iProject.getName();
-                     try {
-                        InputStream contents = fileCvs.getContents();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(contents));
-                        String[] sFirstLine = reader.readLine().split("/");
-                        if (sFirstLine.length > 0) {
-                           String sTag = sFirstLine[sFirstLine.length - 1];
-                           if (sTag.startsWith("T")) {
-                              sTag = sTag.substring(1);
-                           } else {
-                              sTag = "Mainline";
-                           }
-                           sName += " (" + sTag + ")";
-                        }
-                        reader.close();
-                        ht.put(sName, file);
-                     }
-                     catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                     }
-                  }
+                  checkCVS(ht, iProject, file);
                }
             }
 
@@ -87,6 +64,34 @@ public class UpdateH
                Util.showException("No 'UpdateFromH.bat' files found in your projects");
             }
 
+         }
+
+         protected void checkCVS(Hashtable<String, IFile> ht, IProject iProject, IFile file)
+         {
+            IFile fileCvs = iProject.getFile("/CVS/Entries");
+            if (fileCvs != null && fileCvs.exists()) {
+               String sName = iProject.getName();
+               try {
+                  InputStream contents = fileCvs.getContents();
+                  BufferedReader reader = new BufferedReader(new InputStreamReader(contents));
+                  String[] sFirstLine = reader.readLine().split("/");
+                  if (sFirstLine.length > 0) {
+                     String sTag = sFirstLine[sFirstLine.length - 1];
+                     if (sTag.startsWith("T")) {
+                        sTag = sTag.substring(1);
+                     } else {
+                        sTag = "Mainline";
+                     }
+                     sName += " (" + sTag + ")";
+                  }
+                  reader.close();
+                  ht.put(sName, file);
+               }
+               catch (Exception e) {
+                  // TODO Auto-generated catch block
+                  e.printStackTrace();
+               }
+            }
          }
       }.start();
       return null;
