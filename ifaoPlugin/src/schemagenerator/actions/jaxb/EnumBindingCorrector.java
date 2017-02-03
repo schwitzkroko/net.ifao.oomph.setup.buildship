@@ -1,24 +1,24 @@
 package schemagenerator.actions.jaxb;
 
 
-import net.ifao.xml.*;
+import net.ifao.xml.XmlObject;
 
 
-/** 
- * @author ernst 
+/**
+ * @author ernst
  */
 public class EnumBindingCorrector
 {
    XmlObject _schema;
    XmlObject _binding;
 
-   /** 
-    * TODO (ernst) add comment for Constructor EnumBindingCorrector 
-    * 
+   /**
+    * TODO (ernst) add comment for Constructor EnumBindingCorrector
+    *
     * @param pSchema TODO (ernst) add text for param pSchema
     * @param pBinding TODO (ernst) add text for param pBinding
-    * 
-    * @author ernst 
+    *
+    * @author ernst
     */
    public EnumBindingCorrector(XmlObject pSchema, XmlObject pBinding)
    {
@@ -26,25 +26,25 @@ public class EnumBindingCorrector
       _binding = pBinding;
    }
 
-   /** 
-    * Searches the schema for anonymous simpleType enums and creates the referring bindings. 
-    * It serves as entry point for the recursion 
-    * 
-    * @author kaufmann, ernst 
+   /**
+    * Searches the schema for anonymous simpleType enums and creates the referring bindings.
+    * It serves as entry point for the recursion
+    *
+    * @author kaufmann, ernst
     */
    public void addBindingsForSimpleTypeEnums()
    {
       XmlObject[] xmlObjects = _schema.getObjects("");
       for (XmlObject xmlObject : xmlObjects) {
-         addBindingsForSimpleTypeEnums(xmlObject, "/" + getPathPart(xmlObject),
-               xmlObject.getAttribute("name"));
+         addBindingsForSimpleTypeEnums(xmlObject, "/" + getPathPart(xmlObject), xmlObject.getAttribute("name"));
       }
+      addBindingsForDuplicateUpperLowerCaseElements(xmlObjects);
    }
 
    /**
     * Creates the xpath (part) for the xmlObject passed, e.g. <pre>
     * /xs:complexType[@name='FareType']
-    * </pre> 
+    * </pre>
     *
     * @param pXmlObject xmlObject for which the xpath (part) should be created
     * @return part for a xpath
@@ -65,40 +65,38 @@ public class EnumBindingCorrector
       return sbPart.toString();
    }
 
-   /** 
-    * Recursive method which checks, if the xmlObject passed is an anonymous simpleType enum (attributes and elements). 
-    * If yes, the binding for this attribute/element is added to the binding for the schema (field _binding) 
-    * 
-    * <p> TODO rename sLastName to psLastName
-    * @param pXmlObject xmlObject to check 
+   /**
+    * Recursive method which checks, if the xmlObject passed is an anonymous simpleType enum (attributes and elements).
+    * If yes, the binding for this attribute/element is added to the binding for the schema (field _binding)
+    *
+    * @param pXmlObject xmlObject to check
     * @param psPath TODO (ernst) add text for param psPath
-    * @param sLastName TODO (ernst) add text for param sLastName
-    * 
-    * @author kaufmann, ernst 
+    * @param psLastName TODO (ernst) add text for param sLastName
+    *
+    * @author kaufmann, ernst
     */
-   private void addBindingsForSimpleTypeEnums(XmlObject pXmlObject, String psPath, String sLastName)
+   private void addBindingsForSimpleTypeEnums(XmlObject pXmlObject, String psPath, String psLastName)
    {
       if (pXmlObject.getName().equalsIgnoreCase("attributeGroup")) {
          return;
       }
 
-      if ((pXmlObject.getName().equalsIgnoreCase("attribute") || pXmlObject.getName()
-            .equalsIgnoreCase("element")) && pXmlObject.getObjects("simpleType").length > 0) {
+      if ((pXmlObject.getName().equalsIgnoreCase("attribute") || pXmlObject.getName().equalsIgnoreCase("element"))
+            && pXmlObject.getObjects("simpleType").length > 0) {
          if (isEnum(pXmlObject)) {
             // <jaxb:bindings node="//xs:complexType[@name='PointToPointShoppingQuery']/xs:attribute[@name='fareFilter']/xs:simpleType">
             //   <jaxb:typesafeEnumClass name="EnumFareFilter" />
             // </jaxb:bindings>
-            XmlObject bindingsForEnum =
-               _binding.createObject("jaxb:bindings", "node", psPath + "/xs:simpleType", true);
-            bindingsForEnum.createObject("jaxb:typesafeEnumClass", "name", "Enum" + sLastName + "_"
-                  + pXmlObject.getAttribute("name"), true);
+            XmlObject bindingsForEnum = _binding.createObject("jaxb:bindings", "node", psPath + "/xs:simpleType", true);
+            bindingsForEnum.createObject("jaxb:typesafeEnumClass", "name",
+                  "Enum" + psLastName + "_" + pXmlObject.getAttribute("name"), true);
 
             createBindingsForEnumValues(pXmlObject, bindingsForEnum);
          }
       } else {
          String sName = pXmlObject.getAttribute("name");
          if (sName.length() == 0) {
-            sName = sLastName;
+            sName = psLastName;
          }
          for (XmlObject xmlObject : pXmlObject.getObjects("")) {
             addBindingsForSimpleTypeEnums(xmlObject, psPath + getPathPart(xmlObject), sName);
@@ -106,21 +104,21 @@ public class EnumBindingCorrector
       }
    }
 
-   /** 
+   /**
     * Creates bindings for enumeration values.
-    * 
+    *
     * Numbers are mapped to "VALUE_(number)" (e.g.: 1 -> VALUE_1)
     * Negative numbers are mapped to "VALUE_MINUS_(number)" (e.g.: -1 -> VALUE_MINUS_1)
-    * 
+    *
     * This is necessary, because JaxB compiler can not handle enumeration values which are numbers (e.g. 1, 2, ...)
     * or negative numbers (e.g. -1, -2, ...).
-    * 
+    *
     * The minus sign "-" is replaced by an underscore "_", as minus sign is not allowed in variable names.
-    * 
+    *
     * @param pXmlObject The xml object containing the number(s) as enumeration value(s)
     * @param pBindingsForEnum The binding which is being adapted
-    * 
-    * @author ernst 
+    *
+    * @author ernst
     */
    private void createBindingsForEnumValues(XmlObject pXmlObject, XmlObject pBindingsForEnum)
    {
@@ -148,8 +146,8 @@ public class EnumBindingCorrector
                   }
 
                   if (!sEnumMember.equals(sValue)) {
-                     pBindingsForEnum.createObject("jxb:bindings", "node",
-                           "xs:restriction/xs:enumeration[@value='" + sValue + "']", true)
+                     pBindingsForEnum
+                           .createObject("jxb:bindings", "node", "xs:restriction/xs:enumeration[@value='" + sValue + "']", true)
                            .createObject("jxb:typesafeEnumMember", "name", sEnumMember, true);
                   }
                }
@@ -158,13 +156,13 @@ public class EnumBindingCorrector
       }
    }
 
-   /** 
-    * Checks recursivly, if the current xmlObject contains an enumeration 
-    * 
-    * @param pXmlObject xmlObject to check 
-    * @return true, if subelement "enumeration" has been found 
-    * 
-    * @author kaufmann, ernst 
+   /**
+    * Checks recursivly, if the current xmlObject contains an enumeration
+    *
+    * @param pXmlObject xmlObject to check
+    * @return true, if subelement "enumeration" has been found
+    *
+    * @author kaufmann, ernst
     */
    private boolean isEnum(XmlObject pXmlObject)
    {
@@ -187,13 +185,13 @@ public class EnumBindingCorrector
       return bIsEnum;
    }
 
-   /** 
-    * TODO (ernst) add comment for method main 
-    * 
+   /**
+    * TODO (ernst) add comment for method main
+    *
     * <p> TODO rename args to pArgs
     * @param args TODO (ernst) add text for param args
-    * 
-    * @author ernst 
+    *
+    * @author ernst
     */
    public static void main(String[] args)
    {
@@ -221,4 +219,30 @@ public class EnumBindingCorrector
       corr.addBindingsForSimpleTypeEnums(xmlo, sPath, sLastName);
       System.out.println();
    }
+
+
+   /**
+    * The method addBindingsForDuplicateUpperLowerCaseElements searches for elements with equal names
+    * but different upper and lower case writing and adds bindings for these cases.
+    *
+    * @param pXmlObjects array containing all elements
+    *
+    * @author Andrew Clark
+    */
+   private void addBindingsForDuplicateUpperLowerCaseElements(XmlObject[] pXmlObjects)
+   {
+      for (int i = 0; i < pXmlObjects.length; i++) {
+         for (int j = i + 1; j < pXmlObjects.length; j++) {
+            if (j != i && pXmlObjects[j].getAttribute("name") != null && pXmlObjects[i].getAttribute("name") != null
+                  && pXmlObjects[j].getAttribute("name").equalsIgnoreCase(pXmlObjects[i].getAttribute("name"))
+                  && !pXmlObjects[j].getAttribute("name").equals(pXmlObjects[i].getAttribute("name"))) {
+               XmlObject bindingsForEnum =
+                  _binding.createObject("jaxb:bindings", "node", "/" + getPathPart(pXmlObjects[j]), true);
+               bindingsForEnum.createObject("jaxb:class", "name", pXmlObjects[i].getAttribute("name") + "2", true);
+               createBindingsForEnumValues(pXmlObjects[j], bindingsForEnum);
+            }
+         }
+      }
+   }
+
 }
