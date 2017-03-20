@@ -1,0 +1,64 @@
+
+	// create java and eclipse tasks
+	apply plugin: 'java'
+	apply plugin: 'eclipse'
+	
+	// we use java version:
+	sourceCompatibility = 1.8
+	
+	// set the build version
+	def VERSION = System.getenv('VERSION')?:'X_X_X'	
+	version = "${VERSION}"
+  	
+	// java compiler options (for build)
+	compileJava {
+	    options.fork = true                            // Fork your compilation into a child process
+	    options.forkOptions.setMemoryMaximumSize('2g') // Set maximum memory to 2g
+	    options.encoding = 'UTF-8'                     // use utf8
+	    options.debug = true                           
+	    options.debugOptions.setDebugLevel('lines')    // only line number debug informatrion
+	}
+		
+	// java compiler options (for test)
+	compileTestJava {
+		options.encoding = 'UTF-8'  // use utf8
+	}
+	
+	// where to get the external jars from
+    repositories {
+        // local .m2 folder in user directory (for installation)
+        mavenLocal()
+        // 'our' nexus repository (with confirmed jars)
+        maven {url "http://polaris.home.ifao.net:8081/nexus/content/groups/public"}
+    }
+	
+	// ignore test failures 
+	test {
+		ignoreFailures = true
+	    enableAssertions = false
+	}
+	
+// define where to find sources
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+	
+eclipse {
+  project {
+
+    //if you want to assign natures in a groovy fashion:
+    natures = ['org.eclipse.pde.PluginNature']
+
+    //if you want to append some extra build command:
+    buildCommand 'org.eclipse.pde.ManifestBuilder'
+    buildCommand 'org.eclipse.pde.SchemaBuilder'
+  }  
+  classpath {
+    containers 'org.eclipse.pde.core.requiredPlugins'
+  }
+}
