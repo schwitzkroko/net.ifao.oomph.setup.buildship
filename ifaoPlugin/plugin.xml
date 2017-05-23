@@ -146,6 +146,20 @@
             menubarPath="additions">
       </action>
    </objectContribution>
+
+      <objectContribution
+            adaptable="true"
+            id="BranchSwitcher.contribution"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               label="Switch Polaris branch"
+               class="branchswitcher.popup.actions.SwitchBranch"
+               menubarPath="additions"
+               enablesFor="1"
+               icon="icons/branch.gif"
+               id="BranchSwitcher.Action2">
+         </action>
+      </objectContribution>
 	              
    </extension>
 
