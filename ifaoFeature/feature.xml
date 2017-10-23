@@ -2,15 +2,18 @@
 <feature
       id="net.ifao.feature"
       label="i:FAO Plugin Feature"
-      version="2.1.12"
+      version="2.1.13"
       provider-name="i:FAO"
       plugin="net.ifao.plugin">
 
    <description url="http://www.ifao.net">
       The i:FAO Plugin contains useful applications for arctic developers
 Change log:
+2.1.13
+- Improvements for SNCF; handling redirect responses (&quot;The document has moved&quot;) for imported schemas
 2.1.7
-- Fix of boolean treatment in NEW-CIB Interface generating. Fix of compile error
+- Fix of boolean treatment in NEW-CIB Interface generating. Fix
+of compile error
 2.1.6
 - Fix of boolean treatment in NEW-CIB Interface generating
 2.1.4

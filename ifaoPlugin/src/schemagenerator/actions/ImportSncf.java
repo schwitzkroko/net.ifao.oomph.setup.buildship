@@ -1,15 +1,23 @@
 package schemagenerator.actions;
 
 
-import ifaoplugin.*;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import schemagenerator.gui.*;
-
-import net.ifao.xml.*;
+import ifaoplugin.Util;
+import ifaoplugin.UtilSwt;
+import net.ifao.xml.WsdlObject;
+import net.ifao.xml.XmlObject;
+import schemagenerator.gui.SwtSncf;
 
 
 /**
@@ -21,6 +29,8 @@ import net.ifao.xml.*;
  */
 public class ImportSncf
 {
+   private static final Pattern NEW_URL_LOCATION = Pattern.compile("(?s).*a href=\"([^\"]+)\".*");
+
    private String _sLastError = null;
    private final String _sURL_SNCF;
    private final String _sJavaCommunication;
@@ -60,24 +70,24 @@ public class ImportSncf
       _sbResult.append("Java files will not be generated\n\n");
    }
 
-   /** 
-    * Method getLastError 
-    * 
+   /**
+    * Method getLastError
+    *
     * @return last error stored in _sLastError
-    * 
-    * @author kaufmann 
+    *
+    * @author kaufmann
     */
    public String getLastError()
    {
       return _sLastError;
    }
 
-   /** 
-    * Method getResult 
-    * 
+   /**
+    * Method getResult
+    *
     * @return result of the operation
-    * 
-    * @author kaufmann 
+    *
+    * @author kaufmann
     */
    public String getResult()
    {
@@ -119,29 +129,30 @@ public class ImportSncf
       _sbResult.append("Working on service ").append(psService).append("\n");
 
       XmlObject wsdl = downloadWsdl(psService);
-      String sWsdl = wsdl.toString();
-      String sWsdlNamespace = wsdl.getAttribute("targetNamespace");
+      if (wsdl != null) {
+         String sWsdl = wsdl.toString();
+         String sWsdlNamespace = wsdl.getAttribute("targetNamespace");
 
-      XmlObject[] schemas = wsdl.createObject("types").getObjects("schema");
+         XmlObject[] schemas = wsdl.createObject("types").getObjects("schema");
 
-      for (XmlObject schema : schemas) {
-         downloadImports(schema, pSchemaDatas);
+         for (XmlObject schema : schemas) {
+            downloadImports(schema, pSchemaDatas);
+         }
+
+         wsdl.getObject("types").deleteObjects("schema");
+         for (SchemaData schemaData : pSchemaDatas.values()) {
+            wsdl.getObject("types").addObject(schemaData._schema);
+         }
+         String sDataBinding = WsdlObject.getDataBinding(wsdl, null, "", false, false);
+         sDataBinding = addPackageInfos(sDataBinding, pSchemaDatas.values());
+
+         for (SchemaData schemaData : pSchemaDatas.values()) {
+            Util.updateFile(schemaData._sSchemaFile, schemaData._schema.toString(), _sbResult);
+            Util.updateFile(schemaData._sSchemaFile.replaceFirst("data.xsd", "dataBinding.xml"), sDataBinding, _sbResult);
+         }
+
+         updateJavaCommunication(psService, sWsdl);
       }
-
-      wsdl.getObject("types").deleteObjects("schema");
-      for (SchemaData schemaData : pSchemaDatas.values()) {
-         wsdl.getObject("types").addObject(schemaData._schema);
-      }
-      String sDataBinding = WsdlObject.getDataBinding(wsdl, null, "", false, false);
-      sDataBinding = addPackageInfos(sDataBinding, pSchemaDatas.values());
-
-      for (SchemaData schemaData : pSchemaDatas.values()) {
-         Util.updateFile(schemaData._sSchemaFile, schemaData._schema.toString(), _sbResult);
-         Util.updateFile(schemaData._sSchemaFile.replaceFirst("data.xsd", "dataBinding.xml"),
-               sDataBinding, _sbResult);
-      }
-
-      updateJavaCommunication(psService, sWsdl);
    }
 
    /**
@@ -192,11 +203,11 @@ public class ImportSncf
          sImport = "import " + sImport + ".*;\n";
       }
 
-      StringBuffer sbJava = new StringBuffer();
-      HashSet<String> hsExceptions = new HashSet<String>();
+      StringBuilder sbJava = new StringBuilder();
+      HashSet<String> hsExceptions = new HashSet<>();
 
-      for (int i = 0; i < operation.length; i++) {
-         String sOperation = operation[i].getAttribute("name");
+      for (XmlObject element : operation) {
+         String sOperation = element.getAttribute("name");
 
          String sJavaOperation = loadWSDLObject(wsdl, definitions, sOperation, hsExceptions);
 
@@ -204,11 +215,11 @@ public class ImportSncf
 
             // validate import
             if (sImport.length() == 0) {
-               sImport = sJavaOperation.substring(0, sJavaOperation.indexOf("\n") + 1);
+               sImport = sJavaOperation.substring(0, sJavaOperation.indexOf('\n') + 1);
             }
 
             // trunc Import from response
-            sJavaOperation = sJavaOperation.substring(sJavaOperation.indexOf("\n") + 1);
+            sJavaOperation = sJavaOperation.substring(sJavaOperation.indexOf('\n') + 1);
          }
 
          // add Java operation
@@ -228,37 +239,36 @@ public class ImportSncf
       return sbJava.toString();
    }
 
-   /** 
+   /**
     * Method getInputWSDLObject has been copied from old arctic requester
-    * 
+    *
     * @param pWsdl has been copied from old arctic requester
     * @param pDefinitions has been copied from old arctic requester
     * @param psMethod has been copied from old arctic requester
     * @param phsExceptions has been copied from old arctic requester
     * @return has been copied from old arctic requester
-    * 
-    * @author Andreas Brod 
+    *
+    * @author Andreas Brod
     */
-   private String loadWSDLObject(WsdlObject pWsdl, XmlObject pDefinitions, String psMethod,
-                                 HashSet<String> phsExceptions)
+   private String loadWSDLObject(WsdlObject pWsdl, XmlObject pDefinitions, String psMethod, HashSet<String> phsExceptions)
    {
-      String sRet = "";
-      String sParams = "";
+      StringBuilder ret = new StringBuilder();
+      StringBuilder params = new StringBuilder();
 
       // get portType and additional types (with schema)
       XmlObject[] portType = pDefinitions.getObjects("portType");
       XmlObject types = pDefinitions.createObject("types");
 
       // search through the protTypes
-      for (int i = 0; i < portType.length; i++) {
-         XmlObject operation = portType[i].findSubObject("operation", "name", psMethod);
+      for (XmlObject element : portType) {
+         XmlObject operation = element.findSubObject("operation", "name", psMethod);
 
          // if an operation is found ...
          if (operation != null) {
 
             String sMessageTns = operation.createObject("input").getAttribute("message");
-            if (sMessageTns.indexOf(":") > 0) {
-               sMessageTns = sMessageTns.substring(0, sMessageTns.indexOf(":") + 1);
+            if (sMessageTns.indexOf(':') >= 0) {
+               sMessageTns = sMessageTns.substring(0, sMessageTns.indexOf(':') + 1);
             } else {
                sMessageTns = "";
             }
@@ -271,15 +281,12 @@ public class ImportSncf
             String sMessageFault = ":" + operation.createObject("fault").getAttribute("message");
 
             // get the soapAction (if neccessary)
-            String soapAction =
-               getSoapAction(pDefinitions, portType[i].getAttribute("name"), psMethod);
+            String soapAction = getSoapAction(pDefinitions, element.getAttribute("name"), psMethod);
 
             // get the inputNameSpace
-            String inputNameSpace =
-               getInputNamespace(pDefinitions, portType[i].getAttribute("name"), psMethod);
+            String inputNameSpace = getInputNamespace(pDefinitions, element.getAttribute("name"), psMethod);
 
-            String inputPackage =
-               getInputPackage(pDefinitions, portType[i].getAttribute("name"), psMethod);
+            String inputPackage = getInputPackage(pDefinitions, element.getAttribute("name"), psMethod);
             boolean bAddImport = false;
 
             String sOutputType = "";
@@ -290,8 +297,7 @@ public class ImportSncf
 
                // search a the related message-object
                XmlObject messageOutput =
-                  pDefinitions.findSubObject("message", "name",
-                        sMessageOutput.substring(sMessageOutput.lastIndexOf(":") + 1));
+                  pDefinitions.findSubObject("message", "name", sMessageOutput.substring(sMessageOutput.lastIndexOf(':') + 1));
 
                String sOutputTypeOrg = sOutputType;
 
@@ -307,8 +313,8 @@ public class ImportSncf
                         sOutputType = part.getAttribute("element");
                      }
 
-                     if (sOutputType.indexOf(":") > 0) {
-                        sOutputTypeOrg = sOutputType.substring(sOutputType.lastIndexOf(":") + 1);
+                     if (sOutputType.indexOf(':') >= 0) {
+                        sOutputTypeOrg = sOutputType.substring(sOutputType.lastIndexOf(':') + 1);
                         sOutputType = Util.camelCase(sOutputTypeOrg);
 
                      } else {
@@ -321,17 +327,13 @@ public class ImportSncf
 
                // search a the related message-object
                XmlObject messageInput =
-                  pDefinitions.findSubObject("message", "name",
-                        sMessageInput.substring(sMessageInput.lastIndexOf(":") + 1));
+                  pDefinitions.findSubObject("message", "name", sMessageInput.substring(sMessageInput.lastIndexOf(':') + 1));
 
                // get the faultException
                XmlObject messageFault =
-                  pDefinitions.findSubObject("message", "name",
-                        sMessageFault.substring(sMessageFault.lastIndexOf(":") + 1));
+                  pDefinitions.findSubObject("message", "name", sMessageFault.substring(sMessageFault.lastIndexOf(':') + 1));
 
-               XmlObject binding =
-                  pDefinitions.createObject("binding", "type",
-                        sMessageTns + portType[i].getAttribute("name"), true);
+               XmlObject binding = pDefinitions.createObject("binding", "type", sMessageTns + element.getAttribute("name"), true);
 
                String sException = "";
 
@@ -344,8 +346,8 @@ public class ImportSncf
                      sException = partFault.getAttribute("type");
                   }
 
-                  if (sException.indexOf(":") > 0) {
-                     sException = sException.substring(sException.indexOf(":") + 1);
+                  if (sException.indexOf(':') >= 0) {
+                     sException = sException.substring(sException.indexOf(':') + 1);
                   }
 
                   if (sException.length() > 0) {
@@ -358,40 +360,38 @@ public class ImportSncf
                   // ... now we have a message object with input/output
                   XmlObject[] partInput = messageInput.getObjects("part");
 
-                  sRet = "";
+                  ret.setLength(0);
 
-                  sParams = "";
+                  params.setLength(0);
 
                   boolean bIsSoapAction =
-                     soapAction.length() > 0
-                           && !binding.createObject("binding").getAttribute("style")
-                                 .equalsIgnoreCase("rpc");
+                     soapAction.length() > 0 && !binding.createObject("binding").getAttribute("style").equalsIgnoreCase("rpc");
 
                   if (bIsSoapAction) {
-                     sRet += "<!-- SOAPAction: " + soapAction + " -->";
+                     ret.append("<!-- SOAPAction: ").append(soapAction).append(" -->");
                   }
 
                   // if there are no parts, there is a void method
                   if (partInput.length == 0) {
 
                      if (inputNameSpace.length() > 0) {
-                        sRet += "<m:" + psMethod + " xmlns:m=\"" + inputNameSpace + "\"" + " />";
+                        ret.append("<m:").append(psMethod).append(" xmlns:m=\"").append(inputNameSpace).append("\" />");
                      } else {
-                        sRet += "<" + psMethod + " />";
+                        ret.append("<").append(psMethod).append(" />");
                      }
                   }
 
-                  List<String> listNames = new Vector<String>();
-                  List<String> listTypes = new Vector<String>();
-                  List<String> listClasses = new Vector<String>();
+                  List<String> listNames = new ArrayList<>();
+                  List<String> listTypes = new ArrayList<>();
+                  List<String> listClasses = new ArrayList<>();
 
                   for (int j = 0; j < partInput.length; j++) {
                      String sName = partInput[j].getAttribute("name");
                      String sType = partInput[j].getAttribute("type");
                      String sElement = partInput[j].getAttribute("element");
 
-                     if (sParams.length() > 0) {
-                        sParams += ", ";
+                     if (params.length() > 0) {
+                        params.append(", ");
                      }
 
                      if (sType.length() == 0) {
@@ -401,8 +401,8 @@ public class ImportSncf
                      if (sType.trim().length() > 0) {
 
                         // add the type to the java Source
-                        if (sType.indexOf(":") > 0) {
-                           sType = sType.substring(sType.lastIndexOf(":") + 1);
+                        if (sType.indexOf(':') >= 0) {
+                           sType = sType.substring(sType.lastIndexOf(':') + 1);
                         }
 
                         listTypes.add(sType);
@@ -410,219 +410,199 @@ public class ImportSncf
                         sType = Util.camelCase(sType);
 
                         // correct types
-                        if (sType.equalsIgnoreCase("int") || sType.equalsIgnoreCase("long")
-                              || sType.equalsIgnoreCase("float")
+                        if (sType.equalsIgnoreCase("int") || sType.equalsIgnoreCase("long") || sType.equalsIgnoreCase("float")
                               || sType.equalsIgnoreCase("boolean")) {
                            sType = sType.toLowerCase();
                         }
 
-                        sParams += sType + " ";
+                        params.append(sType).append(" ");
 
                         listClasses.add(sType);
 
                         // add the Name to the java Source
-                        if (sName.indexOf(":") > 0) {
-                           listNames.add(sName.substring(sName.lastIndexOf(":") + 1));
+                        if (sName.indexOf(':') >= 0) {
+                           listNames.add(sName.substring(sName.lastIndexOf(':') + 1));
                         } else {
                            listNames.add(sName);
                         }
 
-                        sParams += listNames.get(listNames.size() - 1);
+                        params.append(listNames.get(listNames.size() - 1));
 
                         if (sElement.length() > 0) {
-                           sRet += pWsdl.getWsdlElement(sElement, types, false);
+                           ret.append(pWsdl.getWsdlElement(sElement, types, false));
                         } else {
                            if (j == 0) {
-                              sRet += "<m:" + psMethod;
+                              ret.append("<m:").append(psMethod);
 
                               if (inputNameSpace.length() > 0) {
-                                 sRet += " xmlns:m=\"" + inputNameSpace + "\"";
+                                 ret.append(" xmlns:m=\"").append(inputNameSpace).append("\"");
                               }
 
-                              sRet += ">";
+                              ret.append(">");
                            }
 
                            pWsdl.searchTypes(partInput[j], null, types, "");
 
-                           // sRet += part[j];
-                           sRet += pWsdl.getElement(partInput[j], "", "");
+                           // ret.append(part[j]);
+                           ret.append(pWsdl.getElement(partInput[j], "", ""));
 
                            if (j + 1 == partInput.length) {
-                              sRet += "</m:" + psMethod + ">";
+                              ret.append("</m:").append(psMethod).append(">");
                            }
                         }
                      }
                   }
 
-                  String sHeader = "    /**\n";
+                  StringBuilder header = new StringBuilder("    /**\n");
 
-                  sHeader += "    * The method " + psMethod + " is automatically generated\n";
-                  sHeader += "    * \n";
+                  header.append("    * The method ").append(psMethod).append(" is automatically generated\n");
+                  header.append("    * \n");
 
                   String psMethodJava = Util.camelCase(psMethod, false);
 
-                  String sJava = "";
+                  StringBuilder sJava = new StringBuilder();
 
                   // create the JavaSourceCode
                   if (sOutputType.length() > 0) {
-                     sJava =
-                        "    public " + sOutputType.substring(0, sOutputType.indexOf(" ")) + " "
-                              + psMethodJava + "(" + sParams
-                              + ")\n        throws AgentException {\n";
+                     sJava.append("    public ").append(sOutputType.substring(0, sOutputType.indexOf(' '))).append(" ")
+                           .append(psMethodJava).append("(").append(params.toString())
+                           .append(")\n        throws AgentException {\n");
 
                   } else {
-                     sJava =
-                        "    public void " + psMethodJava + "(" + sParams
-                              + ")\n        throws AgentException {\n";
+                     sJava.append("    public void ").append(psMethodJava).append("(").append(params)
+                           .append(")\n        throws AgentException {\n");
                   }
 
-                  sJava += "        StringBuffer sbRequest = new StringBuffer();\n\n";
+                  sJava.append("        StringBuilder sbRequest = new StringBuilder();\n\n");
 
                   if (bIsSoapAction) {
-                     sJava += "        setSOAPAction(\"" + soapAction + "\");\n\n";
+                     sJava.append("        setSOAPAction(\"").append(soapAction).append("\");\n\n");
                   } else {
 
                      // if there is no soapAction ... add the method
                      if (inputNameSpace.length() > 0) {
-                        sJava +=
-                           "        sbRequest.append(\"<m:" + psMethod + " xmlns:m=\\\""
-                                 + inputNameSpace + "\\\">\");\n";
+                        sJava.append("        sbRequest.append(\"<m:").append(psMethod).append(" xmlns:m=\\\"")
+                              .append(inputNameSpace).append("\\\">\");\n");
                      } else {
-                        sJava += "        sbRequest.append(\"<m:" + psMethod + ">\");\n";
+                        sJava.append("        sbRequest.append(\"<m:").append(psMethod).append(">\");\n");
                      }
                   }
 
                   // add parameters
-                  if (listNames.size() > 0) {
-                     sJava += "\n        // add parameters\n\n";
+                  if (!listNames.isEmpty()) {
+                     sJava.append("\n        // add parameters\n\n");
                   } else {
-                     sJava += "\n        // no parameters defined\n\n";
+                     sJava.append("\n        // no parameters defined\n\n");
                   }
 
                   for (int iLst = 0; iLst < listNames.size(); iLst++) {
-                     sHeader +=
-                        "    * @param " + listNames.get(iLst) + " parameter " + (iLst + 1) + "\n";
+                     header.append("    * @param ").append(listNames.get(iLst)).append(" parameter ").append(iLst + 1)
+                           .append("\n");
 
                      String sClass = listClasses.get(iLst);
                      String sElement = listNames.get(iLst);
 
-                     if (sClass.equalsIgnoreCase("String") || sClass.equalsIgnoreCase("int")
-                           || sClass.equalsIgnoreCase("long") || sClass.equalsIgnoreCase("float")
-                           || sClass.equalsIgnoreCase("boolean")) {
-                        sJava +=
-                           "        sbRequest.append(\"<" + sElement + "\" + _getParamType(\""
-                                 + sClass.toLowerCase() + "\")+ \">\"+" + sElement + "+\"</"
-                                 + sElement + ">\");\n";
+                     if (sClass.equalsIgnoreCase("String") || sClass.equalsIgnoreCase("int") || sClass.equalsIgnoreCase("long")
+                           || sClass.equalsIgnoreCase("float") || sClass.equalsIgnoreCase("boolean")) {
+                        sJava.append("        sbRequest.append(\"<").append(sElement).append("\" + _getParamType(\"")
+                              .append(sClass.toLowerCase()).append("\")+ \">\"+").append(sElement).append("+\"</")
+                              .append(sElement).append(">\");\n");
                      } else {
                         bAddImport = true;
-                        sHeader =
-                           "    private static Object _" + psMethodJava
-                                 + "Monitor = new Object();\n" + sHeader;
-                        sJava += "        synchronized(_" + psMethodJava + "Monitor) {\n";
+                        header.insert(0, "    private static Object _" + psMethodJava + "Monitor = new Object();\n");
+                        sJava.append("        synchronized(_").append(psMethodJava).append("Monitor) {\n");
 
                         String sObj = "s" + Util.camelCase(listTypes.get(iLst));
 
-                        sJava += "            // Convert Castor Object to String\n";
-                        sJava +=
-                           "            String " + sObj
-                                 + " = CastorSerializer.marshalProviderRequest("
-                                 + listNames.get(iLst) + ", false,\n";
-                        sJava +=
-                           "                                               "
-                                 + "null, null, _bValidateRequest, log);\n";
+                        sJava.append("            // Convert Castor Object to String\n");
+                        sJava.append("            String ").append(sObj).append(" = CastorSerializer.marshalProviderRequest(")
+                              .append(listNames.get(iLst)).append(", false,\n");
+                        sJava.append("                                               null, null, _bValidateRequest, log);\n");
 
                         if (!bIsSoapAction && !listTypes.get(iLst).equals(listNames.get(iLst))) {
-                           sJava +=
-                              "            // " + listTypes.get(iLst) + " has to be "
-                                    + listNames.get(iLst) + " for the request\n";
-                           sJava +=
-                              "            " + sObj + " = " + REPLACEXMLTAG + "(\""
-                                    + listTypes.get(iLst) + "\", \"" + listNames.get(iLst) + "\", "
-                                    + sObj + ");\n";
+                           sJava.append("            // ").append(listTypes.get(iLst)).append(" has to be ")
+                                 .append(listNames.get(iLst)).append(" for the request\n");
+                           sJava.append("            ").append(sObj).append(" = ").append(REPLACEXMLTAG).append("(\"")
+                                 .append(listTypes.get(iLst)).append("\", \"").append(listNames.get(iLst)).append("\", ")
+                                 .append(sObj).append(");\n");
                         }
 
-                        sJava += "            sbRequest.append(" + sObj + ");\n";
+                        sJava.append("            sbRequest.append(").append(sObj).append(");\n");
 
-                        sJava += "        }\n";
+                        sJava.append("        }\n");
                      }
                   }
 
                   // if there is no soapAction ... add the method
                   if (!bIsSoapAction) {
 
-                     sJava += "\n        // close the method\n";
-                     sJava += "        sbRequest.append(\"</m:" + psMethod + ">\");\n\n";
+                     sJava.append("\n        // close the method\n");
+                     sJava.append("        sbRequest.append(\"</m:").append(psMethod).append(">\");\n\n");
                   }
 
-                  sJava += "\n        // get the Provider Response\n";
+                  sJava.append("\n        // get the Provider Response\n");
 
-                  sJava += "        String sResponse = sendReceive(sbRequest.toString());\n\n";
+                  sJava.append("        String sResponse = sendReceive(sbRequest.toString());\n\n");
 
                   if (sOutputType.length() > 0) {
-                     sHeader += "    * @return response object\n";
+                     header.append("    * @return response object\n");
 
                      // get the return value
 
-                     String sClass = sOutputType.substring(0, sOutputType.indexOf(" "));
+                     String sClass = sOutputType.substring(0, sOutputType.indexOf(' '));
 
                      String sInner =
-                        "" + REPLACEXMLTAG + "(\""
-                              + sOutputType.substring(sOutputType.indexOf(" ") + 1)
-                              + "\", \"\", sResponse)";
+                        "" + REPLACEXMLTAG + "(\"" + sOutputType.substring(sOutputType.indexOf(' ') + 1) + "\", \"\", sResponse)";
 
                      if (sClass.equalsIgnoreCase("String") || sClass.equals("string")) {
-                        sJava += "        return " + sInner + ";\n";
+                        sJava.append("        return ").append(sInner).append(";\n");
                      } else if (sClass.equalsIgnoreCase("int")) {
-                        sJava += "        return Integer.parseInt(" + sInner + ");\n";
+                        sJava.append("        return Integer.parseInt(").append(sInner).append(");\n");
                      } else if (sClass.equalsIgnoreCase("long")) {
-                        sJava += "        return Long.parseLong(" + sInner + ");\n";
+                        sJava.append("        return Long.parseLong(").append(sInner).append(");\n");
                      } else if (sClass.equalsIgnoreCase("float")) {
-                        sJava += "        return Float.parseFloat(" + sInner + ");\n";
+                        sJava.append("        return Float.parseFloat(").append(sInner).append(");\n");
                      } else if (sClass.equalsIgnoreCase("boolean")) {
-                        sJava += "        return Boolean.parseBoolean(" + sInner + ");\n";
+                        sJava.append("        return Boolean.parseBoolean(").append(sInner).append(");\n");
                      } else {
-                        sInner =
-                           "" + REPLACEXMLTAG + "(\""
-                                 + sOutputType.substring(sOutputType.indexOf(" ") + 1) + "\", \""
-                                 + sOutputTypeOrg + "\", sResponse)";
+                        sInner = "" + REPLACEXMLTAG + "(\"" + sOutputType.substring(sOutputType.indexOf(' ') + 1) + "\", \""
+                              + sOutputTypeOrg + "\", sResponse)";
 
-                        sJava +=
-                           "        return (" + sClass
-                                 + ") CastorSerializer.unmarshalProviderResponse(\n               "
-                                 + sInner + ",\n               " + sClass
-                                 + ".class, log, _bValidateResponse);\n";
+                        sJava.append("        return (").append(sClass)
+                              .append(") CastorSerializer.unmarshalProviderResponse(\n               ").append(sInner)
+                              .append(",\n               ").append(sClass).append(".class, log, _bValidateResponse);\n");
                      }
 
                   }
-                  sHeader += "    * @throws AgentException\n";
-                  sHeader += "    * @author _GENERATOR_\n";
+                  header.append("    * @throws AgentException\n");
+                  header.append("    * @author _GENERATOR_\n");
 
-                  sHeader += "    */\n";
+                  header.append("    */\n");
 
-                  sJava = sHeader + sJava + "    }\n";
+                  sJava.insert(0, header);
+                  sJava.append("    }\n");
 
-                  if ((inputPackage.length() > 0) && (sJava.indexOf("import " + inputPackage) < 0)
-                        && bAddImport) {
-                     sJava = "import " + inputPackage + ".*;\n" + sJava + "";
+                  if ((inputPackage.length() > 0) && (sJava.indexOf("import " + inputPackage) < 0) && bAddImport) {
+                     sJava.insert(0, "import " + inputPackage + ".*;\n");
                   }
 
-                  return sJava;
+                  return sJava.toString();
                }
             }
          } // endif for this method
       }
 
-      return sParams;
+      return params.toString();
    }
 
-   /** 
-    * has been copied from old arctic requester 
-    * 
+   /**
+    * has been copied from old arctic requester
+    *
     * @param pXmlWsdl has been copied from old arctic requester
     * @param psBindingName has been copied from old arctic requester
     * @param psOperationName has been copied from old arctic requester
     * @return has been copied from old arctic requester
-    * 
+    *
     * @author brod
     */
    private String getSoapAction(XmlObject pXmlWsdl, String psBindingName, String psOperationName)
@@ -642,30 +622,29 @@ public class ImportSncf
       return "";
    }
 
-   /** 
-    * Method getOperation  has been copied from old arctic requester 
-    * 
-    * @param pXmlWsdl 
-    * @param psBindingName 
-    * @param psOprationName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getOperation  has been copied from old arctic requester
+    *
+    * @param pXmlWsdl
+    * @param psBindingName
+    * @param psOprationName
+    * @return
+    *
+    * @author Andreas Brod
     */
    private XmlObject getOperation(XmlObject pXmlWsdl, String psBindingName, String psOprationName)
    {
-      XmlObject port =
-         pXmlWsdl.createObject("service").findSubObject("port", "name", psBindingName);
+      XmlObject port = pXmlWsdl.createObject("service").findSubObject("port", "name", psBindingName);
 
       if (port == null) {
          XmlObject[] binding = pXmlWsdl.getObjects("binding");
          boolean ok = false;
 
-         for (int i = 0; i < binding.length; i++) {
-            String sType = binding[i].getAttribute("type");
+         for (XmlObject element : binding) {
+            String sType = element.getAttribute("type");
 
             if (sType.equals(psBindingName) || sType.endsWith(":" + psBindingName)) {
-               psBindingName = binding[i].getAttribute("name");
+               psBindingName = element.getAttribute("name");
                ok = true;
             }
          }
@@ -677,30 +656,28 @@ public class ImportSncf
          psBindingName = port.getAttribute("binding");
       }
 
-      if (psBindingName.indexOf(":") > 0) {
-         psBindingName = psBindingName.substring(psBindingName.indexOf(":") + 1);
+      if (psBindingName.indexOf(':') >= 0) {
+         psBindingName = psBindingName.substring(psBindingName.indexOf(':') + 1);
       }
 
       XmlObject binding = pXmlWsdl.findSubObject("binding", "name", psBindingName);
 
       if (binding != null) {
-         XmlObject operation = binding.findSubObject("operation", "name", psOprationName);
-
-         return operation;
+         return binding.findSubObject("operation", "name", psOprationName);
       }
 
       return null;
    }
 
-   /** 
+   /**
     * Method getInputPackage has been copied from old arctic requester
-    * 
-    * @param pXmlWsdl 
-    * @param psBindingName 
-    * @param psOperationName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    *
+    * @param pXmlWsdl
+    * @param psBindingName
+    * @param psOperationName
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getInputPackage(XmlObject pXmlWsdl, String psBindingName, String psOperationName)
    {
@@ -713,15 +690,15 @@ public class ImportSncf
       return WsdlObject.url2ImportPath(sNew);
    }
 
-   /** 
+   /**
     * Method getInputNamespace  has been copied from old arctic requester
-    * 
-    * @param pXmlWsdl 
-    * @param psBindingName 
-    * @param psOprationName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    *
+    * @param pXmlWsdl
+    * @param psBindingName
+    * @param psOprationName
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getInputNamespace(XmlObject pXmlWsdl, String psBindingName, String psOprationName)
    {
@@ -733,10 +710,10 @@ public class ImportSncf
          // try to get the NameSpace from the message
          XmlObject[] message = pXmlWsdl.getObjects("message");
 
-         for (int i = 0; i < message.length; i++) {
-            if (((s.length() == 0) && message[i].getAttribute("name").equals(psOprationName))
-                  || message[i].getAttribute("name").equals(":" + psOprationName)) {
-               s = message[i].createObject("part").getAttribute("partns");
+         for (XmlObject element : message) {
+            if (((s.length() == 0) && element.getAttribute("name").equals(psOprationName))
+                  || element.getAttribute("name").equals(":" + psOprationName)) {
+               s = element.createObject("part").getAttribute("partns");
             }
          }
 
@@ -761,17 +738,17 @@ public class ImportSncf
       return "";
    }
 
-   /** 
-    * The method getParamTypeMethod returns the complete sourcecode for 
-    * the method _getParamType 
-    * 
-    * @return The SourceCode for the  ParamTypeMethod 
-    * 
-    * @author brod 
+   /**
+    * The method getParamTypeMethod returns the complete sourcecode for
+    * the method _getParamType
+    *
+    * @return The SourceCode for the  ParamTypeMethod
+    *
+    * @author brod
     */
    private String getParamTypeMethod()
    {
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       sb.append("  /**\n");
       sb.append("    * The method _getParamType returns the 'correct' type according\n");
       sb.append("    * to the defined namespaces.\n");
@@ -798,18 +775,18 @@ public class ImportSncf
       return sb.toString();
    }
 
-   /** 
+   /**
     * Method getInnerMethod has been copied from old arctic requester
-    * 
-    * @param phsExceptions has been copied from old arctic requester 
+    *
+    * @param phsExceptions has been copied from old arctic requester
     * @param psProvider has been copied from old arctic requester
     * @return has been copied from old arctic requester
-    * 
-    * @author Andreas Brod 
+    *
+    * @author Andreas Brod
     */
    private String getInnerMethod(HashSet<String> phsExceptions, String psProvider)
    {
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
 
       sb.append("    /**\n");
       sb.append("     * The method " + WsdlObject.REPLACEXMLTAG + " extracts the 'inner' area\n");
@@ -825,12 +802,10 @@ public class ImportSncf
       sb.append("     * @author _GENERATOR_\n");
       sb.append("     * @throws AgentException\n");
       sb.append("     */\n");
-      sb.append("    private String " + WsdlObject.REPLACEXMLTAG
-            + "(String psFromTag, String psToTag, String psText)\n");
+      sb.append("    private String " + WsdlObject.REPLACEXMLTAG + "(String psFromTag, String psToTag, String psText)\n");
       sb.append("        throws AgentException\n");
       sb.append("    {\n");
-      sb.append("        return " + WsdlObject.REPLACEXMLTAG
-            + "(psFromTag, psToTag, psText, true);\n");
+      sb.append("        return " + WsdlObject.REPLACEXMLTAG + "(psFromTag, psToTag, psText, true);\n");
       sb.append("    }\n");
       sb.append("\n");
       sb.append("    /**\n");
@@ -876,8 +851,7 @@ public class ImportSncf
       sb.append("     * @throws AgentException\n");
       sb.append("     * @author _GENERATOR_\n");
       sb.append("     */\n");
-      sb.append("    private String " + WsdlObject.REPLACEXMLTAG
-            + "(String psType, String psFrame, String psResponse,\n");
+      sb.append("    private String " + WsdlObject.REPLACEXMLTAG + "(String psType, String psFrame, String psResponse,\n");
       sb.append("                             boolean pbRecurse)\n");
       sb.append("        throws AgentException\n");
       sb.append("    {\n");
@@ -925,29 +899,23 @@ public class ImportSncf
       sb.append("        if (pbRecurse) {\n");
       sb.append("\n");
 
-      for (Iterator<String> i = phsExceptions.iterator(); i.hasNext();) {
-         String sNext = i.next();
-
+      for (String sNext : phsExceptions) {
          sb.append("            if (getStartTag(psResponse, \"" + sNext + "\") > 0) {\n");
          sb.append("                Object exceptionObject = CastorSerializer.unmarshalProviderResponse(\n");
          sb.append("                    " + WsdlObject.REPLACEXMLTAG + "(\n");
-         sb.append("                    \"" + sNext + "\", \"" + sNext
-               + "\", psResponse, false),\n");
+         sb.append("                    \"" + sNext + "\", \"" + sNext + "\", psResponse, false),\n");
          sb.append("                    " + sNext + ".class, log, false);\n");
          sb.append("\n");
-         sb.append("                throw new " + psProvider
-               + "Exception(exceptionObject, log, false);\n");
+         sb.append("                throw new " + psProvider + "Exception(exceptionObject, log, false);\n");
          sb.append("\n");
          sb.append("            }\n");
       }
 
       sb.append("            if (getStartTag(psResponse, \"Fault\") > 0) {\n");
-      sb.append("                String exceptionObject = " + WsdlObject.REPLACEXMLTAG
-            + "(\"Fault\", \"\", psResponse,\n");
+      sb.append("                String exceptionObject = " + WsdlObject.REPLACEXMLTAG + "(\"Fault\", \"\", psResponse,\n");
       sb.append("                                                   false);\n");
       sb.append("\n");
-      sb.append("                throw new " + psProvider
-            + "Exception(exceptionObject, log, true);\n");
+      sb.append("                throw new " + psProvider + "Exception(exceptionObject, log, true);\n");
       sb.append("            }\n");
       sb.append("            throw new " + psProvider + "Exception(psResponse, log, true);\n");
 
@@ -985,17 +953,12 @@ public class ImportSncf
          psJavaCommunication = psJavaCommunication.substring(psJavaCommunication.indexOf("\n") + 1);
       }
 
-      psJavaCommunication =
-         "// -----------------------------------------------------------\n" + psJavaCommunication;
+      psJavaCommunication = "// -----------------------------------------------------------\n" + psJavaCommunication;
       psJavaCommunication = "// some code, please use the lines above.\n" + psJavaCommunication;
-      psJavaCommunication =
-         "// lines below, because these are deleted. If you want to add\n" + psJavaCommunication;
-      psJavaCommunication =
-         "// ArcticRequester generation menu. Please do not edit any\n" + psJavaCommunication;
-      psJavaCommunication =
-         "// The following lines are automatically generated with the\n" + psJavaCommunication;
-      psJavaCommunication =
-         "// ---- START ------------------------------------------------\n" + psJavaCommunication;
+      psJavaCommunication = "// lines below, because these are deleted. If you want to add\n" + psJavaCommunication;
+      psJavaCommunication = "// ArcticRequester generation menu. Please do not edit any\n" + psJavaCommunication;
+      psJavaCommunication = "// The following lines are automatically generated with the\n" + psJavaCommunication;
+      psJavaCommunication = "// ---- START ------------------------------------------------\n" + psJavaCommunication;
       psJavaCommunication += "// ---- END --------------------------------------------------\n";
       psJavaCommunication += "\n}\n";
 
@@ -1011,33 +974,27 @@ public class ImportSncf
          while (psJavaCommunication.startsWith("import ")) {
             sImport = psJavaCommunication.substring(0, psJavaCommunication.indexOf("\n"));
 
-            sPackage =
-               new String(sImport.substring(sImport.indexOf(" ") + 1, sImport.lastIndexOf(".*")));
+            sPackage = new String(sImport.substring(sImport.indexOf(' ') + 1, sImport.lastIndexOf(".*")));
 
-            psJavaCommunication =
-               psJavaCommunication.substring(psJavaCommunication.indexOf("\n") + 1);
+            psJavaCommunication = psJavaCommunication.substring(psJavaCommunication.indexOf("\n") + 1);
 
             if (sSource.indexOf(sImport) < 0) {
                sSource =
-                  sSource.substring(0, sSource.indexOf("import")) + sImport + "\n"
-                        + sSource.substring(sSource.indexOf("import"));
+                  sSource.substring(0, sSource.indexOf("import")) + sImport + "\n" + sSource.substring(sSource.indexOf("import"));
             }
          }
 
-         sSource =
-            Util.replaceString(sSource, "public Object sendReceive", "private Object sendReceive");
+         sSource = Util.replaceString(sSource, "public Object sendReceive", "private Object sendReceive");
 
-         sSource =
-            Util.replaceString(sSource, "public String sendReceive", "private String sendReceive");
+         sSource = Util.replaceString(sSource, "public String sendReceive", "private String sendReceive");
 
          psJavaCommunication =
-            Util.replaceString(psJavaCommunication, "_GENERATOR_",
-                  "generated by " + System.getProperty("user.name"));
+            Util.replaceString(psJavaCommunication, "_GENERATOR_", "generated by " + System.getProperty("user.name"));
 
          int iStart = sSource.lastIndexOf("// ---- START -");
 
          if (iStart < 0) {
-            iStart = sSource.lastIndexOf("}");
+            iStart = sSource.lastIndexOf('}');
          }
 
          sSource = sSource.substring(0, iStart) + psJavaCommunication;
@@ -1049,11 +1006,11 @@ public class ImportSncf
 
    /**
     * Method getJavaCommunicationName creates the name for the specific communication class of
-    * a WebService. 
+    * a WebService.
     * The code of the WebService will be added to the base filename, e.g.:<br>
     * base filename: c:\JavaComm.java<br>
     * WebService: BA<br>
-    * Resulting filename: c:\JavaCommBA.java 
+    * Resulting filename: c:\JavaCommBA.java
     *
     * @param psCommunicationBase base filename of the java communication class
     * @param psService WebService code, e.g. AQ, BA, ...
@@ -1119,8 +1076,7 @@ public class ImportSncf
       for (XmlObject importObject : imports) {
          String sNamespace = importObject.getAttribute("namespace");
          String sSchemaLocation = importObject.getAttribute("schemaLocation");
-         if (sSchemaLocation != null && sSchemaLocation.matches("https?://.*")
-               && !pSchemas.containsKey(sNamespace)) {
+         if (sSchemaLocation != null && sSchemaLocation.matches("https?://.*") && !pSchemas.containsKey(sNamespace)) {
             // download the new schema
             SchemaData schemaData = new SchemaData(sNamespace, sSchemaLocation);
             pSchemas.put(sNamespace, schemaData);
@@ -1149,8 +1105,7 @@ public class ImportSncf
          String sSchemaLocation = importObject.getAttribute("schemaLocation");
          if (sSchemaLocation != null && sSchemaLocation.matches("https?://.*")) {
             importObject.setAttribute("schemaLocation",
-                  getRelativePathFromNamespace(sSchemaNamespace, sNamespace)
-                        .replaceAll("\\\\", "/") + "data.xsd");
+                  getRelativePathFromNamespace(sSchemaNamespace, sNamespace).replaceAll("\\\\", "/") + "data.xsd");
          }
       }
    }
@@ -1218,7 +1173,7 @@ public class ImportSncf
    }
 
    /**
-    * Method getRelativePathFromNamespace creates the path to the namespace relative to the 
+    * Method getRelativePathFromNamespace creates the path to the namespace relative to the
     * base namespace passed
     *
     * @param psNamespaceURIBase base of the namespaces
@@ -1234,22 +1189,21 @@ public class ImportSncf
       String sPath = getPathFromNamespace(psNamespaceURI2);
       String[] pathParts = sPath.split("[\\\\/]");
 
-      String sNewPath = "";
+      StringBuilder sNewPath = new StringBuilder();
 
       int i = 0;
-      while (i < basePathParts.length && i < pathParts.length
-            && basePathParts[i].equals(pathParts[i])) {
+      while (i < basePathParts.length && i < pathParts.length && basePathParts[i].equals(pathParts[i])) {
          i++;
       }
 
       for (int j = 0; j < basePathParts.length - i; j++) {
-         sNewPath += "../";
+         sNewPath.append("../");
       }
       for (int j = i; j < pathParts.length; j++) {
-         sNewPath += pathParts[j] + "/";
+         sNewPath.append(pathParts[j]).append("/");
       }
 
-      return sNewPath;
+      return sNewPath.toString();
    }
 
    /**
@@ -1271,7 +1225,18 @@ public class ImportSncf
       {
          _sNamespace = psNamespace;
          _sSchemaLocation = psSchemaLocation;
-         _schema = new XmlObject(UtilSwt.loadFromURL(psSchemaLocation)).getFirstObject();
+         String schema = UtilSwt.loadFromURL(psSchemaLocation);
+         // handle redirects
+         while (schema.contains("The document has moved") && schema.indexOf("a href=") >= 0) {
+            Matcher matcher = NEW_URL_LOCATION.matcher(schema);
+            if (matcher.matches()) {
+               System.out.println("Redirected...");
+               _sSchemaLocation = matcher.group(1);
+               schema = UtilSwt.loadFromURL(_sSchemaLocation);
+            }
+         }
+
+         _schema = new XmlObject(schema).getFirstObject();
          _sSchemaFile = _sProviderdataBaseDir + getPathFromNamespace(psNamespace) + "data.xsd";
          _sPackage = getPackageFromNamespace(psNamespace);
       }
