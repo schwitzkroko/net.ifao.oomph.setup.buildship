@@ -1,18 +1,28 @@
 package schemagenerator.actions;
 
 
-import ifaoplugin.*;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.io.*;
-import java.net.*;
-import java.text.*;
-import java.util.*;
-import java.util.regex.*;
-
+import ifaoplugin.Util;
+import ifaoplugin.UtilSwt;
 import net.ifao.util.CorrectDatabindingXsd;
-import net.ifao.xml.*;
-
-import schemagenerator.gui.*;
+import net.ifao.xml.WsdlObject;
+import net.ifao.xml.XmlObject;
+import schemagenerator.gui.SwtEvolviXml;
 
 
 /**
@@ -61,24 +71,24 @@ public class ImportEvolviXml
 
    }
 
-   /** 
+   /**
     * Method getLastError returns content of _sLastError
-    * 
+    *
     * @return last error stored in _sLastError
-    * 
-    * @author kaufmann 
+    *
+    * @author kaufmann
     */
    public String getLastError()
    {
       return _sLastError;
    }
 
-   /** 
+   /**
     * Method getResult returns string content of _sbResult
-    * 
+    *
     * @return result of the operation
-    * 
-    * @author kaufmann 
+    *
+    * @author kaufmann
     */
    public String getResult()
    {
@@ -130,9 +140,9 @@ public class ImportEvolviXml
    }
 
    /**
-    * Method updateSchemasAndDataBinding creates the dataBinding for the WebService passed and 
-    * calls method updateSchemasOfWebservice to update the data.xsd and dataBinding.xml files 
-    * related to this WebService 
+    * Method updateSchemasAndDataBinding creates the dataBinding for the WebService passed and
+    * calls method updateSchemasOfWebservice to update the data.xsd and dataBinding.xml files
+    * related to this WebService
     *
     * @param psService WebService to check, e.g. EvRailApi, EvReferenceData
     * @param psWsdl WSDL of the WebService
@@ -147,7 +157,7 @@ public class ImportEvolviXml
       XmlObject schema = WsdlObject.getSchema(psWsdl);
 
       // delete 'duplicate' elements
-      HashSet<String> hs = new HashSet<String>();
+      HashSet<String> hs = new HashSet<>();
 
       XmlObject[] objs = schema.getObjects("");
 
@@ -163,18 +173,13 @@ public class ImportEvolviXml
 
       // add additional bindings to be able to use v1.008 (taken from phase 12) on phase 13 (or higher) environments
       if (bFixForV1008 && psService.equalsIgnoreCase("EvRailApi")) {
-         _sbResult
-               .append("...adding specific bindings to be able to use v1.008 (taken from phase 12) on phase 13 (or higher) environments. See DT 26568\n\n");
+         _sbResult.append(
+               "...adding specific bindings to be able to use v1.008 (taken from phase 12) on phase 13 (or higher) environments. See DT 26568\n\n");
+         sBinding = addAttributeBinding(sBinding, "/JourneyDetailsRS/@EngineeringWork", "java.lang.String");
+         sBinding = addAttributeBinding(sBinding, "/JourneyDetailsRS/@ZonalLocations", "java.lang.String");
+         sBinding = addAttributeBinding(sBinding, "complexType:TrainSegmentType/@JourneyDuration", "java.lang.String");
          sBinding =
-            addAttributeBinding(sBinding, "/JourneyDetailsRS/@EngineeringWork", "java.lang.String");
-         sBinding =
-            addAttributeBinding(sBinding, "/JourneyDetailsRS/@ZonalLocations", "java.lang.String");
-         sBinding =
-            addAttributeBinding(sBinding, "complexType:TrainSegmentType/@JourneyDuration",
-                  "java.lang.String");
-         sBinding =
-            addAttributeBinding(sBinding,
-                  "complexType:RailFareType/FareClassification/@ValidityCode", "java.lang.String");
+            addAttributeBinding(sBinding, "complexType:RailFareType/FareClassification/@ValidityCode", "java.lang.String");
       }
 
       return updateSchemasOfWebservice(psService, psWsdl, sBinding);
@@ -198,8 +203,7 @@ public class ImportEvolviXml
          String sNewBinding = sBinding.substring(0, indexOf + 19);
 
          sNewBinding +=
-            "\n  <attributeBinding name=\"" + psName + "\">\n    <member java-type=\"" + psType
-                  + "\" />\n  </attributeBinding>";
+            "\n  <attributeBinding name=\"" + psName + "\">\n    <member java-type=\"" + psType + "\" />\n  </attributeBinding>";
 
          sNewBinding += sBinding.substring(indexOf + 19);
          sBinding = sNewBinding;
@@ -214,7 +218,7 @@ public class ImportEvolviXml
     * @param psService WebService to check, e.g. EvRailApi, EvReferenceData
     * @param psWsdl WSDL of the WebService
     * @param psBinding content for dataBinding.xml
-    * 
+    *
     * @return true, if one of the files has been changed
     *
     * @author kaufmann
@@ -222,8 +226,8 @@ public class ImportEvolviXml
    private boolean updateSchemasOfWebservice(String psService, String psWsdl, String psBinding)
    {
       boolean bChanged = false;
-      _namespacesCreated = new TreeSet<String>();
-      _namespacePackage = new HashMap<String, String>();
+      _namespacesCreated = new TreeSet<>();
+      _namespacePackage = new HashMap<>();
 
 
       XmlObject wsdl = new XmlObject(psWsdl);
@@ -239,60 +243,52 @@ public class ImportEvolviXml
                HashMap<String, String> schemaNamespaces = getNamespaces(schema);
                String sSchemaTargetNamespace = schemaNamespaces.get("targetNamespace");
                String sPathForDataXsd =
-                  "uk/co/evolvi/" + psService.toLowerCase() + "/"
-                        + getPathFromNamespace(sSchemaTargetNamespace);
+                  "uk/co/evolvi/" + psService.toLowerCase() + "/" + getPathFromNamespace(sSchemaTargetNamespace);
 
                // get the namespaces used in this schema
-               Set<String> namespacesUsed = new TreeSet<String>();
-               Matcher m =
-                  Pattern.compile("(?:base|type)=\"(\\w+):\\w+\"").matcher(schema.toString());
+               Set<String> namespacesUsed = new TreeSet<>();
+               Matcher m = Pattern.compile("(?:base|type)=\"(\\w+):\\w+\"").matcher(schema.toString());
                while (m.find()) {
                   namespacesUsed.add(m.group(1));
                }
                int iInsertPos = 0;
+               String w3cSchemaNamespace = schemaNamespaces.entrySet().stream()
+                     .filter(entry -> entry.getValue().equals("http://www.w3.org/2001/XMLSchema")).findFirst()
+                     .map(entry -> entry.getKey()).orElse("s");
+
                for (String sNamespace : namespacesUsed) {
-                  String sNamespaceURI = globalNamespaces.get(sNamespace);
-                  schema.setAttribute("xmlns:" + sNamespace, sNamespaceURI);
-                  if (!sNamespaceURI.equals(sSchemaTargetNamespace)
-                        && !sNamespaceURI.startsWith("http://www.w3.org/")
-                        && !sNamespaceURI.startsWith("http://schemas.xmlsoap.org/")) {
-                     XmlObject[] objects = schema.getObjects("import");
-                     for (XmlObject object : objects) {
-                        if (sNamespaceURI.equalsIgnoreCase(object.getAttribute("namespace"))) {
-                           schema.deleteObjects(object);
-                        }
-                     }
-                     XmlObject importObject = new XmlObject("<s:import/>").getFirstObject();
-                     importObject.setAttribute("id", sNamespace);
-                     importObject.setAttribute("namespace", sNamespaceURI);
-                     importObject
-                           .setAttribute(
-                                 "schemaLocation",
-                                 (getRelativePathFromNamespace(sSchemaTargetNamespace,
-                                       sNamespaceURI) + "data.xsd").replace('\\', '/'));
-                     schema.addElementObject(importObject, iInsertPos++);
+                  String sNamespaceURI = schemaNamespaces.get(sNamespace);
+                  if (sNamespaceURI == null) {
+                     sNamespaceURI = globalNamespaces.get(sNamespace);
+                  }
+                  if (sNamespaceURI != null && "".equals(schema.getAttribute("xmlns:" + sNamespace))) {
+                     schema.setAttribute("xmlns:" + sNamespace, sNamespaceURI);
                   }
                }
+
+               for (XmlObject importObject : schema.getObjects("import")) {
+                  if (importObject.getAttribute("schemaLocation").equals("")) {
+                     importObject.setAttribute("schemaLocation",
+                           (getRelativePathFromNamespace(sSchemaTargetNamespace, importObject.getAttribute("namespace"))
+                                 + "data.xsd").replace('\\', '/'));
+                  }
+               }
+
+
                _namespacesCreated.add(sSchemaTargetNamespace);
-               _namespacePackage.put(sSchemaTargetNamespace,
-                     sPathForDataXsd.replaceAll("[\\\\/]", "."));
+               _namespacePackage.put(sSchemaTargetNamespace, sPathForDataXsd.replaceAll("[\\\\/]", "."));
 
                // write the schema, if necessary
-               bChanged |=
-                  Util.updateFile(
-                        Util.getProviderDataPath(_sBaseDir, sPathForDataXsd + "data.xsd"),
-                        schema.toString(), _sbResult);
+               bChanged |= Util.updateFile(Util.getProviderDataPath(_sBaseDir, sPathForDataXsd + "data.xsd"), schema.toString(),
+                     _sbResult);
 
                // write the binding file, if necessary
                if (psBinding != null && psBinding.length() > 0) {
-                  bChanged |=
-                     Util.updateFile(
-                           Util.getProviderDataPath(_sBaseDir, sPathForDataXsd + "dataBinding.xml"),
-                           psBinding, _sbResult);
+                  bChanged |= Util.updateFile(Util.getProviderDataPath(_sBaseDir, sPathForDataXsd + "dataBinding.xml"), psBinding,
+                        _sbResult);
 
                   if (CorrectDatabindingXsd.correctDataBinding(
-                        new File(Util.getProviderDataPath(_sBaseDir, sPathForDataXsd
-                              + "dataBinding.xml")), "")) {
+                        new File(Util.getProviderDataPath(_sBaseDir, sPathForDataXsd + "dataBinding.xml")), "")) {
                      bChanged = true;
                   }
                }
@@ -313,12 +309,10 @@ public class ImportEvolviXml
     */
    private HashMap<String, String> getNamespaces(XmlObject pXml)
    {
-      HashMap<String, String> namespaces = new HashMap<String, String>();
+      HashMap<String, String> namespaces = new HashMap<>();
       String[] attributeNames = pXml.getAttributeNames();
       for (String sAttribute : attributeNames) {
-         Matcher m =
-            Pattern.compile("^(?:xmlns:)?(targetNamespace|(?<=xmlns:)\\w+)=\"([^\"]+)\"$").matcher(
-                  sAttribute);
+         Matcher m = Pattern.compile("^(?:xmlns:)?(targetNamespace|(?<=xmlns:)\\w+)=\"([^\"]+)\"$").matcher(sAttribute);
          if (m.matches()) {
             namespaces.put(m.group(1), m.group(2));
          }
@@ -365,7 +359,7 @@ public class ImportEvolviXml
    }
 
    /**
-    * Method getRelativePathFromNamespace creates the path to the namespace relative to the 
+    * Method getRelativePathFromNamespace creates the path to the namespace relative to the
     * base namespace passed
     *
     * @param psNamespaceURIBase base of the namespaces
@@ -384,8 +378,7 @@ public class ImportEvolviXml
       String sNewPath = "";
 
       int i = 0;
-      while (i < basePathParts.length && i < pathParts.length
-            && basePathParts[i].equals(pathParts[i])) {
+      while (i < basePathParts.length && i < pathParts.length && basePathParts[i].equals(pathParts[i])) {
          i++;
       }
 
@@ -410,11 +403,9 @@ public class ImportEvolviXml
     */
    private String updateWsdl(String psService)
    {
-      String sFileName =
-         Util.getProviderDataPath(_sBaseDir, "uk/co/evolvi/" + psService.toLowerCase()
-               + "/data.wsdl");
+      String sFileName = Util.getProviderDataPath(_sBaseDir, "uk/co/evolvi/" + psService.toLowerCase() + "/data.wsdl");
       String sOldWsdl = Util.loadFromFile(sFileName);
-      String sWsdlUrl = _sURL_EvolviXml + "/" + psService + ".asmx?WSDL";
+      String sWsdlUrl = _sURL_EvolviXml + "/" + psService + ".svc?singleWsdl";
       String sWsdl = UtilSwt.loadFromURL(sWsdlUrl);
       if (sWsdl == null || sWsdl.trim().length() == 0) {
          _sLastError = "Error retrieving " + sWsdlUrl;
@@ -435,7 +426,7 @@ public class ImportEvolviXml
     * Method fixInvalidDefinitions corrects the positiveInteger fields which should be strings:<pre>
     * &lt;s:attribute name="CarNumber" type="s:positiveInteger"/&gt;  ==&gt; &lt;s:attribute name="CarNumber" type="s:string"/&gt;
     * &lt;s:attribute name="SeatNumber" type="s:positiveInteger"/&gt; ==&gt; &lt;s:attribute name="SeatNumber" type="s:string"/&gt;
-    * 
+    *
     * @param psWsdl original WSDL
     * @return corrected WSDL
     *
@@ -443,14 +434,19 @@ public class ImportEvolviXml
     */
    private String fixInvalidDefinitions(String psWsdl)
    {
-      return psWsdl.replaceAll("attribute name=\"CarNumber\" type=\"s:positiveInteger\"",
-            "attribute name=\"CarNumber\" type=\"s:string\"").replaceAll(
-            "attribute name=\"SeatNumber\" type=\"s:positiveInteger\"",
-            "attribute name=\"SeatNumber\" type=\"s:string\"");
+      return psWsdl
+            .replaceAll("attribute name=\"CarNumber\" type=\"(\\w+):positiveInteger\"",
+                  "attribute name=\"CarNumber\" type=\"$1:string\"")
+            .replaceAll("attribute name=\"RoomNumber\" type=\"(\\w+):positiveInteger\"",
+                  "attribute name=\"RoomNumber\" type=\"$1:string\"")
+            .replaceAll("attribute name=\"BerthNumber\" type=\"(\\w+):positiveInteger\"",
+                  "attribute name=\"BerthNumber\" type=\"$1:string\"")
+            .replaceAll("attribute name=\"SeatNumber\" type=\"(\\w+):positiveInteger\"",
+                  "attribute name=\"SeatNumber\" type=\"$1:string\"");
    }
 
    /**
-    * Method updateBatch adds the code for the batch file for the WebService passed. Field 
+    * Method updateBatch adds the code for the batch file for the WebService passed. Field
     * _namespacesCreated must contain all namespaces (=sub-packages) used by the webservice
     * @param psService WebService code, e.g. EvRailApi, EvReferenceData
     * @author kaufmann
@@ -463,8 +459,7 @@ public class ImportEvolviXml
       for (String sNamespace : _namespacesCreated) {
          String sPackage = getPathFromNamespace(sNamespace).replaceAll("[\\\\/]", ".");
          sPackage = _namespacePackage.get(sNamespace).replace("lib.providerdata.", "");
-         sbCastorBuilderProperties.append(sNamespace).append("=")
-               .append(sPackage.substring(0, sPackage.length() - 1));
+         sbCastorBuilderProperties.append(sNamespace).append("=").append(sPackage.substring(0, sPackage.length() - 1));
          if (--i > 0) {
             sbCastorBuilderProperties.append(",\\");
          }
@@ -473,10 +468,8 @@ public class ImportEvolviXml
 
       // save the castorbuilder.properties file
       for (String sNamespace : _namespacesCreated) {
-         String sPathForDataXsd =
-            "uk/co/evolvi/" + psService.toLowerCase() + "/" + getPathFromNamespace(sNamespace);
-         Util.updateFile(
-               Util.getProviderDataPath(_sBaseDir, sPathForDataXsd + "castorbuilder.properties"),
+         String sPathForDataXsd = "uk/co/evolvi/" + psService.toLowerCase() + "/" + getPathFromNamespace(sNamespace);
+         Util.updateFile(Util.getProviderDataPath(_sBaseDir, sPathForDataXsd + "castorbuilder.properties"),
                sbCastorBuilderProperties.toString(), _sbResult);
       }
    }
@@ -532,13 +525,12 @@ public class ImportEvolviXml
       }
 
       StringBuffer sbJava = new StringBuffer();
-      HashSet<String> hsExceptions = new HashSet<String>();
+      HashSet<String> hsExceptions = new HashSet<>();
 
-      for (int i = 0; i < operation.length; i++) {
-         String sOperation = operation[i].getAttribute("name");
+      for (XmlObject element : operation) {
+         String sOperation = element.getAttribute("name");
 
-         String sJavaOperation =
-            loadWSDLObject(wsdl, definitions, sOperation, hsExceptions, psService);
+         String sJavaOperation = loadWSDLObject(wsdl, definitions, sOperation, hsExceptions, psService);
 
          while (sJavaOperation.startsWith("import ")) {
 
@@ -569,13 +561,13 @@ public class ImportEvolviXml
    }
 
 
-   /** 
-    * The method getParamTypeMethod returns the complete sourcecode for 
-    * the method _getParamType 
-    * 
-    * @return The SourceCode for the  ParamTypeMethod 
-    * 
-    * @author brod 
+   /**
+    * The method getParamTypeMethod returns the complete sourcecode for
+    * the method _getParamType
+    *
+    * @return The SourceCode for the  ParamTypeMethod
+    *
+    * @author brod
     */
    private String getParamTypeMethod()
    {
@@ -606,14 +598,14 @@ public class ImportEvolviXml
       return sb.toString();
    }
 
-   /** 
+   /**
     * Method getInnerMethod has been copied from old arctic requester
-    * 
-    * @param phsExceptions has been copied from old arctic requester 
+    *
+    * @param phsExceptions has been copied from old arctic requester
     * @param psProvider has been copied from old arctic requester
     * @return has been copied from old arctic requester
-    * 
-    * @author Andreas Brod 
+    *
+    * @author Andreas Brod
     */
    private String getInnerMethod(HashSet<String> phsExceptions, String psProvider)
    {
@@ -622,9 +614,12 @@ public class ImportEvolviXml
       sb.append("\n");
       sb.append("       /**\n");
       sb.append("       * Method getResponseBody extracts the \"main\" response from the soap body, e.g. everything\n");
-      sb.append("       * between &lt;soap:Body&gt; and &lt;/soap:Body&gt;. The regular expression works for any or no namespace, too\n");
-      sb.append("       * (e.g. &lt;abc:Body&gt;...&lt;/abc:Body&gt; or &lt;Body&gt;...&lt;/Body&gt;) and also if the Body tag contains \n");
-      sb.append("       * attributes (e.g. &lt;abc:Body attribute=\"cool\"&gt;...&lt;/abc:Body&gt;). If the Body can not be extracted,\n");
+      sb.append(
+            "       * between &lt;soap:Body&gt; and &lt;/soap:Body&gt;. The regular expression works for any or no namespace, too\n");
+      sb.append(
+            "       * (e.g. &lt;abc:Body&gt;...&lt;/abc:Body&gt; or &lt;Body&gt;...&lt;/Body&gt;) and also if the Body tag contains \n");
+      sb.append(
+            "       * attributes (e.g. &lt;abc:Body attribute=\"cool\"&gt;...&lt;/abc:Body&gt;). If the Body can not be extracted,\n");
       sb.append("       * \"\" will be returned, which would lead to an error during unmarshalling, of course ;-)\n");
       sb.append("       *\n");
       sb.append("       * @param psResponse original response\n");
@@ -656,12 +651,10 @@ public class ImportEvolviXml
       sb.append("     * @author _GENERATOR_\n");
       sb.append("     * @throws AgentException\n");
       sb.append("     */\n");
-      sb.append("    private String ").append(REPLACEXMLTAG)
-            .append("(String psFromTag, String psToTag, String psText)\n");
+      sb.append("    private String ").append(REPLACEXMLTAG).append("(String psFromTag, String psToTag, String psText)\n");
       sb.append("        throws AgentException\n");
       sb.append("    {\n");
-      sb.append("        return ").append(REPLACEXMLTAG)
-            .append("(psFromTag, psToTag, psText, true);\n");
+      sb.append("        return ").append(REPLACEXMLTAG).append("(psFromTag, psToTag, psText, true);\n");
       sb.append("    }\n");
       sb.append("\n");
       sb.append("    /**\n");
@@ -707,8 +700,7 @@ public class ImportEvolviXml
       sb.append("     * @throws AgentException\n");
       sb.append("     * @author _GENERATOR_\n");
       sb.append("     */\n");
-      sb.append("    private String ").append(REPLACEXMLTAG)
-            .append("(String psType, String psFrame, String psResponse,\n");
+      sb.append("    private String ").append(REPLACEXMLTAG).append("(String psType, String psFrame, String psResponse,\n");
       sb.append("                             boolean pbRecurse)\n");
       sb.append("        throws AgentException\n");
       sb.append("    {\n");
@@ -756,33 +748,25 @@ public class ImportEvolviXml
       sb.append("        if (pbRecurse) {\n");
       sb.append("\n");
 
-      for (Iterator<String> i = phsExceptions.iterator(); i.hasNext();) {
-         String sNext = i.next();
-
-         sb.append("            if (getStartTag(psResponse, \"").append(sNext)
-               .append("\") > 0) {\n");
+      for (String sNext : phsExceptions) {
+         sb.append("            if (getStartTag(psResponse, \"").append(sNext).append("\") > 0) {\n");
          sb.append("                Object exceptionObject = CastorSerializer.unmarshalProviderResponse(\n");
          sb.append("                    ").append(REPLACEXMLTAG).append("(\n");
-         sb.append("                    \"").append(sNext).append("\", \"").append(sNext)
-               .append("\", psResponse, false),\n");
+         sb.append("                    \"").append(sNext).append("\", \"").append(sNext).append("\", psResponse, false),\n");
          sb.append("                    ").append(sNext).append(".class, log, false);\n");
          sb.append("\n");
-         sb.append("                throw new ").append(psProvider)
-               .append("Exception(exceptionObject, log, false);\n");
+         sb.append("                throw new ").append(psProvider).append("Exception(exceptionObject, log, false);\n");
          sb.append("\n");
          sb.append("            }\n");
       }
 
       sb.append("            if (getStartTag(psResponse, \"Fault\") > 0) {\n");
-      sb.append("                String exceptionObject = ").append(REPLACEXMLTAG)
-            .append("(\"Fault\", \"\", psResponse,\n");
+      sb.append("                String exceptionObject = ").append(REPLACEXMLTAG).append("(\"Fault\", \"\", psResponse,\n");
       sb.append("                                                   false);\n");
       sb.append("\n");
-      sb.append("                throw new ").append(psProvider)
-            .append("Exception(exceptionObject, log, true);\n");
+      sb.append("                throw new ").append(psProvider).append("Exception(exceptionObject, log, true);\n");
       sb.append("            }\n");
-      sb.append("            throw new ").append(psProvider)
-            .append("Exception(psResponse, log, true);\n");
+      sb.append("            throw new ").append(psProvider).append("Exception(psResponse, log, true);\n");
 
       sb.append("        }\n");
       sb.append("\n");
@@ -800,20 +784,20 @@ public class ImportEvolviXml
    }
 
 
-   /** 
+   /**
     * Method getInputWSDLObject has been copied from old arctic requester
-    * 
+    *
     * @param pWsdl has been copied from old arctic requester
     * @param pDefinitions has been copied from old arctic requester
     * @param psMethod has been copied from old arctic requester
     * @param phsExceptions has been copied from old arctic requester
     * @param psService WebService code, e.g. EvRailApi, EvReferenceData
     * @return has been copied from old arctic requester
-    * 
-    * @author Andreas Brod 
+    *
+    * @author Andreas Brod
     */
-   private String loadWSDLObject(WsdlObject pWsdl, XmlObject pDefinitions, String psMethod,
-                                 HashSet<String> phsExceptions, String psService)
+   private String loadWSDLObject(WsdlObject pWsdl, XmlObject pDefinitions, String psMethod, HashSet<String> phsExceptions,
+                                 String psService)
    {
       String sRet = "";
       String sParams = "";
@@ -823,8 +807,8 @@ public class ImportEvolviXml
       XmlObject types = pDefinitions.createObject("types");
 
       // search through the protTypes
-      for (int i = 0; i < portType.length; i++) {
-         XmlObject operation = portType[i].findSubObject("operation", "name", psMethod);
+      for (XmlObject element : portType) {
+         XmlObject operation = element.findSubObject("operation", "name", psMethod);
 
          // if an operation is found ...
          if (operation != null) {
@@ -844,15 +828,12 @@ public class ImportEvolviXml
             String sMessageFault = ":" + operation.createObject("fault").getAttribute("message");
 
             // get the soapAction (if neccessary)
-            String soapAction =
-               getSoapAction(pDefinitions, portType[i].getAttribute("name"), psMethod);
+            String soapAction = getSoapAction(pDefinitions, element.getAttribute("name"), psMethod);
 
             // get the inputNameSpace
-            String inputNameSpace =
-               getInputNamespace(pDefinitions, portType[i].getAttribute("name"), psMethod);
+            String inputNameSpace = getInputNamespace(pDefinitions, element.getAttribute("name"), psMethod);
 
-            String inputPackage =
-               getInputPackage(pDefinitions, portType[i].getAttribute("name"), psMethod);
+            String inputPackage = getInputPackage(pDefinitions, element.getAttribute("name"), psMethod);
             boolean bAddImport = false;
 
             String sOutputType = "";
@@ -863,8 +844,7 @@ public class ImportEvolviXml
 
                // search a the related message-object
                XmlObject messageOutput =
-                  pDefinitions.findSubObject("message", "name",
-                        sMessageOutput.substring(sMessageOutput.lastIndexOf(":") + 1));
+                  pDefinitions.findSubObject("message", "name", sMessageOutput.substring(sMessageOutput.lastIndexOf(":") + 1));
 
                String sOutputTypeOrg = sOutputType;
 
@@ -894,17 +874,13 @@ public class ImportEvolviXml
 
                // search a the related message-object
                XmlObject messageInput =
-                  pDefinitions.findSubObject("message", "name",
-                        sMessageInput.substring(sMessageInput.lastIndexOf(":") + 1));
+                  pDefinitions.findSubObject("message", "name", sMessageInput.substring(sMessageInput.lastIndexOf(":") + 1));
 
                // get the faultException
                XmlObject messageFault =
-                  pDefinitions.findSubObject("message", "name",
-                        sMessageFault.substring(sMessageFault.lastIndexOf(":") + 1));
+                  pDefinitions.findSubObject("message", "name", sMessageFault.substring(sMessageFault.lastIndexOf(":") + 1));
 
-               XmlObject binding =
-                  pDefinitions.createObject("binding", "type",
-                        sMessageTns + portType[i].getAttribute("name"), true);
+               XmlObject binding = pDefinitions.createObject("binding", "type", sMessageTns + element.getAttribute("name"), true);
 
                String sException = "";
 
@@ -936,9 +912,7 @@ public class ImportEvolviXml
                   sParams = "";
 
                   boolean bIsSoapAction =
-                     soapAction.length() > 0
-                           && !binding.createObject("binding").getAttribute("style")
-                                 .equalsIgnoreCase("rpc");
+                     soapAction.length() > 0 && !binding.createObject("binding").getAttribute("style").equalsIgnoreCase("rpc");
 
                   if (bIsSoapAction) {
                      sRet += "<!-- SOAPAction: " + soapAction + " -->";
@@ -954,9 +928,9 @@ public class ImportEvolviXml
                      }
                   }
 
-                  List<String> listNames = new Vector<String>();
-                  List<String> listTypes = new Vector<String>();
-                  List<String> listClasses = new Vector<String>();
+                  List<String> listNames = new Vector<>();
+                  List<String> listTypes = new Vector<>();
+                  List<String> listClasses = new Vector<>();
 
                   for (int j = 0; j < partInput.length; j++) {
                      String sName = partInput[j].getAttribute("name");
@@ -983,8 +957,7 @@ public class ImportEvolviXml
                         sType = Util.camelCase(sType);
 
                         // correct types
-                        if (sType.equalsIgnoreCase("int") || sType.equalsIgnoreCase("long")
-                              || sType.equalsIgnoreCase("float")
+                        if (sType.equalsIgnoreCase("int") || sType.equalsIgnoreCase("long") || sType.equalsIgnoreCase("float")
                               || sType.equalsIgnoreCase("boolean")) {
                            sType = sType.toLowerCase();
                         }
@@ -1038,15 +1011,11 @@ public class ImportEvolviXml
 
                   // create the JavaSourceCode
                   if (sOutputType.length() > 0) {
-                     sJava =
-                        "    public " + sOutputType.substring(0, sOutputType.indexOf(" ")) + " "
-                              + psMethodJava + "(" + sParams
-                              + ")\n        throws AgentException {\n";
+                     sJava = "    public " + sOutputType.substring(0, sOutputType.indexOf(" ")) + " " + psMethodJava + "("
+                           + sParams + ")\n        throws AgentException {\n";
 
                   } else {
-                     sJava =
-                        "    public void " + psMethodJava + "(" + sParams
-                              + ")\n        throws AgentException {\n";
+                     sJava = "    public void " + psMethodJava + "(" + sParams + ")\n        throws AgentException {\n";
                   }
 
                   sJava += "        StringBuffer sbRequest = new StringBuffer();\n\n";
@@ -1060,9 +1029,7 @@ public class ImportEvolviXml
 
                      // if there is no soapAction ... add the method
                      if (inputNameSpace.length() > 0) {
-                        sJava +=
-                           "        sbRequest.append(\"<m:" + psMethod + " xmlns:m=\\\""
-                                 + inputNameSpace + "\\\">\");\n";
+                        sJava += "        sbRequest.append(\"<m:" + psMethod + " xmlns:m=\\\"" + inputNameSpace + "\\\">\");\n";
                      } else {
                         sJava += "        sbRequest.append(\"<m:" + psMethod + ">\");\n";
                      }
@@ -1076,44 +1043,32 @@ public class ImportEvolviXml
                   }
 
                   for (int iLst = 0; iLst < listNames.size(); iLst++) {
-                     sHeader +=
-                        "    * @param " + listNames.get(iLst) + " parameter " + (iLst + 1) + "\n";
+                     sHeader += "    * @param " + listNames.get(iLst) + " parameter " + (iLst + 1) + "\n";
 
                      String sClass = listClasses.get(iLst);
                      String sElement = listNames.get(iLst);
 
-                     if (sClass.equalsIgnoreCase("String") || sClass.equalsIgnoreCase("int")
-                           || sClass.equalsIgnoreCase("long") || sClass.equalsIgnoreCase("float")
-                           || sClass.equalsIgnoreCase("boolean")) {
-                        sJava +=
-                           "        sbRequest.append(\"<" + sElement + "\" + _getParamType(\""
-                                 + sClass.toLowerCase() + "\")+ \">\"+" + sElement + "+\"</"
-                                 + sElement + ">\");\n";
+                     if (sClass.equalsIgnoreCase("String") || sClass.equalsIgnoreCase("int") || sClass.equalsIgnoreCase("long")
+                           || sClass.equalsIgnoreCase("float") || sClass.equalsIgnoreCase("boolean")) {
+                        sJava += "        sbRequest.append(\"<" + sElement + "\" + _getParamType(\"" + sClass.toLowerCase()
+                              + "\")+ \">\"+" + sElement + "+\"</" + sElement + ">\");\n";
                      } else {
                         bAddImport = true;
-                        sHeader =
-                           "    private static Object _" + psMethodJava
-                                 + "Monitor = new Object();\n" + sHeader;
+                        sHeader = "    private static Object _" + psMethodJava + "Monitor = new Object();\n" + sHeader;
                         sJava += "        synchronized(_" + psMethodJava + "Monitor) {\n";
 
                         String sObj = "s" + Util.camelCase(listTypes.get(iLst));
 
                         sJava += "            // Convert Castor Object to String\n";
-                        sJava +=
-                           "            String " + sObj + " = CastorSerializer.marshalProviderRequest("
-                                 + listNames.get(iLst) + ", false,\n";
-                        sJava +=
-                           "                                               "
-                                 + "null, null, _bValidateRequest, log);\n";
+                        sJava += "            String " + sObj + " = CastorSerializer.marshalProviderRequest("
+                              + listNames.get(iLst) + ", false,\n";
+                        sJava += "                                               " + "null, null, _bValidateRequest, log);\n";
 
                         if (!bIsSoapAction && !listTypes.get(iLst).equals(listNames.get(iLst))) {
-                           sJava +=
-                              "            // " + listTypes.get(iLst) + " has to be "
-                                    + listNames.get(iLst) + " for the request\n";
-                           sJava +=
-                              "            " + sObj + " = " + REPLACEXMLTAG + "(\""
-                                    + listTypes.get(iLst) + "\", \"" + listNames.get(iLst) + "\", "
-                                    + sObj + ");\n";
+                           sJava += "            // " + listTypes.get(iLst) + " has to be " + listNames.get(iLst)
+                                 + " for the request\n";
+                           sJava += "            " + sObj + " = " + REPLACEXMLTAG + "(\"" + listTypes.get(iLst) + "\", \""
+                                 + listNames.get(iLst) + "\", " + sObj + ");\n";
                         }
 
                         sJava += "            sbRequest.append(" + sObj + ");\n";
@@ -1141,9 +1096,7 @@ public class ImportEvolviXml
                      String sClass = sOutputType.substring(0, sOutputType.indexOf(" "));
 
                      String sInner =
-                        "" + REPLACEXMLTAG + "(\""
-                              + sOutputType.substring(sOutputType.indexOf(" ") + 1)
-                              + "\", \"\", sResponse)";
+                        "" + REPLACEXMLTAG + "(\"" + sOutputType.substring(sOutputType.indexOf(" ") + 1) + "\", \"\", sResponse)";
 
                      if (sClass.equalsIgnoreCase("String") || sClass.equals("string")) {
                         sJava += "        return " + sInner + ";\n";
@@ -1160,17 +1113,15 @@ public class ImportEvolviXml
                         //                           "" + REPLACEXMLTAG + "(\""
                         //                                 + sOutputType.substring(sOutputType.indexOf(" ") + 1) + "\", \""
                         //                                 + sOutputTypeOrg + "\", sResponse)";
-                        //                        
+                        //
                         //                        sJava +=
                         //                           "        return (" + sClass
                         //                                 + ") CastorSerializer.unmarshalProviderResponse(\n               " + sInner
                         //                                 + ",\n               " + sClass
                         //                                 + ".class, log, _bValidateResponse);\n";
-                        sJava +=
-                           "        return ("
-                                 + sClass
-                                 + ") CastorSerializer.unmarshalProviderResponse(getResponseBody(sResponse),\n               "
-                                 + sClass + ".class, log, _bValidateResponse);\n";
+                        sJava += "        return (" + sClass
+                              + ") CastorSerializer.unmarshalProviderResponse(getResponseBody(sResponse),\n               "
+                              + sClass + ".class, log, _bValidateResponse);\n";
                      }
 
                   }
@@ -1181,8 +1132,7 @@ public class ImportEvolviXml
 
                   sJava = sHeader + sJava + "    }\n";
 
-                  if ((inputPackage.length() > 0) && (sJava.indexOf("import " + inputPackage) < 0)
-                        && bAddImport) {
+                  if ((inputPackage.length() > 0) && (sJava.indexOf("import " + inputPackage) < 0) && bAddImport) {
                      sJava = "import " + inputPackage + ".*;\n" + sJava + "";
                   }
 
@@ -1195,14 +1145,14 @@ public class ImportEvolviXml
       return sParams;
    }
 
-   /** 
-    * has been copied from old arctic requester 
-    * 
+   /**
+    * has been copied from old arctic requester
+    *
     * @param pXmlWsdl has been copied from old arctic requester
     * @param psBindingName has been copied from old arctic requester
     * @param psOperationName has been copied from old arctic requester
     * @return has been copied from old arctic requester
-    * 
+    *
     * @author brod
     */
    private String getSoapAction(XmlObject pXmlWsdl, String psBindingName, String psOperationName)
@@ -1223,30 +1173,29 @@ public class ImportEvolviXml
    }
 
 
-   /** 
-    * Method getOperation  has been copied from old arctic requester 
-    * 
-    * @param pXmlWsdl 
-    * @param psBindingName 
-    * @param psOprationName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getOperation  has been copied from old arctic requester
+    *
+    * @param pXmlWsdl
+    * @param psBindingName
+    * @param psOprationName
+    * @return
+    *
+    * @author Andreas Brod
     */
    private XmlObject getOperation(XmlObject pXmlWsdl, String psBindingName, String psOprationName)
    {
-      XmlObject port =
-         pXmlWsdl.createObject("service").findSubObject("port", "name", psBindingName);
+      XmlObject port = pXmlWsdl.createObject("service").findSubObject("port", "name", psBindingName);
 
       if (port == null) {
          XmlObject[] binding = pXmlWsdl.getObjects("binding");
          boolean ok = false;
 
-         for (int i = 0; i < binding.length; i++) {
-            String sType = binding[i].getAttribute("type");
+         for (XmlObject element : binding) {
+            String sType = element.getAttribute("type");
 
             if (sType.equals(psBindingName) || sType.endsWith(":" + psBindingName)) {
-               psBindingName = binding[i].getAttribute("name");
+               psBindingName = element.getAttribute("name");
                ok = true;
             }
          }
@@ -1274,15 +1223,15 @@ public class ImportEvolviXml
    }
 
 
-   /** 
+   /**
     * Method getInputNamespace  has been copied from old arctic requester
-    * 
-    * @param pXmlWsdl 
-    * @param psBindingName 
-    * @param psOprationName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    *
+    * @param pXmlWsdl
+    * @param psBindingName
+    * @param psOprationName
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getInputNamespace(XmlObject pXmlWsdl, String psBindingName, String psOprationName)
    {
@@ -1294,10 +1243,10 @@ public class ImportEvolviXml
          // try to get the NameSpace from the message
          XmlObject[] message = pXmlWsdl.getObjects("message");
 
-         for (int i = 0; i < message.length; i++) {
-            if (((s.length() == 0) && message[i].getAttribute("name").equals(psOprationName))
-                  || message[i].getAttribute("name").equals(":" + psOprationName)) {
-               s = message[i].createObject("part").getAttribute("partns");
+         for (XmlObject element : message) {
+            if (((s.length() == 0) && element.getAttribute("name").equals(psOprationName))
+                  || element.getAttribute("name").equals(":" + psOprationName)) {
+               s = element.createObject("part").getAttribute("partns");
             }
          }
 
@@ -1322,15 +1271,15 @@ public class ImportEvolviXml
       return "";
    }
 
-   /** 
+   /**
     * Method getInputPackage has been copied from old arctic requester
-    * 
-    * @param pXmlWsdl 
-    * @param psBindingName 
-    * @param psOperationName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    *
+    * @param pXmlWsdl
+    * @param psBindingName
+    * @param psOperationName
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getInputPackage(XmlObject pXmlWsdl, String psBindingName, String psOperationName)
    {
@@ -1369,39 +1318,31 @@ public class ImportEvolviXml
          while (psJavaCommunication.startsWith("import ")) {
             sImport = psJavaCommunication.substring(0, psJavaCommunication.indexOf("\n"));
 
-            sPackage =
-               new String(sImport.substring(sImport.indexOf(" ") + 1, sImport.lastIndexOf(".*")));
+            sPackage = new String(sImport.substring(sImport.indexOf(" ") + 1, sImport.lastIndexOf(".*")));
 
-            psJavaCommunication =
-               psJavaCommunication.substring(psJavaCommunication.indexOf("\n") + 1);
+            psJavaCommunication = psJavaCommunication.substring(psJavaCommunication.indexOf("\n") + 1);
 
             if (sSource.indexOf(sImport) < 0) {
                sSource =
-                  sSource.substring(0, sSource.indexOf("import")) + sImport + "\n"
-                        + sSource.substring(sSource.indexOf("import"));
+                  sSource.substring(0, sSource.indexOf("import")) + sImport + "\n" + sSource.substring(sSource.indexOf("import"));
             }
          }
 
-         sSource =
-            Util.replaceString(sSource, "public Object sendReceive", "private Object sendReceive");
+         sSource = Util.replaceString(sSource, "public Object sendReceive", "private Object sendReceive");
 
-         sSource =
-            Util.replaceString(sSource, "public String sendReceive", "private String sendReceive");
+         sSource = Util.replaceString(sSource, "public String sendReceive", "private String sendReceive");
 
          psJavaCommunication =
-            Util.replaceString(psJavaCommunication, "_GENERATOR_",
-                  "generated by " + System.getProperty("user.name"));
+            Util.replaceString(psJavaCommunication, "_GENERATOR_", "generated by " + System.getProperty("user.name"));
 
          int iStart = -1;
          int iEnd = -1;
 
-         Matcher matcherStart =
-            Pattern.compile("(?m)^(.*// ---- START \\[" + psService + "\\] -+)$").matcher(sSource);
+         Matcher matcherStart = Pattern.compile("(?m)^(.*// ---- START \\[" + psService + "\\] -+)$").matcher(sSource);
          if (matcherStart.find()) {
             iStart = matcherStart.start(1);
          }
-         Matcher matcherEnd =
-            Pattern.compile("(?m)^(.*// ---- END \\[" + psService + "\\] -+)$").matcher(sSource);
+         Matcher matcherEnd = Pattern.compile("(?m)^(.*// ---- END \\[" + psService + "\\] -+)$").matcher(sSource);
          if (matcherEnd.find()) {
             iEnd = matcherEnd.end(1);
          }
@@ -1416,9 +1357,8 @@ public class ImportEvolviXml
             bAddLineBreak = true;
          }
 
-         sSource =
-            sSource.substring(0, iStart) + "   " + psJavaCommunication.trim()
-                  + (bAddLineBreak ? "\n" : "") + sSource.substring(iEnd);
+         sSource = sSource.substring(0, iStart) + "   " + psJavaCommunication.trim() + (bAddLineBreak ? "\n" : "")
+               + sSource.substring(iEnd);
 
          Util.updateFile(sFileNameJavaCommunication, sSource, _sbResult);
 
@@ -1427,11 +1367,11 @@ public class ImportEvolviXml
 
    /**
     * Method getJavaCommunicationName creates the name for the specific communication class of
-    * a WebService. 
+    * a WebService.
     * The code of the WebService will be added to the base filename, e.g.:<br>
     * base filename: c:\JavaComm.java<br>
     * WebService: BA<br>
-    * Resulting filename: c:\JavaCommBA.java 
+    * Resulting filename: c:\JavaCommBA.java
     *
     * @param psCommunicationBase base filename of the java communication class
     * @param psService WebService code, e.g. EvRailApi, EvReferenceData
@@ -1477,9 +1417,8 @@ public class ImportEvolviXml
       StringBuilder sbMonitors = new StringBuilder();
       StringBuilder sbJava = new StringBuilder();
       String sClassName = Util.camelCase(psName);
-      sbJava.append("   public ").append(sClassName).append("Class ")
-            .append(Character.toLowerCase(psName.charAt(0))).append(sClassName.substring(1))
-            .append(" = new ").append(sClassName).append("Class();\n\n");
+      sbJava.append("   public ").append(sClassName).append("Class ").append(Character.toLowerCase(psName.charAt(0)))
+            .append(sClassName.substring(1)).append(" = new ").append(sClassName).append("Class();\n\n");
       sbJava.append("   public class ").append(sClassName).append("Class {\n");
 
       while (st.hasMoreTokens()) {
@@ -1495,20 +1434,18 @@ public class ImportEvolviXml
       sbJava.append("   }\n");
 
       String sHeader =
-         "   // The following lines are automatically generated with the\n"
-               + "   // SchemaGenerator. Please do not edit any\n"
+         "   // The following lines are automatically generated with the\n" + "   // SchemaGenerator. Please do not edit any\n"
                + "   // lines below, because these are deleted. If you want to add\n"
                + "   // some code, please use the lines above.\n"
-               + "   // -----------------------------------------------------------\n"
-               + "   // URL: " + _sURL_EvolviXml.replaceAll("\\\\", "/") + "/" + psName
-               + ".asmx?WSDL\n   // DATE: "
+               + "   // -----------------------------------------------------------\n" + "   // URL: "
+               + _sURL_EvolviXml.replaceAll("\\\\", "/") + "/" + psName + ".svc?singleWsdl\n   // DATE: "
                + (new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date())) + "\n";
 
       psName = " [" + psName + "] -";
-      while (psName.length() < 49)
+      while (psName.length() < 49) {
          psName += "-";
-      sSource =
-         "// ---- START" + psName + "\n" + sHeader + sbMonitors.toString() + sbJava.toString();
+      }
+      sSource = "// ---- START" + psName + "\n" + sHeader + sbMonitors.toString() + sbJava.toString();
       sSource += "   // ---- END" + psName + "--\n";
 
       return sImport + sSource;

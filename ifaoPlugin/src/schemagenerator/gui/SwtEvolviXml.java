@@ -1,18 +1,20 @@
 package schemagenerator.gui;
 
-import net.ifao.xml.*;
-import schemagenerator.*;
-import schemagenerator.actions.*;
 
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+
+import net.ifao.xml.XmlObject;
+import schemagenerator.Generator;
+import schemagenerator.actions.ImportEvolviXml;
+
 
 /**
  * Class SwtEvolviXml
@@ -35,7 +37,8 @@ public class SwtEvolviXml
    private Text textJavaCommunication = null;
    private Button buttonOpen = null;
 
-   public static final String[] EVOLVI_SERVICES = new String[] {"EvRailApi", "EvReferenceData"};
+   public static final String[] EVOLVI_SERVICES = new String[]{ "EvRailApi", "ReferenceData" };
+
    /**
     * Constructor SwtSncf
     *
@@ -47,23 +50,25 @@ public class SwtEvolviXml
    public SwtEvolviXml(Composite pParent, int pStyle)
    {
       super(pParent, pStyle);
-		initialize();
+      initialize();
    }
 
    /**
     * This method initializes this
-    * 
+    *
     */
-   private void initialize() {
-        GridData gridData = new GridData();
-        gridData.grabExcessHorizontalSpace = true;
-        gridData.horizontalAlignment = org.eclipse.swt.layout.GridData.FILL;
-        textAreaInfo = new Text(this, SWT.MULTI | SWT.WRAP);
-        textAreaInfo.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-        textAreaInfo.setText("Please enter the base URL of EvolviXML's WebServices and the path and filename of the JavaCommunication");
-        textAreaInfo.setLayoutData(gridData);
-        this.setLayout(new GridLayout());
-        createCompositeMain();
+   private void initialize()
+   {
+      GridData gridData = new GridData();
+      gridData.grabExcessHorizontalSpace = true;
+      gridData.horizontalAlignment = org.eclipse.swt.layout.GridData.FILL;
+      textAreaInfo = new Text(this, SWT.MULTI | SWT.WRAP);
+      textAreaInfo.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+      textAreaInfo
+            .setText("Please enter the base URL of EvolviXML's WebServices and the path and filename of the JavaCommunication");
+      textAreaInfo.setLayoutData(gridData);
+      this.setLayout(new GridLayout());
+      createCompositeMain();
    }
 
    /**
@@ -109,8 +114,8 @@ public class SwtEvolviXml
    @Override
    public void start(Generator pGenerator)
    {
-      ImportEvolviXml importEvolviXml = new ImportEvolviXml(textURL_EvolviXml.getText(), textJavaCommunication
-            .getText(), pGenerator.sBaseArctic);
+      ImportEvolviXml importEvolviXml =
+         new ImportEvolviXml(textURL_EvolviXml.getText(), textJavaCommunication.getText(), pGenerator.sBaseArctic);
       if (importEvolviXml.getLastError() != null) {
          errorMsg(importEvolviXml.getLastError());
          return;
@@ -129,7 +134,7 @@ public class SwtEvolviXml
    }
 
    /**
-    * This method initializes compositeMain	
+    * This method initializes compositeMain
     *
     */
    private void createCompositeMain()
@@ -174,8 +179,8 @@ public class SwtEvolviXml
                String sUrl = textURL_EvolviXml.getText();
                if (sUrl.length() > 0) {
                   for (String sService : EVOLVI_SERVICES) {
-                     sbInfo.append("\n").append(sService).append(" - ").append(sUrl).append("/")
-                           .append(sService).append(".asmx?WSDL");
+                     sbInfo.append("\n").append(sService).append(" - ").append(sUrl).append("/").append(sService)
+                           .append(".svc?singleWsdl");
                   }
                } else {
                   for (String sService : EVOLVI_SERVICES) {
