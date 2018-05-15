@@ -2,79 +2,128 @@ package ifaoplugin;
 
 
 import java.awt.Toolkit;
-import java.awt.datatransfer.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.net.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Stack;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.*;
+import java.util.zip.Adler32;
+import java.util.zip.Checksum;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+import javax.swing.JTree;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jface.dialogs.*;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.*;
-import org.eclipse.swt.graphics.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-
-import net.ifao.xml.XmlObject;
-
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
+import net.ifao.xml.XmlObject;
 
 
 /**
  * Util class
- * 
+ *
  * <p>
  * Copyright &copy; 2010, i:FAO
- * 
+ *
  * @author brod
  */
 public class Util
 {
-   private static final String ARCTIC_CONFIGURATION_CLASS =
-      "net.ifao.arctic.io.config.Configuration";
+   private static final String ARCTIC_CONFIGURATION_CLASS = "net.ifao.arctic.io.config.Configuration";
 
    /**
     * return a specific arctic configuration files, which is within an
     * arctic root directory
-    * 
+    *
     * @param psRootDirectory the arctic root directory
     * @param psFileName the name of the configuration file
-    * 
+    *
     * @return the file handle for this configuration file
     */
    public static File getConfFile(String psRootDirectory, String psFileName)
    {
-      // dtd wins
-      File confFile = new File(psRootDirectory, "dtd" + File.separator + psFileName);
-      if (confFile.exists()) {
-         return confFile;
+      String[] sRootDirectories = { psRootDirectory,
+            psRootDirectory + File.separator + ".." + File.separator + ".." + File.separator + "arctic_configurations" };
+
+      String[] fileNames = { File.separator + "conf" + File.separator + psFileName,
+            "conf" + File.separator + "definitions" + File.separator + psFileName,
+            "conf" + File.separator + "dtd" + File.separator + psFileName };
+
+      for (String root : sRootDirectories) {
+         for (String fileName : fileNames) {
+            File file = new File(root, fileName);
+            if (file.exists()) {
+               try {
+                  return file.getCanonicalFile();
+               }
+               catch (IOException e) {
+                  return file;
+               }
+            }
+         }
       }
-      // use the confCirectory
-      if (psFileName.endsWith("xml")) {
-         return new File(psRootDirectory, "conf" + File.separator + psFileName);
-      }
-      return new File(psRootDirectory,
-            "conf" + File.separator + "definitions" + File.separator + psFileName);
+      return null;
    }
+
 
    /**
     * This method returns the current plugin VERSION
-    * 
+    *
     * @return the current plugin VERSION
-    * 
+    *
     * @author brod
     */
    public static String getVERSION()
@@ -96,8 +145,7 @@ public class Util
       try {
          while ((sLine = reader.readLine()) != null) {
             if (sLine.startsWith("Bundle-Version:")) {
-               StringTokenizer st =
-                  new StringTokenizer(sLine.substring(sLine.indexOf(":") + 1), " .:");
+               StringTokenizer st = new StringTokenizer(sLine.substring(sLine.indexOf(":") + 1), " .:");
                sVersion = "" + (Integer.parseInt(st.nextToken()) + 1);
                while (st.hasMoreTokens()) {
                   sVersion += "." + st.nextToken();
@@ -117,10 +165,10 @@ public class Util
 
    /**
     * Method loadFromFile
-    * 
+    *
     * @param psFileName
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String loadFromFile(String psFileName)
@@ -128,13 +176,13 @@ public class Util
       return loadFromFile(new File(psFileName));
    }
 
-   /** 
-    * loads a text from file. 
-    * 
+   /**
+    * loads a text from file.
+    *
     * @param pFile f object File
     * @return loaded text from file
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static String loadFromFile(File pFile)
    {
@@ -186,10 +234,10 @@ public class Util
 
    /**
     * method isXmlFile return true if file ends with *.x*
-    * 
+    *
     * @param psFileName The Mane of the File
     * @return true if file ends with *.x*
-    * 
+    *
     * @author brod
     */
    protected static boolean isXmlFile(String psFileName)
@@ -203,12 +251,12 @@ public class Util
 
    /**
     * Method replaceString
-    * 
+    *
     * @param psText
     * @param psStartString
     * @param psReplaceWith
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String replaceString(String psText, String psStartString, String psReplaceWith)
@@ -233,12 +281,12 @@ public class Util
 
    /**
     * Method writeFile
-    * 
-    * 
+    *
+    *
     * @param psFileName
     * @param psAddiText additional text String
     * @return
-    * 
+    *
     */
    public static File writeToFile(String psFileName, String psAddiText)
    {
@@ -306,18 +354,18 @@ public class Util
       return f;
    }
 
-   private static HashSet<String> hsFiles = new HashSet<String>();
+   private static HashSet<String> hsFiles = new HashSet<>();
    private static PrintStream _systemOut = System.out;
-   private static Stack<PrintStream> _stackPrintStream = new Stack<PrintStream>();
+   private static Stack<PrintStream> _stackPrintStream = new Stack<>();
    private static Hashtable<String, File> _htPackageDirectories;
    private static String _sBaseArctic;
 
    /**
     * Method camelCase
-    * 
+    *
     * @param psText
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String camelCase(String psText)
@@ -327,11 +375,11 @@ public class Util
 
    /**
     * Method camelCase
-    * 
+    *
     * @param psText
     * @param pbReplaceFirst
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String camelCase(String psText, boolean pbReplaceFirst)
@@ -355,7 +403,7 @@ public class Util
 
    /**
     * This method can be used to initSwing
-    * 
+    *
     * @author brod
     */
    public static void initSwing()
@@ -370,9 +418,9 @@ public class Util
 
    /**
     * Method exec
-    * 
+    *
     * @param psArgs
-    * 
+    *
     * @author Andreas Brod
     */
    public static void exec(String psArgs)
@@ -382,10 +430,10 @@ public class Util
 
    /**
     * Method exec
-    * 
+    *
     * @param psArgs
     * @param pbPrint
-    * 
+    *
     * @author Andreas Brod
     */
    public static void exec(String psArgs, boolean pbPrint)
@@ -423,10 +471,10 @@ public class Util
 
    /**
     * This method loads a File
-    * 
+    *
     * @param psFileName name of the file
     * @return content of the file
-    * 
+    *
     * @author brod
     */
    public static String loadFile(String psFileName)
@@ -444,10 +492,10 @@ public class Util
 
    /**
     * This method reads Bytes from a file
-    * 
+    *
     * @param psFileName FileName
     * @return content of the file
-    * 
+    *
     * @author brod
     */
    protected static byte[] readBytes(String psFileName)
@@ -473,11 +521,11 @@ public class Util
    /**
     * This method returns an InputStream (from a file or the content
     * of the compiled package.
-    * 
+    *
     * @param psFileName FileName
     * @return content of the file
     * @throws IOException
-    * 
+    *
     * @author brod
     */
    private static InputStream getInputStream(String psFileName)
@@ -493,9 +541,9 @@ public class Util
 
    /**
     * This method shows an Exception with a JOptionPane
-    * 
+    *
     * @param pException exception
-    * 
+    *
     * @author brod
     */
    public static void showException(Exception pException)
@@ -507,9 +555,9 @@ public class Util
 
    /**
     * This method shows an Exception with a JOptionPane
-    * 
+    *
     * @param psException exception String
-    * 
+    *
     * @author brod
     */
    public static void showException(String psException)
@@ -519,10 +567,10 @@ public class Util
 
    /**
     * this method returns an ImageIcon
-    * 
+    *
     * @param psIconName IconName
     * @return ImageIcon
-    * 
+    *
     * @author brod
     */
    public static ImageIcon getImageIcon(String psIconName)
@@ -532,9 +580,9 @@ public class Util
 
    /**
     * This method sets the system Output
-    * 
+    *
     * @param pOutputStream OutputStream
-    * 
+    *
     * @author brod
     */
    public static void setOutput(PrintStream pOutputStream)
@@ -545,10 +593,10 @@ public class Util
       }
    }
 
-   /** 
-    * removes the output. 
-    * 
-    * @author Brod 
+   /**
+    * removes the output.
+    *
+    * @author Brod
     */
    public static void removeOutput()
    {
@@ -563,9 +611,9 @@ public class Util
 
    /**
     * Method getClipboard
-    * 
+    *
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getClipboard()
@@ -587,11 +635,11 @@ public class Util
 
    /**
     * Method validDir
-    * 
-    * 
+    *
+    *
     * @param psDirToValidate
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static boolean validDir(String psDirToValidate)
@@ -621,9 +669,9 @@ public class Util
 
    /**
     * Method deleteAllInDirectory
-    * 
+    *
     * @param psDir
-    * 
+    *
     * @author Andreas Brod
     */
    public static void deleteAllInDirectory(String psDir)
@@ -642,11 +690,11 @@ public class Util
 
    /**
     * Method getUntil
-    * 
+    *
     * @param pTokens
     * @param psStartText
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getUntil(StringTokenizer pTokens, String psStartText)
@@ -667,13 +715,13 @@ public class Util
 
    /**
     * Method getUntil
-    * 
+    *
     * @param pTokens
     * @param psEnd
     * @param psUp
     * @param psDown
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getUntil(StringTokenizer pTokens, String psEnd, String psUp, String psDown)
@@ -703,10 +751,10 @@ public class Util
 
    /**
     * Method surroundHtml
-    * 
+    *
     * @param psText
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String surroundHtml(String psText)
@@ -718,12 +766,12 @@ public class Util
 
    /**
     * Method fillXml
-    * 
+    *
     * @param pXmlObject
     * @param pjTree1
     * @param pTop
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String fillXml(XmlObject pXmlObject, JTree pjTree1, DefaultMutableTreeNode pTop)
@@ -745,16 +793,15 @@ public class Util
 
    /**
     * Method fillXmlPlain
-    * 
+    *
     * @param pXmlObject
     * @param pjTree1
     * @param pTop
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
-   public static String fillXmlPlain(XmlObject pXmlObject, JTree pjTree1,
-                                     DefaultMutableTreeNode pTop)
+   public static String fillXmlPlain(XmlObject pXmlObject, JTree pjTree1, DefaultMutableTreeNode pTop)
    {
       String sText = "";
 
@@ -773,11 +820,11 @@ public class Util
 
    /**
     * Method createNodes
-    * 
-    * 
+    *
+    *
     * @param pNode
     * @param pXmlObj
-    * 
+    *
     * @author Andreas Brod
     */
    private static void createNodes(DefaultMutableTreeNode pNode, XmlObject pXmlObj)
@@ -819,12 +866,12 @@ public class Util
    /**
     * Method updateFile checks, if the file has been changed and saves the new content. Unchanged
     * files will not be saved (again).
-    * 
+    *
     * @param psFileName file name
     * @param psNewContent content to be compared to the content of the file
     * @param psbResult for "logging" the result, might be <code>null</code>
     * @return true, if the file has been changed (and saved)
-    * 
+    *
     * @author kaufmann
     */
    public static boolean updateFile(String psFileName, String psNewContent, StringBuilder psbResult)
@@ -847,9 +894,9 @@ public class Util
 
    /**
     * Method deleteFile
-    * 
+    *
     * @param psFileName
-    * 
+    *
     * @author Andreas Brod
     */
    public static void deleteFile(String psFileName)
@@ -864,17 +911,16 @@ public class Util
 
    /**
     * Method replaceString
-    * 
+    *
     * @param psText
     * @param psStartString
     * @param psEndString
     * @param psReplaceWith
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
-   public static String replaceString(String psText, String psStartString, String psEndString,
-                                      String psReplaceWith)
+   public static String replaceString(String psText, String psStartString, String psEndString, String psReplaceWith)
    {
       int iStart = psText.indexOf(psStartString);
 
@@ -900,12 +946,12 @@ public class Util
 
    /**
     * Method replaceProvider
-    * 
+    *
     * @param psText
     * @param psProvider
     * @param pGdsObject
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String replaceProvider(String psText, String psProvider, XmlObject pGdsObject)
@@ -914,9 +960,8 @@ public class Util
 
       String sOldProviders = "";
       try {
-         XmlObject xmlProviders = new XmlObject(
-               psText.substring(psText.indexOf("<Providers>"), psText.indexOf("</Providers>")))
-                     .getFirstObject();
+         XmlObject xmlProviders =
+            new XmlObject(psText.substring(psText.indexOf("<Providers>"), psText.indexOf("</Providers>"))).getFirstObject();
          sOldProviders = xmlProviders.getObject("Provider").toString();
       }
       catch (Exception e) {
@@ -933,8 +978,7 @@ public class Util
          sProviderReference = "<ProviderReference />";
       }
 
-      XmlObject xmlProviderReference =
-         (new XmlObject(sProviderReference)).createObject("ProviderReference");
+      XmlObject xmlProviderReference = (new XmlObject(sProviderReference)).createObject("ProviderReference");
 
       if (pGdsObject.getName().equals("root")) {
          pGdsObject = pGdsObject.getFirstObject();
@@ -972,8 +1016,7 @@ public class Util
                         String[] attributeNames = providerProfiles.getAttributeNames(true);
                         for (String attributeName : attributeNames) {
                            if (xmlProvider.getAttribute(attributeName).length() == 0) {
-                              xmlProvider.setAttribute(attributeName,
-                                    providerProfiles.getAttribute(attributeName));
+                              xmlProvider.setAttribute(attributeName, providerProfiles.getAttribute(attributeName));
                            }
                         }
 
@@ -1002,19 +1045,15 @@ public class Util
             if (queues != null) {
                queues.deleteObjects("!--");
                queues.addElementObject(
-                     new XmlObject("<!-- Queues where taken from data/ProviderReference.xml ("
-                           + psProvider.trim() + ") -->"),
-                     0);
+                     new XmlObject("<!-- Queues where taken from data/ProviderReference.xml (" + psProvider.trim() + ") -->"), 0);
             } else {
 
                // get queues
-               queues = (new XmlObject(
-                     psText.substring(psText.indexOf("<Queues>"), psText.indexOf("</Queues>") + 9)))
-                           .getFirstObject();
+               queues =
+                  (new XmlObject(psText.substring(psText.indexOf("<Queues>"), psText.indexOf("</Queues>") + 9))).getFirstObject();
 
                queues.deleteObjects("!--");
-               queues.addElementObject(
-                     new XmlObject("<!-- Enter Queues for " + psProvider.trim() + " -->"), 0);
+               queues.addElementObject(new XmlObject("<!-- Enter Queues for " + psProvider.trim() + " -->"), 0);
             }
 
             String sQueues = queues.toString();
@@ -1033,8 +1072,7 @@ public class Util
 
       while ((sProviderType.length() > 0) && (iProviderId > 0)) {
          iProviderId = psText.indexOf("\"", iProviderId) + 1;
-         psText = psText.substring(0, iProviderId) + sProviderType
-               + psText.substring(psText.indexOf("\"", iProviderId));
+         psText = psText.substring(0, iProviderId) + sProviderType + psText.substring(psText.indexOf("\"", iProviderId));
 
          iProviderId = psText.indexOf(" providerId=\"", iProviderId + 10);
       }
@@ -1044,10 +1082,10 @@ public class Util
 
    /**
     * Method getHtmlNoSpecial
-    * 
+    *
     * @param psHtmlString
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getHtmlNoSpecial(String psHtmlString)
@@ -1077,10 +1115,10 @@ public class Util
 
    /**
     * Method getNoHtml
-    * 
+    *
     * @param psHtmlString
     * @return
-    * 
+    *
     * @author $author$
     */
    public static String getNoHtml(String psHtmlString)
@@ -1200,11 +1238,11 @@ public class Util
     * parameters if the Returns should be kept. If this flag is set to false
     * the Return (preformated) characters are ignored (if there is an empty
     * line between the tags).
-    * 
+    *
     * @param psXmlString unformatted XML string
     * @param pbKeepReturn Keep return indicator
     * @return formatted XML string
-    * 
+    *
     * @author Jochen Pinder, Andreas Brod
     */
    public static String formatXmlString(String psXmlString, boolean pbKeepReturn)
@@ -1324,10 +1362,10 @@ public class Util
 
    /**
     * Method isNumber
-    * 
+    *
     * @param pcChar
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static boolean isNumber(char pcChar)
@@ -1341,10 +1379,10 @@ public class Util
 
    /**
     * Method getDateTime
-    * 
+    *
     * @param psFormat
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getDateTime(String psFormat)
@@ -1356,12 +1394,12 @@ public class Util
 
    /**
     * Method getValue
-    * 
+    *
     * @param psText
     * @param psTag
     * @param psField
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getValue(String psText, String psTag, String psField)
@@ -1386,11 +1424,11 @@ public class Util
 
    /**
     * Method personialze
-    * 
+    *
     * @param psRequest
     * @param pFile
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String personialze(String psRequest, File pFile)
@@ -1406,8 +1444,7 @@ public class Util
             XmlObject oCreditCard = oPersonalize.getObject("CreditCard");
 
             if (oCreditCard != null) {
-               psRequest = findCreditCard(psRequest,
-                     oCreditCard.getAttribute("company") + oCreditCard.getAttribute("number"));
+               psRequest = findCreditCard(psRequest, oCreditCard.getAttribute("company") + oCreditCard.getAttribute("number"));
             }
 
             XmlObject oEmail = oPersonalize.getObject("Email");
@@ -1426,11 +1463,11 @@ public class Util
 
    /**
     * Method personialze
-    * 
+    *
     * @param psRequest
     * @param pXmlObject
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String personialze(String psRequest, XmlObject pXmlObject)
@@ -1453,18 +1490,17 @@ public class Util
 
    /**
     * Method personialze
-    * 
+    *
     * @param psText
     * @param psTag
     * @param psName
     * @param psValue
     * @param pbReplaceAll
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
-   private static String personialze(String psText, String psTag, String psName, String psValue,
-                                     boolean pbReplaceAll)
+   private static String personialze(String psText, String psTag, String psName, String psValue, boolean pbReplaceAll)
    {
       if (pbReplaceAll) {
          String sValueAll = getValue(psText, psTag, psName).toUpperCase();
@@ -1503,13 +1539,13 @@ public class Util
 
    /**
     * Method personialze
-    * 
+    *
     * @param psText
     * @param psTag
     * @param psName
     * @param psValue
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    private static String personialze(String psText, String psTag, String psName, String psValue)
@@ -1528,8 +1564,7 @@ public class Util
             String sRep = psText.substring(iPos, iEnd);
 
             if (sRep.indexOf(psName) >= 0) {
-               psText = psText.substring(0, iPos) + personialze(sRep, psName, psValue)
-                     + psText.substring(iEnd);
+               psText = psText.substring(0, iPos) + personialze(sRep, psName, psValue) + psText.substring(iEnd);
             }
 
             iPos = iEnd;
@@ -1541,12 +1576,12 @@ public class Util
 
    /**
     * Method personialze
-    * 
+    *
     * @param psText
     * @param psName
     * @param psValue
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    private static String personialze(String psText, String psName, String psValue)
@@ -1575,11 +1610,11 @@ public class Util
 
    /**
     * Method findCreditCard
-    * 
+    *
     * @param psText
     * @param psValue
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String findCreditCard(String psText, String psValue)
@@ -1608,11 +1643,11 @@ public class Util
 
    /**
     * Method findEMail
-    * 
+    *
     * @param psText
     * @param psValue
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String findEMail(String psText, String psValue)
@@ -1644,10 +1679,10 @@ public class Util
 
    /**
     * Method isEMailChar
-    * 
+    *
     * @param pcChar
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    private static boolean isEMailChar(char pcChar)
@@ -1671,10 +1706,10 @@ public class Util
 
    /**
     * Method hexToInt
-    * 
+    *
     * @param psText
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static int hexToInt(String psText)
@@ -1692,10 +1727,10 @@ public class Util
 
    /**
     * Method getPath
-    * 
+    *
     * @param psPath
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getPath(String psPath)
@@ -1705,8 +1740,7 @@ public class Util
       }
 
       if ((psPath.indexOf("\\") > 0) || (psPath.indexOf("/") > 0)) {
-         psPath =
-            psPath.substring(0, Math.max(psPath.lastIndexOf("\\"), psPath.lastIndexOf("/")) + 1);
+         psPath = psPath.substring(0, Math.max(psPath.lastIndexOf("\\"), psPath.lastIndexOf("/")) + 1);
       }
 
       return psPath;
@@ -1714,9 +1748,9 @@ public class Util
 
    /**
     * Method removeDir
-    * 
+    *
     * @param psDir
-    * 
+    *
     * @author Andreas Brod
     */
    public static void removeDir(String psDir)
@@ -1740,12 +1774,12 @@ public class Util
 
    /**
     * Method getAttribute
-    * 
+    *
     * @param psText
     * @param psTag
     * @param psAttribute
     * @return
-    * 
+    *
     * @author $author$
     */
    public static String getAttribute(String psText, String psTag, String psAttribute)
@@ -1766,11 +1800,11 @@ public class Util
 
    /**
     * Method getTag
-    * 
+    *
     * @param psText
     * @param psTag
     * @return
-    * 
+    *
     * @author $author$
     */
    public static String getTag(String psText, String psTag)
@@ -1803,11 +1837,11 @@ public class Util
 
    /**
     * Method fillInt
-    * 
+    *
     * @param piIntValue
     * @param piLength
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    private static String fillInt(int piIntValue, int piLength)
@@ -1823,10 +1857,10 @@ public class Util
 
    /**
     * This method returns a text as CamelCase
-    * 
+    *
     * @param psText Text, which has to be transformed
     * @return CamelCase text
-    * 
+    *
     * @author brod
     */
    public static String getCamelCase(String psText)
@@ -1846,12 +1880,12 @@ public class Util
 
    /**
     * Method getDateTime
-    * 
+    *
     * @param piDaysToAdd
     * @param pbDateTime
     * @param pBaseDate
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getDateTime(int piDaysToAdd, boolean pbDateTime, Date pBaseDate)
@@ -1884,12 +1918,12 @@ public class Util
 
    /**
     * Method getDateTime2
-    * 
+    *
     * @param piDaysToAdd
     * @param pbDateTime
     * @param pBaseDate
     * @return
-    * 
+    *
     * @author Andreas Brod
     */
    public static String getDateTimeZone(int piDaysToAdd, boolean pbDateTime, Date pBaseDate)
@@ -1917,8 +1951,7 @@ public class Util
       }
       catch (NumberFormatException e) {}
 
-      SimpleDateFormat sd = pbDateTime ? new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-            : new SimpleDateFormat("yyyy-MM-dd");
+      SimpleDateFormat sd = pbDateTime ? new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") : new SimpleDateFormat("yyyy-MM-dd");
 
       return sd.format(gc.getTime());
    }
@@ -1926,10 +1959,10 @@ public class Util
    /**
     * This method returns a CheckSum using the Adler32
     * algorithm.
-    * 
-    * @param pyarrBytes bytes 
+    *
+    * @param pyarrBytes bytes
     * @return checksum for the bytes
-    * 
+    *
     * @author brod
     */
    public static long getCheckSum(byte[] pyarrBytes)
@@ -1941,40 +1974,38 @@ public class Util
 
    /**
     * This method returns the compiled class
-    * 
+    *
     * @param psPath Path
     * @param psName Name
     * @return CompiledClass
     * @throws ClassNotFoundException
-    * 
+    *
     * @author brod
     */
    public static Class<?> getCompiledClass(String psPath, String psName)
       throws ClassNotFoundException
    {
-      return new ArcticClassLoader(Thread.currentThread().getContextClassLoader(), psPath)
-            .loadClass(psName);
+      return new ArcticClassLoader(Thread.currentThread().getContextClassLoader(), psPath).loadClass(psName);
 
    }
 
 
-   /** 
-    * writes a to file. 
-    * <p> 
-    *  ... add detailed information for method writeToFile 
-    * 
+   /**
+    * writes a to file.
+    * <p>
+    *  ... add detailed information for method writeToFile
+    *
     * <p> TODO rename file to pFile, content to pyarrContent
     * @param pFile file object
     * @param pyarrContent pyarr byte array of contents
     * @throws IOException
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static void writeToFile(File pFile, byte[] pyarrContent)
       throws IOException
    {
-      _systemOut.println(
-            "write file " + pFile.getAbsolutePath() + " (" + pyarrContent.length + " bytes)");
+      _systemOut.println("write file " + pFile.getAbsolutePath() + " (" + pyarrContent.length + " bytes)");
       if (!pFile.getParentFile().exists()) {
          pFile.getParentFile().mkdirs();
       }
@@ -1984,14 +2015,14 @@ public class Util
       out.close();
    }
 
-   /** 
-    * loads the byte array of bytes. 
-    * 
+   /**
+    * loads the byte array of bytes.
+    *
     * @param pFile file object
     * @return load byte array of bytes
     * @throws IOException
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static byte[] loadBytes(File pFile)
       throws IOException
@@ -2002,17 +2033,17 @@ public class Util
       return out.toByteArray();
    }
 
-   /** 
-    * copies this Util. 
-    * <p> 
-    *  ... add detailed information for method copy 
-    * 
+   /**
+    * copies this Util.
+    * <p>
+    *  ... add detailed information for method copy
+    *
     * <p> TODO rename fis to pFis, fos to pFos
     * @param pFis fis object Input Stream
     * @param pFos fos object Output Stream
     * @throws IOException
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    static void copy(InputStream pFis, OutputStream pFos)
       throws IOException
@@ -2151,10 +2182,10 @@ public class Util
 
    /**
     * This methods loads the content from an URL
-    * 
+    *
     * @param psUrl url
     * @return url content
-    * 
+    *
     */
    public static String loadFromUrl(String psUrl)
    {
@@ -2176,14 +2207,14 @@ public class Util
       return "";
    }
 
-   /** 
-    * selects this Util. 
-    * 
+   /**
+    * selects this Util.
+    *
     * @param psMessage message final
     * @param parrValues lst final
     * @return select
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static String select(final String psMessage, final String[] parrValues)
    {
@@ -2194,8 +2225,7 @@ public class Util
          @Override
          public void run()
          {
-            ElementListSelectionDialog dialog =
-               new ElementListSelectionDialog(defa.getActiveShell(), new LabelProvider());
+            ElementListSelectionDialog dialog = new ElementListSelectionDialog(defa.getActiveShell(), new LabelProvider());
             dialog.setElements(parrValues);
             dialog.setTitle(psMessage);
             // user pressed cancel
@@ -2213,11 +2243,11 @@ public class Util
 
 
    /**
-    * Returns the output path of an arctic project in the current eclipse workspace. If more than 
+    * Returns the output path of an arctic project in the current eclipse workspace. If more than
     * one arctic project is found in the workspace, the developer has to select the project.
     * If no arctic project exists in the workspace, <code>null</code> will be returned.
     *
-    * @return output path of an arctic project, or null if no arctic project is available or none 
+    * @return output path of an arctic project, or null if no arctic project is available or none
     * has been selected
     *
     * @author kaufmann
@@ -2246,8 +2276,7 @@ public class Util
                String sProjectOutputPath = null;
                try {
                   sProjectOutputPath = project.getLocation()
-                        .append(JavaCore.create(project).getOutputLocation().removeFirstSegments(1))
-                        .toPortableString();
+                        .append(JavaCore.create(project).getOutputLocation().removeFirstSegments(1)).toPortableString();
                }
                catch (JavaModelException pException) {
                   // ignored
@@ -2263,10 +2292,10 @@ public class Util
 
       String sOutputPath;
       switch (outputPaths.size()) {
-         case 0: // no arctic project found 
+         case 0: // no arctic project found
             sOutputPath = null;
             break;
-         case 1: // return the one and only arctic project's output path 
+         case 1: // return the one and only arctic project's output path
             sOutputPath = outputPaths.values().iterator().next();
             break;
          default: // let the developer select the project
@@ -2312,7 +2341,7 @@ public class Util
    }
 
    /**
-    * Creates a dialog with an OK button and the specified text. The text may be multilined. The 
+    * Creates a dialog with an OK button and the specified text. The text may be multilined. The
     * dialog will show scrollbars, if necessary
     *
     * @param psTitle title of the dialog
@@ -2320,8 +2349,7 @@ public class Util
     *
     * @author kaufmann
     */
-   public static void displayDialog(final String psTitle,
-                                    final IDialogContentBuilder pDialogContentBuilder)
+   public static void displayDialog(final String psTitle, final IDialogContentBuilder pDialogContentBuilder)
    {
       Shell shell = Display.getDefault().getActiveShell();
 
@@ -2357,8 +2385,7 @@ public class Util
           * @author kaufmann
           */
          @Override
-         protected Button createButton(Composite pParent, int pId, String pLabel,
-                                       boolean pbDefaultButton)
+         protected Button createButton(Composite pParent, int pId, String pLabel, boolean pbDefaultButton)
          {
             // prevent the cancel button to be created
             if (pId == IDialogConstants.CANCEL_ID) {
@@ -2384,7 +2411,7 @@ public class Util
    }
 
    /**
-    * Creates a dialog with an OK button and the specified text. The text may be multilined. The 
+    * Creates a dialog with an OK button and the specified text. The text may be multilined. The
     * dialog will show scrollbars, if necessary
     *
     * @param psTitle title of the dialog
@@ -2416,7 +2443,7 @@ public class Util
    }
 
    /**
-    * Creates a dialog with an OK button and the stacktrace of an exception. The stacktrace may be 
+    * Creates a dialog with an OK button and the stacktrace of an exception. The stacktrace may be
     * preceeded by an additional text
     *
     * @param psTitle title of the dialog
@@ -2425,8 +2452,7 @@ public class Util
     *
     * @author kaufmann
     */
-   public static void displayExceptionInDialog(String psTitle, Exception pException,
-                                               String psAdditionalText)
+   public static void displayExceptionInDialog(String psTitle, Exception pException, String psAdditionalText)
    {
       try (OutputStream out = new ByteArrayOutputStream()) {
          pException.printStackTrace(new PrintStream(out));
@@ -2453,23 +2479,22 @@ public class Util
     * @author kaufmann
     */
    public static void setArcticConfiguration(String psPath, ClassLoader pLoader)
-      throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException
+      throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+      NoSuchMethodException, SecurityException
    {
       Class<?> configuration = pLoader.loadClass(ARCTIC_CONFIGURATION_CLASS);
-      configuration.getMethod("setConfigDirectory", new Class[]{ String.class }).invoke(null,
-            new Object[]{ psPath });
+      configuration.getMethod("setConfigDirectory", new Class[]{ String.class }).invoke(null, new Object[]{ psPath });
 
    }
 
-   /** 
-    * returns a provider data file. 
-    * 
+   /**
+    * returns a provider data file.
+    *
     * @param psBaseArctic base arctic String
     * @param psPath path String
     * @return the provider data file
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static File getProviderDataFile(String psBaseArctic, String psPath)
    {
@@ -2504,31 +2529,29 @@ public class Util
          } else {
             if (sRequestedPath.startsWith(sProviderFolder)) {
                // get relative File
-               return getFile(
-                     new File(file, sRequestedPath.substring(sProviderFolder.length() + 1)));
+               return getFile(new File(file, sRequestedPath.substring(sProviderFolder.length() + 1)));
             } else if (sProviderFolder.startsWith(sRequestedPath)) {
                // get the absulte path
                String absolutePath = file.getAbsolutePath().replace('\\', '/');
-               // ... and find the relative path 
+               // ... and find the relative path
                int indexOf = absolutePath.indexOf(sRequestedPath);
                if (indexOf > 0) {
-                  return getFile(
-                        new File(absolutePath.substring(0, indexOf + sRequestedPath.length())));
+                  return getFile(new File(absolutePath.substring(0, indexOf + sRequestedPath.length())));
                }
             }
          }
       }
-      // file not found: return 'old' path 
+      // file not found: return 'old' path
       return getFile(new File(sBaseDir, "lib/providerdata/" + sRequestedPath));
    }
 
-   /** 
-    * returns a CanonicalFile file (if possible) 
-    * 
+   /**
+    * returns a CanonicalFile file (if possible)
+    *
     * @param pFile file object
     * @return the file
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    private static File getFile(File pFile)
    {
@@ -2540,18 +2563,18 @@ public class Util
       }
    }
 
-   /** 
-    * returns the package directories. 
-    * 
+   /**
+    * returns the package directories.
+    *
     * @param psBaseArctic base arctic String
     * @return the package directories
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    private static synchronized Hashtable<String, File> getPackageDirectories(String psBaseArctic)
    {
       if (_htPackageDirectories == null || !psBaseArctic.equalsIgnoreCase(_sBaseArctic)) {
-         _htPackageDirectories = new Hashtable<String, File>();
+         _htPackageDirectories = new Hashtable<>();
          _sBaseArctic = psBaseArctic;
          File file = new File(_sBaseArctic, "lib/provider");
          if (file.isDirectory()) {
@@ -2566,17 +2589,16 @@ public class Util
       return _htPackageDirectories;
    }
 
-   /** 
-    * adds the package directories. 
-    * 
+   /**
+    * adds the package directories.
+    *
     * @param phtPackageDirectories pht package directories Hashtable of strings and files
     * @param pDataFile data file object
     * @param psDirectory directory String
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
-   private static void addPackageDirectories(Hashtable<String, File> phtPackageDirectories,
-                                             File pDataFile, String psDirectory)
+   private static void addPackageDirectories(Hashtable<String, File> phtPackageDirectories, File pDataFile, String psDirectory)
    {
       File subDirectory = null;
       for (File subFile : pDataFile.listFiles()) {
@@ -2597,35 +2619,36 @@ public class Util
       if (subDirectory == null) {
          phtPackageDirectories.put(psDirectory, pDataFile);
       } else {
-         if (psDirectory.length() > 0)
+         if (psDirectory.length() > 0) {
             psDirectory += "/";
+         }
          psDirectory += subDirectory.getName();
          addPackageDirectories(phtPackageDirectories, subDirectory, psDirectory);
       }
    }
 
-   /** 
-    * returns a provider data file. 
-    * 
+   /**
+    * returns a provider data file.
+    *
     * @param psBaseArctic base arctic File
     * @param psPath path String
     * @return the provider data file
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static File getProviderDataFile(File psBaseArctic, String psPath)
    {
       return getProviderDataFile(psBaseArctic.getAbsolutePath(), psPath);
    }
 
-   /** 
-    * returns a provider data path. 
-    * 
+   /**
+    * returns a provider data path.
+    *
     * @param psBaseArctic base arctic String
     * @param psPath from namespace String
     * @return the provider data path
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static String getProviderDataPath(String psBaseArctic, String psPath)
    {
@@ -2644,44 +2667,42 @@ public class Util
       }
    }
 
-   /** 
-    * returns a provider data package path. For this the path will be scanned for the 
+   /**
+    * returns a provider data package path. For this the path will be scanned for the
     * related lib directory and the related package path.
     * <p>
     * This works with directories (delimited with '/' or '\') and packages (delimited
     * with '.').
-    * 
+    *
     * @param psAbsolutePath path String
     * @param psPath path String
     * @return the provider data package path
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static String getProviderDataPackagePath(String psAbsolutePath, String psPath)
    {
-      Matcher matcher = Pattern.compile(".*[./\\\\]lib[./\\\\]provider.*?data[./\\\\](.+)")
-            .matcher(psAbsolutePath);
+      Matcher matcher = Pattern.compile(".*[./\\\\]lib[./\\\\]provider.*?data[./\\\\](.+)").matcher(psAbsolutePath);
       if (matcher.find()) {
          return matcher.group(1);
       }
       return psPath;
    }
 
-   /** 
+   /**
     * returns a provider data root directory. Below this directory the Path can be found.
-    * This may be be e.g. <code>arcticRoot/lib/Provider/AmadeusWsdl/data</code> 
-    * 
+    * This may be be e.g. <code>arcticRoot/lib/Provider/AmadeusWsdl/data</code>
+    *
     * @param psBaseArctic base arctic String
     * @param psPath path String
     * @return the provider data root directory
-    * 
-    * @author Brod 
+    *
+    * @author Brod
     */
    public static String getProviderDataRootDirectory(String psBaseArctic, String psPath)
    {
       String relativeProviderDataFile = getProviderDataPath(psBaseArctic, psPath);
-      return relativeProviderDataFile.substring(0,
-            relativeProviderDataFile.length() - psPath.length() - 1);
+      return relativeProviderDataFile.substring(0, relativeProviderDataFile.length() - psPath.length() - 1);
    }
 
 
