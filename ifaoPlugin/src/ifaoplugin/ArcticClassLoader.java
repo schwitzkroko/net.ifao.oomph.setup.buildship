@@ -1,35 +1,42 @@
 package ifaoplugin;
 
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
-import java.util.zip.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Stack;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 
 /**
  * private class ArcticClassLoader, to load an arctic class
- * 
+ *
  * <p>
  * Copyright &copy; 2010, i:FAO
- * 
+ *
  * @author brod
  */
 public class ArcticClassLoader
    extends ClassLoader
 {
-   private final String _startPath;
+   private final List<File> _startPath;
    private final String _fileSeparator = System.getProperty("file.separator");
 
    /**
     * Constructor for ArcticClassLoader
-    * 
+    *
     * @param pParentClassLoader ParentClassLoader
     * @param psStartPath startPath
-    * 
+    *
     * @author brod
     */
-   public ArcticClassLoader(ClassLoader pParentClassLoader, String psStartPath)
+   public ArcticClassLoader(ClassLoader pParentClassLoader, List<File> psStartPath)
    {
       super(pParentClassLoader);
       this._startPath = psStartPath;
@@ -37,11 +44,11 @@ public class ArcticClassLoader
 
    /**
     * method findClass has to be implemented
-    * 
+    *
     * @param psName name
     * @return found Class
     * @throws ClassNotFoundException
-    * 
+    *
     * @author brod
     */
    @Override
@@ -53,12 +60,12 @@ public class ArcticClassLoader
 
    /**
     * private method to find a Class
-    * 
+    *
     * @param psName name of the class
     * @param pstkFiles stack of Files
     * @return found class
     * @throws ClassNotFoundException
-    * 
+    *
     * @author brod
     */
    private Class<?> findClass(String psName, Stack<File> pstkFiles)
@@ -96,9 +103,17 @@ public class ArcticClassLoader
          } else {
 
             println("ArcticClassLoader - loading: " + path.toString());
-            File classFile = new File(this._startPath + _fileSeparator + path.toString());
-            fileLength = (int) classFile.length();
-            fis = new FileInputStream(classFile);
+            for (File startPath : _startPath) {
+               File classFile = new File(startPath + _fileSeparator + path.toString());
+               if (classFile.exists()) {
+                  fileLength = (int) classFile.length();
+                  fis = new FileInputStream(classFile);
+                  break;
+               }
+            }
+         }
+         if (fis == null) {
+            throw new LinkageError(path.toString() + " not found");
          }
 
          // read the contents from the stream
@@ -115,8 +130,9 @@ public class ArcticClassLoader
          // define package
          String packageName = null;
          int lastDot = psName.lastIndexOf('.');
-         if (lastDot != -1)
+         if (lastDot != -1) {
             packageName = psName.substring(0, lastDot);
+         }
          // Package
          if (packageName != null) {
             try {
@@ -161,7 +177,7 @@ public class ArcticClassLoader
 
    /**
     * @param psText Text to print
-    * 
+    *
     * @author brod
     */
    private void println(String psText)
@@ -177,23 +193,27 @@ public class ArcticClassLoader
     * <li>lib/providerdataJar</li>
     * <li>lib</li>
     * </ul>
-    * 
+    *
     * @return the stack of files
-    * 
+    *
     * @author brod
     */
    private Stack<File> getStack()
    {
-      Stack<File> stk = new Stack<File>();
+      Stack<File> stk = new Stack<>();
       try {
-         File f = new File(this._startPath);
+         File f;
+         if (_startPath.size() > 1) {
+            f = this._startPath.get(0).getParentFile();
+         } else {
+            f = this._startPath.get(0);
+         }
          File sRoot = f.getParentFile().getAbsoluteFile();
 
          // add to path
          addToStack(new File(sRoot + File.separator + "extFiles" + File.separator + "lib"), stk);
          addToStack(new File(sRoot + File.separator + "lib" + File.separator + "provider"), stk);
-         addToStack(new File(sRoot + File.separator + "lib" + File.separator + "providerdataJar"),
-               stk);
+         addToStack(new File(sRoot + File.separator + "lib" + File.separator + "providerdataJar"), stk);
          addToStack(new File(sRoot + File.separator + "lib"), stk);
 
       }
@@ -204,10 +224,10 @@ public class ArcticClassLoader
 
    /**
     * Adds the jar files of a directory to the stack
-    * 
+    *
     * @param pDirectory directory where the jar files are searched
     * @param pStackOfFiles Stack the jar files are added to
-    * 
+    *
     * @author brod
     */
    private void addToStack(File pDirectory, Stack<File> pStackOfFiles)

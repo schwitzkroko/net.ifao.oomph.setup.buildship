@@ -1,31 +1,37 @@
 package net.ifao.plugins.editor.testcase;
 
 
-import ifaoplugin.Util;
-
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
-import net.ifao.xml.Xml;
-
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.internal.Workbench;
 
+import ifaoplugin.Util;
+import net.ifao.xml.Xml;
 
-/** 
- * Main class TestcaseData encapsultes the Data of the TestcaseClass. 
- * The TestcaseClass depends on the automatically generated TestcaseAdapter, 
- * which contains the GUI. So this class contains the Data and is the 
- * interface for the "world" 
- * 
- * <p> 
- * Copyright &copy; 2007, i:FAO 
- * 
- * @author brod 
+
+/**
+ * Main class TestcaseData encapsultes the Data of the TestcaseClass.
+ * The TestcaseClass depends on the automatically generated TestcaseAdapter,
+ * which contains the GUI. So this class contains the Data and is the
+ * interface for the "world"
+ *
+ * <p>
+ * Copyright &copy; 2007, i:FAO
+ *
+ * @author brod
  */
 public class TestcaseData
    extends Testcase
@@ -42,7 +48,7 @@ public class TestcaseData
 
    private String _sTscFile = "";
    private String _sCaseType;
-   private File _classesDirectory;
+   private List<File> _classesDirectory = new ArrayList<>();
    private Class _clsAnnotationTitle;
    private Class _clsAnnotationParam;
    private String _sTestTemplatesXml;
@@ -50,35 +56,38 @@ public class TestcaseData
 
    private java.util.Hashtable<String, String> _htInit;
    private java.util.Hashtable<String, String> _htValid;
-   private java.util.Hashtable<String, ArrayList<TAnnotation>> _htCode = new java.util.Hashtable<String, ArrayList<TAnnotation>>();
+   private java.util.Hashtable<String, ArrayList<TAnnotation>> _htCode = new java.util.Hashtable<>();
 
    private TestcaseRunner _testcaseRunner = null;
    private TestcasePage _rootTestcasePage;
    private Class _abstractUIPlugin;
 
+   private IProject project;
+
    // ---------------------------------------------------------------
    // Constructor
    // ---------------------------------------------------------------
 
-   /** 
-    * Constructor TestcaseData with the following parameters: 
-    * 
-    * @param pBusinessRulesPage The TestcasePage-BusinessRulesPage 
-    * @param pParent The parent class (GUI) 
-    * @param pAbstractUIPlugin The Abstract user interface 
-    * @param pFile The FileName (for this testcase) 
-    * @param pbIsDirectTsc If the Button src is activated 
-    * 
-    * @author brod 
+   /**
+    * Constructor TestcaseData with the following parameters:
+    *
+    * @param pBusinessRulesPage The TestcasePage-BusinessRulesPage
+    * @param pParent The parent class (GUI)
+    * @param pAbstractUIPlugin The Abstract user interface
+    * @param pFile The FileName (for this testcase)
+    * @param pbIsDirectTsc If the Button src is activated
+    *
+    * @author brod
     */
-   public TestcaseData(TestcasePage pBusinessRulesPage, Composite pParent, Class pAbstractUIPlugin,
-                       File pFile, boolean pbIsDirectTsc)
+   public TestcaseData(TestcasePage pBusinessRulesPage, Composite pParent, Class pAbstractUIPlugin, IFile pFile,
+                       boolean pbIsDirectTsc)
    {
       super(pBusinessRulesPage, pParent, pAbstractUIPlugin, pFile);
       _rootTestcasePage = pBusinessRulesPage;
       _abstractUIPlugin = pAbstractUIPlugin;
+      project = pFile.getProject();
 
-      _sTscFile = pFile.getAbsolutePath().replaceAll("\\\\", "/");
+      _sTscFile = pFile.getLocation().toFile().getAbsolutePath().replaceAll("\\\\", "/");
 
       // file has to be the tsc-File
       if (!_sTscFile.endsWith(".tsc")) {
@@ -87,33 +96,45 @@ public class TestcaseData
 
       int iJUnitTest = _sTscFile.indexOf("/jUnitTest/");
       if (iJUnitTest < 0) {
-         throw new RuntimeException(
-               "Invalid File selected. File has to be located within jUnitTest directory");
+         throw new RuntimeException("Invalid File selected. File has to be located within jUnitTest directory");
       }
 
       String sBase = _sTscFile.substring(0, iJUnitTest);
 
-      _classesDirectory = new File(sBase + "/classes");
-      if (!_classesDirectory.exists()) {
-         _classesDirectory = new File(sBase + "/bin");
+      _classesDirectory.clear();
+
+      _classesDirectory.addAll(ClassPathBuilder.getClassesFolders(project));
+
+      _sCaseType = getBaseClassType(_sTscFile.substring(iJUnitTest + 11, _sTscFile.length() - 4).replaceAll("\\/", "."));
+
+      _sTestTemplatesXml = sBase + "/jUnitTest/net/ifao/" + _sBaseDir4Components + "/data/TestTemplates"
+            + (_sCaseType.startsWith("-") ? "" : "_" + _sCaseType) + ".xml";
+
+      _clsAnnotationTitle = null;
+      _clsAnnotationParam = null;
+      if (_clsAnnotationTitle == null) {
+         try {
+            _clsAnnotationTitle = Util.getCompiledClass(_classesDirectory, "net.ifao.ruletest.framework.annotation.Title");
+         }
+         catch (ClassNotFoundException e) {
+            // ignore this
+         }
       }
 
-      _sCaseType = getBaseClassType(_sTscFile.substring(iJUnitTest + 11, _sTscFile.length() - 4)
-            .replaceAll("\\/", "."));
-
-      _sTestTemplatesXml = sBase + "/jUnitTest/net/ifao/" + _sBaseDir4Components
-            + "/data/TestTemplates" + (_sCaseType.startsWith("-") ? "" : "_" + _sCaseType) + ".xml";
-
-      try {
-         _clsAnnotationTitle = Util.getCompiledClass(_classesDirectory.getAbsolutePath(),
-               "net.ifao.ruletest.framework.annotation.Title");
-         _clsAnnotationParam = Util.getCompiledClass(_classesDirectory.getAbsolutePath(),
-               "net.ifao.ruletest.framework.annotation.Param");
+      if (_clsAnnotationTitle != null) {
+         if (_clsAnnotationParam == null) {
+            try {
+               _clsAnnotationParam = Util.getCompiledClass(_classesDirectory, "net.ifao.ruletest.framework.annotation.Param");
+            }
+            catch (ClassNotFoundException e) {
+               // ignore this
+            }
+         }
       }
-      catch (ClassNotFoundException e1) {
+      if (_clsAnnotationParam == null) {
          _clsAnnotationTitle = null;
-         _clsAnnotationParam = null;
       }
+
       initLists();
 
       getCLabelType().setText(_sCaseType);
@@ -124,52 +145,6 @@ public class TestcaseData
 
    }
 
-   /** 
-    * method main for test purpose. 
-    * 
-    * @param pArgs Arguments 
-    * 
-    * @author brod 
-    */
-   public static void main(String[] pArgs)
-   {
-      display("BusinessRules", null);
-   }
-
-   /** 
-    * method display (for test purpose) form the main method 
-    * 
-    * @param psTitle The title string 
-    * @param pAbstractUIPlugin The Abstract user interface 
-    * 
-    * @author brod 
-    */
-   public static void display(String psTitle, Class pAbstractUIPlugin)
-   {
-      Shell sShell = new Shell();
-      sShell.setText(psTitle);
-      GridLayout gridLayout = new GridLayout();
-      gridLayout.horizontalSpacing = 0;
-      gridLayout.marginWidth = 0;
-      gridLayout.marginHeight = 0;
-      gridLayout.verticalSpacing = 0;
-      sShell.setLayout(gridLayout);
-      Display display = Display.getDefault();
-      String sFile = "";
-      sFile = "net/ifao/arctic/agents/amadeus/xml/pnr/business/CancelActiveSegmentsRule.tsc";
-      sFile = "net/ifao/arctic/agents/amadeus/xml/pnr/elements/PnrElementAccountingInfo.tsc";
-      sFile = "net/ifao/arctic/agents/hrs/wsdl/framework/business/PrepareCancellation.tsc";
-      TestcaseData testcaseData = new TestcaseData(null, sShell, pAbstractUIPlugin, new File(
-            "C:/arctic/eclipse/main/jUnitTest/" + sFile), true);
-      sShell.setImage(testcaseData.getIcon("rule.gif"));
-      sShell.pack();
-      sShell.open();
-      while (!sShell.isDisposed()) {
-         if (!display.readAndDispatch())
-            display.sleep();
-      }
-      display.dispose();
-   }
 
    MessageBox messageBox;
 
@@ -177,15 +152,16 @@ public class TestcaseData
    // protected methods
    // ---------------------------------------------------------------
 
-   /** 
-    * Method reload to reload the values 
-    * 
-    * @author brod 
+   /**
+    * Method reload to reload the values
+    *
+    * @author brod
     */
    protected void reload()
    {
-      if (_sTscFile == null)
+      if (_sTscFile == null) {
          return;
+      }
 
       Xml xmlNew = loadXml(_sTscFile);
       String xmlString = getXmlString(false);
@@ -195,13 +171,14 @@ public class TestcaseData
 
       if (_rootTestcasePage != null && _rootTestcasePage.isDirty()) {
 
-         if (messageBox != null)
+         if (messageBox != null) {
             return;
+         }
 
          messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
          messageBox.setText(_sTscFile.substring(_sTscFile.lastIndexOf("/") + 1) + " Changed");
-         messageBox.setMessage("The file has been changed on the file system. Do you want\n"
-               + "to load the changes within the TestcaseEditor?");
+         messageBox.setMessage(
+               "The file has been changed on the file system. Do you want\n" + "to load the changes within the TestcaseEditor?");
 
          if (messageBox.open() != SWT.YES) {
             messageBox = null;
@@ -213,7 +190,7 @@ public class TestcaseData
 
       // clear the list of expanded
       clearExpanded();
-      // remember the current state 
+      // remember the current state
       rememberExpanded(getTreeTestcases().getItems());
 
       _xmlTestData = xmlNew;
@@ -224,8 +201,7 @@ public class TestcaseData
       if (testObjectClass.indexOf(".") > 0) {
          String sName = testObjectClass.substring(testObjectClass.lastIndexOf(".") + 1);
          if (testObjectClass.indexOf(".agents.") > 0) {
-            String sPackage = testObjectClass
-                  .substring(testObjectClass.lastIndexOf(".agents.") + 8);
+            String sPackage = testObjectClass.substring(testObjectClass.lastIndexOf(".agents.") + 8);
             if (sPackage.indexOf(".") > 0) {
                sName += " (" + Util.getCamelCase(sPackage.substring(0, sPackage.indexOf(".")));
                sPackage = sPackage.substring(sPackage.indexOf(".") + 1);
@@ -239,24 +215,25 @@ public class TestcaseData
       }
 
       clickTreeTestcases(getTreeTestcases());
-      if (_rootTestcasePage != null)
+      if (_rootTestcasePage != null) {
          _rootTestcasePage.setDirty(false);
+      }
 
       // clear the list of expanded
       clearExpanded();
 
    }
 
-   /** 
-    * The method getXmlString returns a XmlString which accords 
-    * to the values of the current tree 
-    * 
-    * @param pbGetRoot if the xmlString should contain 
-    * the root element 
-    * @return The XmlString (which represents the current state 
-    * of the treeItems 
-    * 
-    * @author brod 
+   /**
+    * The method getXmlString returns a XmlString which accords
+    * to the values of the current tree
+    *
+    * @param pbGetRoot if the xmlString should contain
+    * the root element
+    * @return The XmlString (which represents the current state
+    * of the treeItems
+    *
+    * @author brod
     */
    public String getXmlString(boolean pbGetRoot)
    {
@@ -266,11 +243,12 @@ public class TestcaseData
       // loop through tree
       TreeItem[] items = getTreeTestcases().getItems();
 
-      for (int i = 0; i < items.length; i++) {
-         addItems(items[i], xmlSave);
+      for (TreeItem item : items) {
+         addItems(item, xmlSave);
       }
-      if (pbGetRoot)
+      if (pbGetRoot) {
          return xmlRoot.toString();
+      }
       return xmlSave.toString();
    }
 
@@ -278,15 +256,15 @@ public class TestcaseData
    // private methods
    // ---------------------------------------------------------------
 
-   /** 
-    * The method getBaseClassType contains a list of all known 
-    * BaseClass Types. This should be enhanced if there is 
-    * a new BaseClassTyp 
-    * 
-    * @param psName The name of the Class 
-    * @return The text which should be displayed 
-    * 
-    * @author brod 
+   /**
+    * The method getBaseClassType contains a list of all known
+    * BaseClass Types. This should be enhanced if there is
+    * a new BaseClassTyp
+    *
+    * @param psName The name of the Class
+    * @return The text which should be displayed
+    *
+    * @author brod
     */
    private String getBaseClassType(String psName)
    {
@@ -314,22 +292,22 @@ public class TestcaseData
       }
 
       try {
-
-         Class<?> compiledClass = Util
-               .getCompiledClass(_classesDirectory.getAbsolutePath(), psName);
+         Class<?> compiledClass = Util.getCompiledClass(_classesDirectory, psName);
 
          String baseClassType = getBaseClassType(compiledClass.getSuperclass().getName());
 
-         if (!baseClassType.endsWith("-"))
+         if (!baseClassType.endsWith("-")) {
             return baseClassType;
+         }
 
          // try interfaces
          Class[] interfaces = compiledClass.getInterfaces();
-         for (int i = 0; i < interfaces.length; i++) {
-            baseClassType = getBaseClassType(interfaces[i].getName());
+         for (Class interface1 : interfaces) {
+            baseClassType = getBaseClassType(interface1.getName());
 
-            if (!baseClassType.endsWith("-"))
+            if (!baseClassType.endsWith("-")) {
                return baseClassType;
+            }
          }
 
       }
@@ -339,44 +317,45 @@ public class TestcaseData
 
    }
 
-   /** 
-    * The method getInitArrayList returns a list of available InitClasses 
-    * for a specific directory. E.g. 
-    * <code>/jUnitTest/net/ifao/ruletest/initialize</code> 
-    * 
-    * @param psDirectory The name of the directory 
-    * @return a Hashtable with String 
-    * 
-    * @author brod 
+   /**
+    * The method getInitArrayList returns a list of available InitClasses
+    * for a specific directory. E.g.
+    * <code>/jUnitTest/net/ifao/ruletest/initialize</code>
+    *
+    * @param psDirectory The name of the directory
+    * @return a Hashtable with String
+    *
+    * @author brod
     */
    private java.util.Hashtable<String, String> getInitArrayList(String psDirectory)
    {
-      java.util.Hashtable<String, String> lst = new java.util.Hashtable<String, String>();
+      java.util.Hashtable<String, String> lst = new java.util.Hashtable<>();
       if (_sTscFile.indexOf("/jUnitTest/") > 0) {
-         addToArrayList(lst, new File(_sTscFile.substring(0, _sTscFile.indexOf("/jUnitTest/") + 11)
-               + "net/ifao/" + _sBaseDir4Components + "/" + psDirectory));
+         addToArrayList(lst, new File(_sTscFile.substring(0, _sTscFile.indexOf("/jUnitTest/") + 11) + "net/ifao/"
+               + _sBaseDir4Components + "/" + psDirectory));
 
       }
       return lst;
    }
 
-   /** 
-    * The private method addToArrayList is called from the getInitArrayList, 
-    * which adds Annotataion of javaFiles to an arraylist 
-    * 
-    * @param phtList Hashtable with entries 
-    * @param pDirectory The directory which has to be analysed 
-    * 
-    * @author brod 
+   /**
+    * The private method addToArrayList is called from the getInitArrayList,
+    * which adds Annotataion of javaFiles to an arraylist
+    *
+    * @param phtList Hashtable with entries
+    * @param pDirectory The directory which has to be analysed
+    *
+    * @author brod
     */
    private void addToArrayList(java.util.Hashtable<String, String> phtList, File pDirectory)
    {
-      if (!pDirectory.exists())
+      if (!pDirectory.exists()) {
          return;
+      }
       if (pDirectory.isDirectory()) {
          File[] files = pDirectory.listFiles();
-         for (int i = 0; i < files.length; i++) {
-            addToArrayList(phtList, files[i]);
+         for (File file : files) {
+            addToArrayList(phtList, file);
          }
       } else {
 
@@ -388,26 +367,27 @@ public class TestcaseData
             if (_clsAnnotationTitle != null) {
                String sPath = pDirectory.getAbsolutePath();
                sPath = sPath.substring(0, sPath.indexOf("jUnitTest"));
+               System.out.println("Check for " + sName);
 
                try {
-                  Class compiledClass = Util.getCompiledClass(_classesDirectory.getAbsolutePath(),
-                        sName);
+                  Class compiledClass = Util.getCompiledClass(_classesDirectory, sName);
                   while (compiledClass != null) {
 
                      Annotation[] annotations = compiledClass.getAnnotations();
 
                      TAnnotation annot;
-                     for (int i = 0; i < annotations.length; i++)
-                        if ((annot = addAnnotation(sName, annotations[i])) != null) {
+                     for (Annotation annotation : annotations) {
+                        if ((annot = addAnnotation(sName, annotation)) != null) {
 
                            phtList.put(annot.value, annot.desc);
                         }
+                     }
                      // System.out.println(">>> " + compiledClass.getName());
                      Method[] methods = compiledClass.getDeclaredMethods();
-                     for (int j = 0; j < methods.length; j++) {
-                        Annotation[] annMethods = methods[j].getAnnotations();
-                        for (int k = 0; k < annMethods.length; k++) {
-                           addAnnotation(sName, annMethods[k]);
+                     for (Method method : methods) {
+                        Annotation[] annMethods = method.getAnnotations();
+                        for (Annotation annMethod : annMethods) {
+                           addAnnotation(sName, annMethod);
                         }
                      }
                      compiledClass = compiledClass.getSuperclass();
@@ -426,15 +406,15 @@ public class TestcaseData
 
    }
 
-   /** 
-    * The method addAnnotation associates a Annotations to a javaFile 
-    * (Within the private member <code>_htCode</code>) 
-    * 
-    * @param psFileName The name of the javaFile 
-    * @param pAnnotation The according annotation 
-    * @return new TAnnotation object 
-    * 
-    * @author brod 
+   /**
+    * The method addAnnotation associates a Annotations to a javaFile
+    * (Within the private member <code>_htCode</code>)
+    *
+    * @param psFileName The name of the javaFile
+    * @param pAnnotation The according annotation
+    * @return new TAnnotation object
+    *
+    * @author brod
     */
    private TAnnotation addAnnotation(String psFileName, Annotation pAnnotation)
    {
@@ -449,16 +429,18 @@ public class TestcaseData
          TAnnotation tAnnot = new TAnnotation(value, description, components);
          // ("value=\"" + value + "\", description=\"" + description + "\"");
 
-         if (tAnnot.components.indexOf(_sCaseType) < 0)
+         if (tAnnot.components.indexOf(_sCaseType) < 0) {
             return null;
+         }
 
          ArrayList<TAnnotation> lst = _htCode.get(psFileName);
          if (lst == null) {
-            lst = new ArrayList<TAnnotation>();
+            lst = new ArrayList<>();
             _htCode.put(psFileName, lst);
          }
-         if (annotationType.getName().equals(_clsAnnotationTitle.getName()))
+         if (annotationType.getName().equals(_clsAnnotationTitle.getName())) {
             lst.clear();
+         }
          lst.add(tAnnot);
          return tAnnot;
 
@@ -467,23 +449,21 @@ public class TestcaseData
 
    }
 
-   /** 
-    * The method getAnnotationTypeGetMethod returns a specific value of the 
-    * pAnnotation (per reflection) 
-    * 
-    * @param pAnnotation The Annotation 
-    * @param pClass The class (which contains the method) 
-    * @param psMethodName The methodName of the class 
-    * @return The related String ("" of there was an exception) 
-    * 
-    * @author brod 
+   /**
+    * The method getAnnotationTypeGetMethod returns a specific value of the
+    * pAnnotation (per reflection)
+    *
+    * @param pAnnotation The Annotation
+    * @param pClass The class (which contains the method)
+    * @param psMethodName The methodName of the class
+    * @return The related String ("" of there was an exception)
+    *
+    * @author brod
     */
-   private String getAnnotationTypeGetMethod(Annotation pAnnotation,
-                                             Class<? extends Annotation> pClass, String psMethodName)
+   private String getAnnotationTypeGetMethod(Annotation pAnnotation, Class<? extends Annotation> pClass, String psMethodName)
    {
       try {
-         return (String) pClass.getMethod(psMethodName, new Class[0]).invoke(pAnnotation,
-               new Object[0]);
+         return (String) pClass.getMethod(psMethodName, new Class[0]).invoke(pAnnotation, new Object[0]);
       }
       catch (Exception e) {}
       return "";
@@ -493,10 +473,10 @@ public class TestcaseData
    // Override methods
    // ---------------------------------------------------------------
 
-   /** 
-    * Override method initLists 
-    * 
-    * @author brod 
+   /**
+    * Override method initLists
+    *
+    * @author brod
     */
    @Override
    void initLists()
@@ -506,13 +486,13 @@ public class TestcaseData
 
    }
 
-   /** 
-    * Override method htCodeGet 
-    * 
-    * @param psAttribute param attribute 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method htCodeGet
+    *
+    * @param psAttribute param attribute
+    * @return
+    *
+    * @author brod
     */
    @Override
    ArrayList<TAnnotation> htCodeGet(String psAttribute)
@@ -520,12 +500,12 @@ public class TestcaseData
       return _htCode.get(psAttribute);
    }
 
-   /** 
-    * Override method getInitItems 
-    * 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method getInitItems
+    *
+    * @return
+    *
+    * @author brod
     */
    @Override
    Hashtable<String, String> getInitItems()
@@ -533,12 +513,12 @@ public class TestcaseData
       return _htInit;
    }
 
-   /** 
-    * Override method getValidItems 
-    * 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method getValidItems
+    *
+    * @return
+    *
+    * @author brod
     */
    @Override
    Hashtable<String, String> getValidItems()
@@ -547,27 +527,24 @@ public class TestcaseData
       return _htValid;
    }
 
-   /** 
-    * Override method getClass 
-    * 
-    * @param psExpCase param expCase 
-    * @param pbSearchInInit param pbSearchInInit 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method getClass
+    *
+    * @param psExpCase param expCase
+    * @param pbSearchInInit param pbSearchInInit
+    * @return
+    *
+    * @author brod
     */
    @Override
    String getClass(String psExpCase, boolean pbSearchInInit)
    {
       Object[] keys = _htCode.keySet().toArray();
       for (int i = 0; i < keys.length; i++) {
-         if (!pbSearchInInit
-               && keys[i].toString().startsWith("net.ifao." + _sBaseDir4Components + ".initialize")) {
+         if (!pbSearchInInit && keys[i].toString().startsWith("net.ifao." + _sBaseDir4Components + ".initialize")) {
             continue;
          }
-         if (pbSearchInInit
-               && !keys[i].toString()
-                     .startsWith("net.ifao." + _sBaseDir4Components + ".initialize")) {
+         if (pbSearchInInit && !keys[i].toString().startsWith("net.ifao." + _sBaseDir4Components + ".initialize")) {
             continue;
          }
          ArrayList<TAnnotation> name = _htCode.get(keys[i]);
@@ -578,12 +555,12 @@ public class TestcaseData
       return null;
    }
 
-   /** 
-    * Override method loadXml 
-    * 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method loadXml
+    *
+    * @return
+    *
+    * @author brod
     */
    @Override
    Xml loadXml()
@@ -591,13 +568,13 @@ public class TestcaseData
       return loadXml(_sTestTemplatesXml);
    }
 
-   /** 
-    * Override method loadXml 
-    * 
-    * @param psPath param psPath 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method loadXml
+    *
+    * @param psPath param psPath
+    * @return
+    *
+    * @author brod
     */
    private Xml loadXml(String psPath)
    {
@@ -615,13 +592,13 @@ public class TestcaseData
       return loadXml;
    }
 
-   /** 
-    * Override method getValueText 
-    * 
-    * @param pXmlValue param xmlValue 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method getValueText
+    *
+    * @param pXmlValue param xmlValue
+    * @return
+    *
+    * @author brod
     */
    @Override
    String getValueText(Xml pXmlValue)
@@ -634,12 +611,12 @@ public class TestcaseData
       return sValue;
    }
 
-   /** 
-    * Override method getTestTemplatesXml 
-    * 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method getTestTemplatesXml
+    *
+    * @return
+    *
+    * @author brod
     */
    @Override
    String getTestTemplatesXml()
@@ -647,12 +624,12 @@ public class TestcaseData
       return _sTestTemplatesXml;
    }
 
-   /** 
-    * Override method getTscPath 
-    * 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method getTscPath
+    *
+    * @return
+    *
+    * @author brod
     */
    @Override
    String getTscPath()
@@ -660,13 +637,13 @@ public class TestcaseData
       return _sTscFile;
    }
 
-   /** 
-    * Override method runFile 
-    * 
-    * @param psFile2Run param psFile2Run 
-    * @param pbDeleteFile2Run param pbDeleteFile2Run 
-    * 
-    * @author brod 
+   /**
+    * Override method runFile
+    *
+    * @param psFile2Run param psFile2Run
+    * @param pbDeleteFile2Run param pbDeleteFile2Run
+    *
+    * @author brod
     */
    @Override
    protected void runFile(String psFile2Run, boolean pbDeleteFile2Run)
@@ -678,8 +655,7 @@ public class TestcaseData
       if (_testcaseRunner != null && _testcaseRunner.isAlive()) {
          MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
          messageBox.setText("JUnit-Process");
-         messageBox.setMessage("There is anothe JUnitProcess running.\n"
-               + "Please try again if other process has finished.");
+         messageBox.setMessage("There is anothe JUnitProcess running.\n" + "Please try again if other process has finished.");
          messageBox.open();
 
       } else {
@@ -701,51 +677,51 @@ public class TestcaseData
          JUnitWait unitWait = new JUnitWait(_abstractUIPlugin, psFile2Run);
          unitWait.show();
 
-         _testcaseRunner = new TestcaseRunner(display, psFile2Run, pbDeleteFile2Run, unitWait);
+         _testcaseRunner = new TestcaseRunner(project, display, psFile2Run, pbDeleteFile2Run, unitWait);
          _testcaseRunner.start();
       }
    }
 
-   /** 
-    * Override method getXmlTestCases 
-    * 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method getXmlTestCases
+    *
+    * @return
+    *
+    * @author brod
     */
    @Override
    Xml[] getXmlTestCases()
    {
-      if (_xmlTestData == null)
+      if (_xmlTestData == null) {
          return new Xml[0];
+      }
 
       return _xmlTestData.getObjects("TestCase");
    }
 
-   /** 
-    * Override method getTestObjectClass 
-    * 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * Override method getTestObjectClass
+    *
+    * @return
+    *
+    * @author brod
     */
    @Override
    String getTestObjectClass()
    {
       int iNetIfao = _sTscFile.indexOf("/net/ifao/");
       if (iNetIfao > 0 && _sTscFile.indexOf(".", iNetIfao) > 0) {
-         return _sTscFile.substring(iNetIfao + 1, _sTscFile.lastIndexOf("."))
-               .replaceAll("\\/", ".");
+         return _sTscFile.substring(iNetIfao + 1, _sTscFile.lastIndexOf(".")).replaceAll("\\/", ".");
       }
       return "";
    }
 
-   /** 
-    * Override method clickButtonTCSrc 
-    * 
-    * @param pButtonTCSrc param pButtonTCSrc 
-    * 
-    * @author brod 
+   /**
+    * Override method clickButtonTCSrc
+    *
+    * @param pButtonTCSrc param pButtonTCSrc
+    *
+    * @author brod
     */
    @Override
    protected void clickButtonTCSrc(Button pButtonTCSrc)

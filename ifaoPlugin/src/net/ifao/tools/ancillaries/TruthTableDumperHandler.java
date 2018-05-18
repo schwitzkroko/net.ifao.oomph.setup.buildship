@@ -1,16 +1,25 @@
 package net.ifao.tools.ancillaries;
 
 
-import java.lang.reflect.*;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
-import ifaoplugin.*;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Text;
+
+import ifaoplugin.ArcticClassLoader;
+import ifaoplugin.Util;
 import ifaoplugin.Util.IDialogContentBuilder;
-
-import org.eclipse.core.commands.*;
-import org.eclipse.swt.*;
-import org.eclipse.swt.graphics.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
 
 
 /**
@@ -50,12 +59,12 @@ public class TruthTableDumperHandler
          Util.displayTextInDialog("ERROR", "\n No arctic project found/selected \n");
       } else {
 
-         ClassLoader loader = new ArcticClassLoader(getClass().getClassLoader(), sClassesPath);
+         ClassLoader loader = new ArcticClassLoader(getClass().getClassLoader(), Arrays.asList(new File(sClassesPath)));
          String sConfigPath = sClassesPath.substring(0, sClassesPath.lastIndexOf("/")) + "/conf";
 
          try {
             Util.setArcticConfiguration(sConfigPath, loader);
-            
+
             // create WIKI formatter
             Class wikiMarkUpFormatterClass = loader.loadClass(WIKI_MARKUP_FORMATTER_CLASS);
             Object wikiMarkUpFormatter = wikiMarkUpFormatterClass.newInstance();
@@ -77,30 +86,24 @@ public class TruthTableDumperHandler
 
             // start the dump as simple text
             StringBuilder sb = new StringBuilder();
-            Object truthTableDumper =
-               truthTableDumperClass.getConstructor(outputFormatterInterface,
-                     java.lang.StringBuilder.class).newInstance(simpleTextFormatter, sb);
-            truthTableDumperClass.getMethod("run", new Class<?>[]{}).invoke(truthTableDumper,
-                  new Object[]{});
+            Object truthTableDumper = truthTableDumperClass
+                  .getConstructor(outputFormatterInterface, java.lang.StringBuilder.class).newInstance(simpleTextFormatter, sb);
+            truthTableDumperClass.getMethod("run", new Class<?>[]{}).invoke(truthTableDumper, new Object[]{});
             String sSimpleTextDump = sb.toString();
 
             // start the dump as wiki text
             sb.setLength(0);
-            truthTableDumper =
-               truthTableDumperClass.getConstructor(outputFormatterInterface,
-                     java.lang.StringBuilder.class).newInstance(wikiMarkUpFormatter, sb);
-            truthTableDumperClass.getMethod("run", new Class<?>[]{}).invoke(truthTableDumper,
-                  new Object[]{});
+            truthTableDumper = truthTableDumperClass.getConstructor(outputFormatterInterface, java.lang.StringBuilder.class)
+                  .newInstance(wikiMarkUpFormatter, sb);
+            truthTableDumperClass.getMethod("run", new Class<?>[]{}).invoke(truthTableDumper, new Object[]{});
             String sWikiMarkUpDump = sb.toString();
 
             // show the results
             displayResults(sSimpleTextDump, sWikiMarkUpDump);
          }
-         catch (InstantiationException | IllegalAccessException | ClassNotFoundException
-               | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-               | SecurityException pException) {
-            Util.displayExceptionInDialog(sClassesPath, pException,
-                  "Error finding the TruthTableDumper or its children!\n\n");
+         catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException
+               | InvocationTargetException | NoSuchMethodException | SecurityException pException) {
+            Util.displayExceptionInDialog(sClassesPath, pException, "Error finding the TruthTableDumper or its children!\n\n");
          }
       }
       return null;
@@ -121,10 +124,10 @@ public class TruthTableDumperHandler
          @Override
          public void createContent(Composite pContainer)
          {
-            pContainer.setLayout(new FillLayout(SWT.HORIZONTAL|SWT.VERTICAL));
-            
+            pContainer.setLayout(new FillLayout(SWT.HORIZONTAL | SWT.VERTICAL));
+
             TabFolder tabFolder = new TabFolder(pContainer, SWT.NONE);
-            
+
             addTab(tabFolder, "Simple Text", psSimpleTextDump);
             addTab(tabFolder, "Wiki Markup", psWikiMarkUpDump);
          }
@@ -137,7 +140,7 @@ public class TruthTableDumperHandler
             text.setFont(new Font(Display.getDefault(), "Courier", 10, SWT.NONE));
             text.setText(psTabContent);
             tabItem.setControl(text);
-            
+
          }
       });
    }

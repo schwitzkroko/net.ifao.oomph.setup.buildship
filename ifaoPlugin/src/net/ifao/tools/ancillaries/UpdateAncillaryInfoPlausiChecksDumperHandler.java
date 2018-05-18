@@ -1,19 +1,30 @@
 package net.ifao.tools.ancillaries;
 
 
-import java.lang.annotation.*;
-import java.lang.reflect.*;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
-import ifaoplugin.*;
-import org.eclipse.core.commands.*;
-import org.eclipse.swt.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
+
+import ifaoplugin.ArcticClassLoader;
+import ifaoplugin.JsonToTree;
+import ifaoplugin.Util;
 
 
 /**
- * Dumps the plausi checks of UpdateAncillaryInfo to a Dialog 
+ * Dumps the plausi checks of UpdateAncillaryInfo to a Dialog
  *
  * <p>
  * Copyright &copy; 2014, i:FAO Group GmbH
@@ -23,10 +34,8 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
    extends AbstractHandler
 {
 
-   private static final String CHECKER =
-      "net.ifao.arctic.agents.newcib.wsdl.ancillary.plausi.Checker";
-   private static final String CHECK_SPACE =
-      "net.ifao.arctic.agents.newcib.wsdl.ancillary.plausi.CheckSpace";
+   private static final String CHECKER = "net.ifao.arctic.agents.newcib.wsdl.ancillary.plausi.Checker";
+   private static final String CHECK_SPACE = "net.ifao.arctic.agents.newcib.wsdl.ancillary.plausi.CheckSpace";
    private static final String ANCILLARY_PLAUSI_CHECK_ROOT_SPACE =
       "net.ifao.arctic.agents.newcib.wsdl.ancillary.plausi.AncillaryPlausiCheckRootSpace";
 
@@ -50,7 +59,7 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
          if (sClassesPath == null) {
             Util.displayTextInDialog("ERROR", "\n No arctic project found/selected \n");
          } else {
-            ClassLoader loader = new ArcticClassLoader(getClass().getClassLoader(), sClassesPath);
+            ClassLoader loader = new ArcticClassLoader(getClass().getClassLoader(), Arrays.asList(new File(sClassesPath)));
 
             Class<?> accessUtilClass = null;
             try {
@@ -60,18 +69,15 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
                pException1.printStackTrace();
             }
 
-            Method getField =
-               accessUtilClass.getMethod("getField", new Class[]{ Object.class, String.class });
+            Method getField = accessUtilClass.getMethod("getField", new Class[]{ Object.class, String.class });
 
 
-            Class<?> ancillaryPlausiCheckRootSpaceClass =
-               loader.loadClass(ANCILLARY_PLAUSI_CHECK_ROOT_SPACE);
+            Class<?> ancillaryPlausiCheckRootSpaceClass = loader.loadClass(ANCILLARY_PLAUSI_CHECK_ROOT_SPACE);
 
             Constructor<?> ancillaryPlausiCheckRootSpaceConstructor =
                ancillaryPlausiCheckRootSpaceClass.getConstructor(int.class, int.class);
 
-            /* AncillaryPlausiCheckRootSpace*/Object root =
-               ancillaryPlausiCheckRootSpaceConstructor.newInstance(0, 0);
+            /* AncillaryPlausiCheckRootSpace*/Object root = ancillaryPlausiCheckRootSpaceConstructor.newInstance(0, 0);
 
             StringBuilder sb = new StringBuilder();
 
@@ -92,17 +98,17 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
     * @param psResultString result of the checker as JSON string
     *
     * @author kaufmann
-    * @throws InstantiationException 
-    * @throws SecurityException 
-    * @throws NoSuchMethodException 
-    * @throws InvocationTargetException 
-    * @throws IllegalArgumentException 
-    * @throws IllegalAccessException 
-    * @throws ClassNotFoundException 
+    * @throws InstantiationException
+    * @throws SecurityException
+    * @throws NoSuchMethodException
+    * @throws InvocationTargetException
+    * @throws IllegalArgumentException
+    * @throws IllegalAccessException
+    * @throws ClassNotFoundException
     */
    private void showResult(final String psResultString, ClassLoader pLoader)
-      throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException, InstantiationException
+      throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+      NoSuchMethodException, SecurityException, InstantiationException
    {
       Util.displayDialog("UpdateAncillaryInfoPlausiChecksDumper", new Util.IDialogContentBuilder()
       {
@@ -115,10 +121,8 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
             GridData gd_text = new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1);
             //            gd_text.widthHint = 536;
             text.setLayoutData(gd_text);
-            text.setText("This compilation shows all Ancillary plausi checks during CIB Ancillary import.\n"
-                  + "Generation Time: "
-                  + new java.util.Date(System.currentTimeMillis()).toString()
-                  + "\n");
+            text.setText("This compilation shows all Ancillary plausi checks during CIB Ancillary import.\n" + "Generation Time: "
+                  + new java.util.Date(System.currentTimeMillis()).toString() + "\n");
 
             JsonToTree.buildTree(pContainer, "UpdateAncillaryInfoPlausiChecks", psResultString);
          }
@@ -138,14 +142,13 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
     *
     * @param space root of the plausi checks
     * @param pLoader class loader
-    * @param pGetField 
+    * @param pGetField
     * @return
     * @throws Exception
     *
     * @author kaufmann
     */
-   private String analyseCheckSpace(/*AncillaryPlausiCheckSpace*/Object space,
-                                    ClassLoader pLoader, Method pGetField)
+   private String analyseCheckSpace(/*AncillaryPlausiCheckSpace*/Object space, ClassLoader pLoader, Method pGetField)
       throws Exception
    {
       StringBuilder sb = new StringBuilder();
@@ -158,7 +161,7 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
          sb.append(", checkers: ");
       }
       sb.append(getCheckers(space, pLoader, pGetField));
-      List/*<AncillaryPlausiCheckSpace>*/subSpaces =
+      List/*<AncillaryPlausiCheckSpace>*/ subSpaces =
          (List/*<AncillaryPlausiCheckSpace>*/) pGetField.invoke(null, space, "_subSpaces");
       if (subSpaces.size() > 0) {
          sb.append(", subspaces: [");
@@ -179,7 +182,7 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
 
 
    /**
-    * Gets the value of attribute scope of annotation CheckSpace 
+    * Gets the value of attribute scope of annotation CheckSpace
     *
     * @param space AncillaryPlausiCheckSpace
     * @param pLoader class loader
@@ -193,18 +196,15 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
     *
     * @author kaufmann
     */
-   private String getCheckSpaceAnnotation_scope(/*AncillaryPlausiCheckSpace*/Object space,
-                                                ClassLoader pLoader)
-      throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException
+   private String getCheckSpaceAnnotation_scope(/*AncillaryPlausiCheckSpace*/Object space, ClassLoader pLoader)
+      throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+      NoSuchMethodException, SecurityException
    {
       @SuppressWarnings("unchecked")
-      Class<Annotation> checkSpaceAnnotationClass =
-         (Class<Annotation>) pLoader.loadClass(CHECK_SPACE);
-      /*CheckSpace*/Annotation annotation =
-         space.getClass().getAnnotation(checkSpaceAnnotationClass);
-      return (String) (annotation == null ? null : annotation.getClass()
-            .getMethod("scope", new Class<?>[]{}).invoke(annotation, new Object[]{}));
+      Class<Annotation> checkSpaceAnnotationClass = (Class<Annotation>) pLoader.loadClass(CHECK_SPACE);
+      /*CheckSpace*/Annotation annotation = space.getClass().getAnnotation(checkSpaceAnnotationClass);
+      return (String) (annotation == null ? null
+            : annotation.getClass().getMethod("scope", new Class<?>[]{}).invoke(annotation, new Object[]{}));
    }
 
 
@@ -225,14 +225,14 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
     */
    private String getCheckerAnnotation(/*AncillaryPlausiCheckChecker<? extends AncillaryPlausiCheckSpace>*/Object checker,
                                        ClassLoader pLoader)
-      throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException
+      throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+      NoSuchMethodException, SecurityException
    {
       @SuppressWarnings("unchecked")
       Class<Annotation> checkerAnnotationClass = (Class<Annotation>) pLoader.loadClass(CHECKER);
       /*Checker*/Annotation annotation = checker.getClass().getAnnotation(checkerAnnotationClass);
-      return (String) (annotation == null ? null : annotation.getClass()
-            .getMethod("checks", new Class<?>[]{}).invoke(annotation, new Object[]{}));
+      return (String) (annotation == null ? null
+            : annotation.getClass().getMethod("checks", new Class<?>[]{}).invoke(annotation, new Object[]{}));
    }
 
 
@@ -247,14 +247,13 @@ public class UpdateAncillaryInfoPlausiChecksDumperHandler
     *
     * @author kaufmann
     */
-   private String getCheckers(/*AncillaryPlausiCheckSpace*/Object space, ClassLoader pLoader,
-                              Method pGetField)
+   private String getCheckers(/*AncillaryPlausiCheckSpace*/Object space, ClassLoader pLoader, Method pGetField)
       throws Exception
    {
       StringBuilder sb = new StringBuilder();
-      List/*<AncillaryPlausiCheckChecker<? extends AncillaryPlausiCheckSpace>>*/checkers =
-         (List/*<AncillaryPlausiCheckChecker<? extends AncillaryPlausiCheckSpace>>*/) pGetField
-               .invoke(null, space, "_plausiCheckers");
+      List/*<AncillaryPlausiCheckChecker<? extends AncillaryPlausiCheckSpace>>*/ checkers =
+         (List/*<AncillaryPlausiCheckChecker<? extends AncillaryPlausiCheckSpace>>*/) pGetField.invoke(null, space,
+               "_plausiCheckers");
       sb.append("[");
       for (/*AncillaryPlausiCheckChecker<? extends AncillaryPlausiCheckSpace>*/Object checker : checkers) {
          sb.append(checker.getClass().getSimpleName());

@@ -1,17 +1,26 @@
 package net.ifao.plugins.editor.testcase;
 
 
-import ifaoplugin.*;
+import java.io.BufferedInputStream;
+import java.io.File;
 
-import java.io.*;
-
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.*;
-import org.eclipse.ui.part.*;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.FileEditorInput;
+
+import ifaoplugin.Util;
+import ifaoplugin.UtilSwt;
 
 
 public class TestcasePage
@@ -28,8 +37,9 @@ public class TestcasePage
    public void doSave(IProgressMonitor monitor)
    {
       report("doSave()");
-      if (composite == null || !_dirty)
+      if (composite == null || !_dirty) {
          return;
+      }
 
       String xmlString = composite.getXmlString(true);
       UtilSwt.writeFile(_iFileTsc, xmlString, monitor);
@@ -69,8 +79,7 @@ public class TestcasePage
          } else if (parentFile.getParentFile().getName().equals("agents")) {
             sAllTests = "AllTests" + Util.getCamelCase(sProvider) + ".java";
          } else {
-            sAllTests = "AllTests" + Util.getCamelCase(sProvider)
-                  + Util.getCamelCase(parentFile.getName()) + ".java";
+            sAllTests = "AllTests" + Util.getCamelCase(sProvider) + Util.getCamelCase(parentFile.getName()) + ".java";
          }
       }
       sPath += sAllTests;
@@ -87,21 +96,21 @@ public class TestcasePage
       String sDetail = readAllTests(fileDetailProvider, iFile, false);
 
       // find detail Provider
-      if (sDetail.length() > 0)
-
+      if (sDetail.length() > 0) {
          UtilSwt.writeFile(fileDetailProvider, sDetail, monitor);
+      }
 
       // add this fileDetailProvider to root-ProviderSuite
-      while (parentFile != null && parentFile.getParentFile() != null
-            && !parentFile.getName().equals("agents")
+      while (parentFile != null && parentFile.getParentFile() != null && !parentFile.getName().equals("agents")
             && !parentFile.getParentFile().getName().equals("agents")) {
          parentFile = parentFile.getParentFile();
       }
 
       IFile fileRootProvider = getPath2AllTests(fileDetailProvider, parentFile);
       sDetail = readAllTests(fileRootProvider, fileDetailProvider, true);
-      if (sDetail.length() > 0)
+      if (sDetail.length() > 0) {
          UtilSwt.writeFile(fileRootProvider, sDetail, monitor);
+      }
 
       while (parentFile != null && !parentFile.getName().equals("net")) {
 
@@ -112,8 +121,9 @@ public class TestcasePage
 
          IFile fileRootMain = getPath2AllTests(fileRootProvider, parentFile);
          sDetail = readAllTests(fileRootMain, fileRootProvider, true);
-         if (sDetail.length() > 0)
+         if (sDetail.length() > 0) {
             UtilSwt.writeFile(fileRootMain, sDetail, monitor);
+         }
 
 
       }
@@ -154,11 +164,11 @@ public class TestcasePage
       if (sDetail.indexOf(sName) < 0 && unitEnd > 0) {
          if (runSuite) {
             // unitEnd = sDetail.indexOf("return ", unitEnd);
-            sDetail = sDetail.substring(0, unitEnd) + "suite.addTest(" + sPackage + "." + sName
-                  + ".suite());" + "\n      " + sDetail.substring(unitEnd);
+            sDetail = sDetail.substring(0, unitEnd) + "suite.addTest(" + sPackage + "." + sName + ".suite());" + "\n      "
+                  + sDetail.substring(unitEnd);
          } else {
-            sDetail = sDetail.substring(0, unitEnd) + "suite.addTestSuite(" + sPackage + "."
-                  + sName + ".class);" + "\n      " + sDetail.substring(unitEnd);
+            sDetail = sDetail.substring(0, unitEnd) + "suite.addTestSuite(" + sPackage + "." + sName + ".class);" + "\n      "
+                  + sDetail.substring(unitEnd);
 
          }
          return sDetail;
@@ -250,8 +260,9 @@ public class TestcasePage
    @Override
    public void dispose()
    {
-      if (composite != null)
+      if (composite != null) {
          composite.dispose();
+      }
       super.dispose();
    }
 
@@ -286,8 +297,7 @@ public class TestcasePage
          _bIsDirectTsc = true;
       }
 
-      String sPathSrc = "src" + sPath.substring(sPath.indexOf("/"), sPath.lastIndexOf(".") + 1)
-            + "java";
+      String sPathSrc = "src" + sPath.substring(sPath.indexOf("/"), sPath.lastIndexOf(".") + 1) + "java";
 
       _iFileSrc = project.getFile(sPathSrc);
 
@@ -360,8 +370,7 @@ public class TestcasePage
    {
       report("createPartControl()");
       if (_iFileTsc != null) {
-         File file = _iFileTsc.getLocation().toFile();
-         composite = new TestcaseData(this, parent, ifaoplugin.Activator.class, file, _bIsDirectTsc);
+         composite = new TestcaseData(this, parent, ifaoplugin.Activator.class, _iFileTsc, _bIsDirectTsc);
       }
 
    }
@@ -370,8 +379,9 @@ public class TestcasePage
    public void setFocus()
    {
       report("setFocus()");
-      if (composite == null)
+      if (composite == null) {
          return;
+      }
       composite.setFocus();
 
    }
@@ -379,21 +389,22 @@ public class TestcasePage
    public void reload()
    {
       report("reload()");
-      if (composite == null)
+      if (composite == null) {
          return;
+      }
       composite.reload();
    }
 
    private void report(String psText)
    {
-   // System.out.println(psText);
+      // System.out.println(psText);
    }
 
 
    public void openSrc()
    {
       try {
-         IJavaElement el = (IJavaElement) _iFileSrc.getAdapter(IJavaElement.class);
+         IJavaElement el = _iFileSrc.getAdapter(IJavaElement.class);
          org.eclipse.jdt.ui.JavaUI.openInEditor(el);
       }
       catch (Exception e) {

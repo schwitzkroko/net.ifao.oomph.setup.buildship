@@ -1,16 +1,26 @@
 package net.ifao.tools.ancillaries;
 
 
-import ifaoplugin.*;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.regex.*;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 
-import org.eclipse.core.commands.*;
-import org.eclipse.swt.*;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
+import ifaoplugin.ArcticClassLoader;
+import ifaoplugin.Util;
 
 
 /**
@@ -45,7 +55,7 @@ public class RuleProcessorLanguageDumperHandler
          Util.displayTextInDialog("ERROR", "\n No arctic project found/selected \n");
       } else {
 
-         ClassLoader loader = new ArcticClassLoader(getClass().getClassLoader(), sClassesPath);
+         ClassLoader loader = new ArcticClassLoader(getClass().getClassLoader(), Arrays.asList(new File(sClassesPath)));
 
          try {
             StringBuilder sbResult = new StringBuilder();
@@ -53,11 +63,9 @@ public class RuleProcessorLanguageDumperHandler
 
             showResultAsTable(sbResult.toString());
          }
-         catch (InstantiationException | IllegalAccessException | ClassNotFoundException
-               | NoSuchMethodException | SecurityException | IllegalArgumentException
-               | InvocationTargetException pException) {
-            Util.displayExceptionInDialog(sClassesPath, pException,
-                  "Error finding the RootClassLocator or its children!\n\n");
+         catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException
+               | SecurityException | IllegalArgumentException | InvocationTargetException pException) {
+            Util.displayExceptionInDialog(sClassesPath, pException, "Error finding the RootClassLocator or its children!\n\n");
          }
       }
       return null;
@@ -75,44 +83,38 @@ public class RuleProcessorLanguageDumperHandler
     * @throws IllegalAccessException
     * @throws IllegalArgumentException
     * @throws InvocationTargetException
-    * @throws ClassNotFoundException 
+    * @throws ClassNotFoundException
     *
     * @author kaufmann
     */
-   private static void dumpLanguage(ClassLoader loader, String psNameSpace, Object locator,
-                                    StringBuilder psbResult)
-      throws NoSuchMethodException, SecurityException, IllegalAccessException,
-      IllegalArgumentException, InvocationTargetException, ClassNotFoundException
+   private static void dumpLanguage(ClassLoader loader, String psNameSpace, Object locator, StringBuilder psbResult)
+      throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
+      InvocationTargetException, ClassNotFoundException
 
    {
       // get helper for private methods/members
       Class<?> accessUtilClass = loader.loadClass("util.Access");
 
-      Method getField =
-         accessUtilClass.getMethod("getField", new Class[]{ Object.class, String.class });
+      Method getField = accessUtilClass.getMethod("getField", new Class[]{ Object.class, String.class });
       Method executeMethod =
-         accessUtilClass.getMethod("executeMethod", new Class[]{ Object.class, String.class,
-               Object[].class });
+         accessUtilClass.getMethod("executeMethod", new Class[]{ Object.class, String.class, Object[].class });
 
       //      Map<String, Class<?>> mapClassFromName = (Map<String, Class<?>>) Access.getField(locator, "_mapClassFromName");
       @SuppressWarnings("unchecked")
-      Map<String, Class<?>> mapClassFromName =
-         (Map<String, Class<?>>) getField.invoke(null, locator, "_mapClassFromName");
+      Map<String, Class<?>> mapClassFromName = (Map<String, Class<?>>) getField.invoke(null, locator, "_mapClassFromName");
       //      Map<String, Object> locators = (Map<String, Object>) Access.getField(locator, "_locators");
       @SuppressWarnings("unchecked")
-      Map<String, Object> locators =
-         (Map<String, Object>) getField.invoke(null, locator, "_locators");
+      Map<String, Object> locators = (Map<String, Object>) getField.invoke(null, locator, "_locators");
 
       String prefix = psNameSpace == null ? "" : psNameSpace + ":";
 
       //      String thisNameSpace = prefix + Access.executeMethod(locator, "getNamespace", new Object[] {});
-      String thisNameSpace =
-         prefix + executeMethod.invoke(null, locator, "getNamespace", new Object[]{});
+      String thisNameSpace = prefix + executeMethod.invoke(null, locator, "getNamespace", new Object[]{});
 
       if (mapClassFromName.size() > 0) {
          for (String s : mapClassFromName.keySet()) {
-            psbResult.append(thisNameSpace).append(":").append(s).append(" (")
-                  .append(mapClassFromName.get(s).getName()).append(")\n");
+            psbResult.append(thisNameSpace).append(":").append(s).append(" (").append(mapClassFromName.get(s).getName())
+                  .append(")\n");
          }
       }
 
@@ -124,9 +126,9 @@ public class RuleProcessorLanguageDumperHandler
    /**
     * Creates a table to show the dumped results
     *
-    * @param psResult result of the dump; expected format of each line: the URN is followed by a space 
+    * @param psResult result of the dump; expected format of each line: the URN is followed by a space
     * and then the class name in parenthesis. Example:
-    * ancillary:fact:payment&nbsp;(net.ifao.arctic.agents.common.ruleprocessor.ancillary.domain.resource.fact.Payment) 
+    * ancillary:fact:payment&nbsp;(net.ifao.arctic.agents.common.ruleprocessor.ancillary.domain.resource.fact.Payment)
     *
     * @author kaufmann
     */

@@ -33,6 +33,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.StringTokenizer;
@@ -1982,7 +1983,7 @@ public class Util
     *
     * @author brod
     */
-   public static Class<?> getCompiledClass(String psPath, String psName)
+   public static Class<?> getCompiledClass(List<File> psPath, String psName)
       throws ClassNotFoundException
    {
       return new ArcticClassLoader(Thread.currentThread().getContextClassLoader(), psPath).loadClass(psName);
