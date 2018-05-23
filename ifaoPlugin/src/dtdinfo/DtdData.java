@@ -1,22 +1,32 @@
 package dtdinfo;
 
 
-import ifaoplugin.Util;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-import net.ifao.xml.*;
 import dtdinfo.gui.DtdFrame;
+import ifaoplugin.Util;
+import net.ifao.xml.DtdObject;
+import net.ifao.xml.XmlObject;
 
 
-/** 
- * Class DtdData 
- * 
- * <p> 
- * Copyright &copy; 2002, i:FAO, AG. 
- * @author Andreas Brod 
+/**
+ * Class DtdData
+ *
+ * <p>
+ * Copyright &copy; 2002, i:FAO, AG.
+ * @author Andreas Brod
  */
 public class DtdData
 {
@@ -25,29 +35,30 @@ public class DtdData
    public static final String MANDATORY = "<!-- Mandatory -->";
 
    private DtdObject request, response;
-   private Vector<String> vRequests = new Vector<String>();
-   private Vector<String> classes = new Vector<String>();
+   private Vector<String> vRequests = new Vector<>();
+   private Vector<String> classes = new Vector<>();
 
-   Hashtable<String, String> htList = new Hashtable<String, String>();
+   Hashtable<String, String> htList = new Hashtable<>();
    XmlObject settings = null;
 
-   /** 
-    * Constructor DtdData 
+   /**
+    * Constructor DtdData
     */
    public DtdData(boolean pbReloadPath)
    {
       this("data\\DtdInfo.xml", pbReloadPath);
    }
 
-   /** 
-    * Constructor DtdData 
-    * @param pbReloadPath 
+   /**
+    * Constructor DtdData
+    * @param pbReloadPath
     */
    public DtdData(String psFile, boolean pbReloadPath)
    {
       if (psFile != null) {
+         File pFile = new File(psFile);
          try {
-            settings = new XmlObject(new File(psFile));
+            settings = new XmlObject(pFile);
 
             if (settings.getObject("Settings") != null) {
                settings = settings.getObject("Settings");
@@ -55,14 +66,19 @@ public class DtdData
                settings = null;
             }
          }
-         catch (FileNotFoundException ex) {}
+         catch (FileNotFoundException ex) {
+            try {
+               System.err.println("File " + pFile.getCanonicalPath() + " not found");
+            }
+            catch (IOException e) {
+               // ignore
+            }
+         }
       }
 
       if (settings == null) {
-         settings =
-            (new XmlObject("<Settings user=\"\" left=\"0\" top=\"0\" "
-                  + "width=\"640\" height=\"500\" r1=\"300\" " + "r2=\"300\" r3=\"100\"/>"))
-                  .getObject("Settings");
+         settings = (new XmlObject("<Settings user=\"\" left=\"0\" top=\"0\" " + "width=\"640\" height=\"500\" r1=\"300\" "
+               + "r2=\"300\" r3=\"100\"/>")).getObject("Settings");
       }
 
       if (pbReloadPath) {
@@ -71,27 +87,26 @@ public class DtdData
 
    }
 
-   /** 
-    * Method setSettings 
-    * 
+   /**
+    * Method setSettings
+    *
     * <p> TODO rename sUser to psUser, iLeft to piLeft, iTop to piTop, iWitdh to piWitdh, iHeight to piHeight, iRuler1 to piRuler1, iRuler2 to piRuler2, iRuler3 to piRuler3, sAgent to psAgent, sProvider to psProvider, sDefaultPath to psDefaultPath
-    * @param sUser 
-    * @param iLeft 
-    * @param iTop 
-    * @param iWitdh 
-    * @param iHeight 
-    * @param iRuler1 
-    * @param iRuler2 
-    * @param iRuler3 
-    * @param sAgent 
-    * @param sProvider 
-    * @param sDefaultPath 
-    * 
-    * @author $author$ 
+    * @param sUser
+    * @param iLeft
+    * @param iTop
+    * @param iWitdh
+    * @param iHeight
+    * @param iRuler1
+    * @param iRuler2
+    * @param iRuler3
+    * @param sAgent
+    * @param sProvider
+    * @param sDefaultPath
+    *
+    * @author $author$
     */
-   public void setSettings(String sUser, int iLeft, int iTop, int iWitdh, int iHeight, int iRuler1,
-                           int iRuler2, int iRuler3, String sAgent, String sProvider,
-                           String sDefaultPath)
+   public void setSettings(String sUser, int iLeft, int iTop, int iWitdh, int iHeight, int iRuler1, int iRuler2, int iRuler3,
+                           String sAgent, String sProvider, String sDefaultPath)
    {
       settings.setAttribute("user", sUser);
       settings.setAttribute("left", "" + iLeft);
@@ -106,26 +121,26 @@ public class DtdData
       Util.writeToFile("data\\DtdInfo.xml", settings.toString());
    }
 
-   /** 
-    * Method getUser 
-    * 
-    * @return 
-    * 
-    * @author $author$ 
+   /**
+    * Method getUser
+    *
+    * @return
+    *
+    * @author $author$
     */
    public String getUser()
    {
       return settings.getAttribute("user");
    }
 
-   /** 
-    * Method getSetting 
-    * 
+   /**
+    * Method getSetting
+    *
     * <p> TODO rename sAttribute to psAttribute
-    * @param sAttribute 
-    * @return 
-    * 
-    * @author $author$ 
+    * @param sAttribute
+    * @return
+    *
+    * @author $author$
     */
    public int getSetting(String sAttribute)
    {
@@ -137,39 +152,39 @@ public class DtdData
       }
    }
 
-   /** 
-    * Method getStringSetting 
-    * 
+   /**
+    * Method getStringSetting
+    *
     * <p> TODO rename sAttribute to psAttribute
-    * @param sAttribute 
-    * @return 
-    * 
-    * @author $author$ 
+    * @param sAttribute
+    * @return
+    *
+    * @author $author$
     */
    public String getStringSetting(String sAttribute)
    {
       return settings.getAttribute(sAttribute);
    }
 
-   /** 
-    * Method getPath 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getPath
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    public String getPath()
    {
       return settings.getAttribute("defaultPath");
    }
 
-   /** 
-    * Method setPath 
-    * 
+   /**
+    * Method setPath
+    *
     * <p> TODO rename sPath to psPath
-    * @param sPath 
-    * 
-    * @author Andreas Brod 
+    * @param sPath
+    *
+    * @author Andreas Brod
     */
    public void setPath(String sPath)
    {
@@ -196,25 +211,30 @@ public class DtdData
 
       settings.setAttribute("defaultPath", sPath);
 
-
-      request = new DtdObject(Util.getConfFile(sPath, "ArcticRequest.dtd"));
-      response = new DtdObject(Util.getConfFile(sPath, "ArcticResponse.dtd"));
-
       vRequests.clear();
 
-      XmlObject[] requests =
-         request.getXmlObject("Arctic").createObject("Arctic").createObject("Request")
-               .getObjects("");
+      File confFile = Util.getConfFile(sPath, "ArcticRequest.dtd");
+      if (confFile != null) {
+         request = new DtdObject(confFile);
+         confFile = Util.getConfFile(sPath, "ArcticResponse.dtd");
+         if (confFile != null) {
+            response = new DtdObject(Util.getConfFile(sPath, "ArcticResponse.dtd"));
 
-      classes.clear();
-      addClasses(new File(sPath + SRCPATH), "\\");
 
-      String sClasses = classes.toString();
+            XmlObject[] requests = request.getXmlObject("Arctic").createObject("Arctic").createObject("Request").getObjects("");
 
-      for (XmlObject request2 : requests) {
-         if (sClasses.toLowerCase().indexOf("\\" + request2.getName().toLowerCase() + ".java") > 0) {
-            vRequests.add(request2.getName());
+            classes.clear();
+            addClasses(new File(sPath + SRCPATH), "\\");
+
+            String sClasses = classes.toString();
+
+            for (XmlObject request2 : requests) {
+               if (sClasses.toLowerCase().indexOf("\\" + request2.getName().toLowerCase() + ".java") > 0) {
+                  vRequests.add(request2.getName());
+               }
+            }
          }
+
       }
 
       DtdMain.stopWaitThread();
@@ -222,14 +242,14 @@ public class DtdData
       // System.out.println(classes);
    }
 
-   /** 
-    * Method getFormatedPnrElement 
-    * 
+   /**
+    * Method getFormatedPnrElement
+    *
     * <p> TODO rename sPnr to psPnr
-    * @param sPnr 
-    * @return 
-    * 
-    * @author $author$ 
+    * @param sPnr
+    * @return
+    *
+    * @author $author$
     */
    public static String getFormatedPnrElement(String sPnr)
    {
@@ -262,16 +282,16 @@ public class DtdData
       return sPnr + "." + sAttr;
    }
 
-   /** 
-    * Method getPnrElements 
-    * 
-    * @return 
-    * 
-    * @author $author$ 
+   /**
+    * Method getPnrElements
+    *
+    * @return
+    *
+    * @author $author$
     */
    public Hashtable<String, List<String>> getPnrElements()
    {
-      Hashtable<String, List<String>> lst = new Hashtable<String, List<String>>();
+      Hashtable<String, List<String>> lst = new Hashtable<>();
 
       for (String sKey : htList.keySet()) {
          StringValues sValue = new StringValues(get(sKey));
@@ -291,14 +311,13 @@ public class DtdData
                List<String> elements = lst.get(sPnr);
 
                if (elements == null) {
-                  elements = new Vector<String>();
+                  elements = new Vector<>();
 
                   lst.put(sPnr, elements);
                }
 
                while (sValue.hasNext()) {
-                  String sLine2 =
-                     sValue.getNext().replaceAll("<br>", "\n   ").replaceAll("&nbsp;", " ").trim();
+                  String sLine2 = sValue.getNext().replaceAll("<br>", "\n   ").replaceAll("&nbsp;", " ").trim();
 
                   if ((sLine2.length() > 0) && sValue.hasNext()) {
                      sKey += "\n   " + sLine2;
@@ -314,14 +333,14 @@ public class DtdData
       return lst;
    }
 
-   /** 
-    * Method addClasses 
-    * 
+   /**
+    * Method addClasses
+    *
     * <p> TODO rename f to another name, sAdd to psAdd
-    * @param f 
-    * @param sAdd 
-    * 
-    * @author Andreas Brod 
+    * @param f
+    * @param sAdd
+    *
+    * @author Andreas Brod
     */
    private void addClasses(File f, String sAdd)
    {
@@ -344,15 +363,15 @@ public class DtdData
       }
    }
 
-   /** 
-    * Method getRequests 
-    * 
-    * 
+   /**
+    * Method getRequests
+    *
+    *
     * <p> TODO rename sProvider to psProvider
-    * @param sProvider 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param sProvider
+    * @return
+    *
+    * @author Andreas Brod
     */
    public Vector<String> getRequests(String sProvider)
    {
@@ -366,7 +385,7 @@ public class DtdData
 
       Arrays.sort(list);
 
-      Vector<String> vList = new Vector<String>();
+      Vector<String> vList = new Vector<>();
 
       for (Object element : list) {
          String sPro = "\\\\" + sProvider + element + ".java";
@@ -379,20 +398,20 @@ public class DtdData
       return vList;
    }
 
-   /** 
-    * Method getProvider 
-    * 
+   /**
+    * Method getProvider
+    *
     * <p> TODO rename sRequest to psRequest, bChangeToSmartAgent to pbChangeToSmartAgent
-    * @param sRequest 
-    * @param bChangeToSmartAgent 
-    * @param psProvider 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param sRequest
+    * @param bChangeToSmartAgent
+    * @param psProvider
+    * @return
+    *
+    * @author Andreas Brod
     */
    public Vector<String> getProvider(String sRequest, boolean bChangeToSmartAgent, String psProvider)
    {
-      Vector<String> vList = new Vector<String>();
+      Vector<String> vList = new Vector<>();
 
       sRequest += ".java";
 
@@ -416,7 +435,7 @@ public class DtdData
 
       if (psProvider.length() > 0) {
          if (vList.contains(psProvider)) {
-            vList = new Vector<String>();
+            vList = new Vector<>();
 
             vList.add(psProvider);
 
@@ -429,7 +448,7 @@ public class DtdData
 
       Arrays.sort(list);
 
-      vList = new Vector<String>();
+      vList = new Vector<>();
 
       for (Object element : list) {
          vList.add((String) element);
@@ -438,52 +457,52 @@ public class DtdData
       return vList;
    }
 
-   /** 
-    * Method getRequest 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getRequest
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    public DtdObject getRequest()
    {
       return request;
    }
 
-   /** 
-    * Method getResponse 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getResponse
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    public DtdObject getResponse()
    {
       return response;
    }
 
-   /** 
-    * Method getRequest 
-    * 
+   /**
+    * Method getRequest
+    *
     * <p> TODO rename sName to psName
-    * @param sName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param sName
+    * @return
+    *
+    * @author Andreas Brod
     */
    public XmlObject getRequest(String sName)
    {
       return request.getXmlObject(sName);
    }
 
-   /** 
-    * Method getResponse 
-    * 
+   /**
+    * Method getResponse
+    *
     * <p> TODO rename sName to psName
-    * @param sName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param sName
+    * @return
+    *
+    * @author Andreas Brod
     */
    public XmlObject getResponse(String sName)
    {
@@ -505,13 +524,13 @@ public class DtdData
 
    String sLastLoad = "";
 
-   /** 
-    * Method loadList 
-    * 
+   /**
+    * Method loadList
+    *
     * <p> TODO rename sFileName to psFileName
-    * @param sFileName 
-    * 
-    * @author $author$ 
+    * @param sFileName
+    *
+    * @author $author$
     */
    public void loadList(String sFileName)
    {
@@ -522,15 +541,15 @@ public class DtdData
       sLastLoad = sFileName;
    }
 
-   /** 
-    * TODO (brod) add comment for method getHtmlHeader 
-    * 
+   /**
+    * TODO (brod) add comment for method getHtmlHeader
+    *
     * @param psTitle TODO (brod) add text for param psTitle
     * @param psRootPath TODO (brod) add text for param psRootPath
     * @param pbRevisionHistory TODO (brod) add text for param pbRevisionHistory
     * @return TODO (brod) add text for returnValue
-    * 
-    * @author brod 
+    *
+    * @author brod
     */
    private String getHtmlHeader(String psTitle, String psRootPath, boolean pbRevisionHistory)
    {
@@ -587,12 +606,12 @@ public class DtdData
       return sb.toString();
    }
 
-   /** 
-    * TODO (brod) add comment for method getHtmlFooter 
-    * 
+   /**
+    * TODO (brod) add comment for method getHtmlFooter
+    *
     * @return TODO (brod) add text for returnValue
-    * 
-    * @author brod 
+    *
+    * @author brod
     */
    private String getHtmlFooter()
    {
@@ -606,19 +625,18 @@ public class DtdData
 
    }
 
-   /** 
-    * TODO (brod) add comment for method createAditionalDocuments 
-    * 
+   /**
+    * TODO (brod) add comment for method createAditionalDocuments
+    *
     * <p> TODO rename sbFiles to pFiles
     * @param psRootPath TODO (brod) add text for param psRootPath
     * @param psText TODO (brod) add text for param psText
     * @param pArcticPnrElementInfos TODO (brod) add text for param pArcticPnrElementInfos
     * @param sbFiles TODO (brod) add text for param sbFiles
-    * 
-    * @author brod 
+    *
+    * @author brod
     */
-   private void createAditionalDocuments(String psRootPath, String psText,
-                                         XmlObject pArcticPnrElementInfos, StringBuffer sbFiles,
+   private void createAditionalDocuments(String psRootPath, String psText, XmlObject pArcticPnrElementInfos, StringBuffer sbFiles,
                                          Set<File> phsFiles)
    {
       int iPos = psText.indexOf(DtdFrame.DOC_REF);
@@ -632,8 +650,7 @@ public class DtdData
             String sTitle = sName.substring(sName.lastIndexOf(sLast) + 1, sName.lastIndexOf("."));
             if (sTitle.endsWith("_PnrElements") || sTitle.endsWith("_PnrElement")) {
                sb.append(getHtmlHeader(sTitle, psRootPath, false));
-               sb.append(getPnrElements4Documentation(pArcticPnrElementInfos, sName, psRootPath,
-                     sbFiles, phsFiles));
+               sb.append(getPnrElements4Documentation(pArcticPnrElementInfos, sName, psRootPath, sbFiles, phsFiles));
 
             } else {
                sb.append(getHtmlHeader(sTitle, psRootPath, true));
@@ -648,22 +665,21 @@ public class DtdData
       }
    }
 
-   /** 
-    * TODO (brod) add comment for method getPnrElements4Documentation 
-    * 
+   /**
+    * TODO (brod) add comment for method getPnrElements4Documentation
+    *
     * <p> TODO rename sRootFile to psRootFile, sbFiles to pFiles
     * @param pArcticPnrElementInfos TODO (brod) add text for param pArcticPnrElementInfos
     * @param sRootFile TODO (brod) add text for param sRootFile
     * @param psRootPath TODO (brod) add text for param psRootPath
     * @param sbFiles TODO (brod) add text for param sbFiles
     * @return TODO (brod) add text for returnValue
-    * 
-    * @author brod 
-    * @param phsFiles 
+    *
+    * @author brod
+    * @param phsFiles
     */
-   private String getPnrElements4Documentation(XmlObject pArcticPnrElementInfos, String sRootFile,
-                                               String psRootPath, StringBuffer sbFiles,
-                                               Set<File> phsFiles)
+   private String getPnrElements4Documentation(XmlObject pArcticPnrElementInfos, String sRootFile, String psRootPath,
+                                               StringBuffer sbFiles, Set<File> phsFiles)
    {
 
       StringBuffer sb = new StringBuffer();
@@ -679,23 +695,17 @@ public class DtdData
       for (XmlObject element : pnrElementInfo) {
          if (element.getAttribute("scope").equals("PUBLIC")) {
             int iNameEnd = sName.lastIndexOf(".");
-            String sDetail =
-               sName.substring(0, iNameEnd) + "_" + element.getAttribute("type")
-                     + sName.substring(iNameEnd);
-            sb.append("<li><a href='" + sDetail + "'>" + element.getAttribute("name") + "("
-                  + element.getAttribute("type") + ")" + "</a>\n");
+            String sDetail = sName.substring(0, iNameEnd) + "_" + element.getAttribute("type") + sName.substring(iNameEnd);
+            sb.append("<li><a href='" + sDetail + "'>" + element.getAttribute("name") + "(" + element.getAttribute("type") + ")"
+                  + "</a>\n");
 
             // create Additional Document
             if (Util.loadFromFile(sRootFile + sDetail).length() == 0) {
                StringBuffer sb2 = new StringBuffer();
-               sb2.append(getHtmlHeader(sDetail.substring(0, sDetail.lastIndexOf(".")), psRootPath,
-                     true));
-               sb2.append("<b>Parameters for BusinessElement:</b><br>"
-                     + element.getAttribute("name")
-                     + " <a href='"
-                     + "/arctic/repository/info?Method=Component&typeComponents=BusinessElement&Component="
-                     + sProvider + "." + element.getAttribute("type") + "'>("
-                     + element.getAttribute("type") + ")</a><br><br>\n");
+               sb2.append(getHtmlHeader(sDetail.substring(0, sDetail.lastIndexOf(".")), psRootPath, true));
+               sb2.append("<b>Parameters for BusinessElement:</b><br>" + element.getAttribute("name") + " <a href='"
+                     + "/arctic/repository/info?Method=Component&typeComponents=BusinessElement&Component=" + sProvider + "."
+                     + element.getAttribute("type") + "'>(" + element.getAttribute("type") + ")</a><br><br>\n");
 
                XmlObject[] pnrElementParamInfo = element.getObjects("PnrElementParamInfo");
                sb2.append("<table width='75%'>\n");
@@ -706,8 +716,7 @@ public class DtdData
                sb2.append("  </tr>\n");
                for (XmlObject element2 : pnrElementParamInfo) {
                   sb2.append("  <tr>\n");
-                  sb2.append("    <td><b>" + element2.getAttribute("name") + " ("
-                        + element2.getAttribute("id") + ")</b></td>\n");
+                  sb2.append("    <td><b>" + element2.getAttribute("name") + " (" + element2.getAttribute("id") + ")</b></td>\n");
                   sb2.append("    <td>... to be added</td>\n");
                   sb2.append("    <td>... to be added</td>\n");
                   sb2.append("  </tr>\n");
@@ -728,21 +737,21 @@ public class DtdData
       return sb.toString();
    }
 
-   /** 
-    * Method writeList 
-    * 
+   /**
+    * Method writeList
+    *
     * <p> TODO rename sRequest to psRequest, sResponse to psResponse
-    * @param sRequest 
-    * @param sResponse 
+    * @param sRequest
+    * @param sResponse
     * @param pArcticPnrElementInfos TODO (brod) add text for param pArcticPnrElementInfos
     * @return TODO (brod) add text for returnValue
-    * 
-    * @author $author$ 
-    * @param xmlData 
-    * @param phsFiles 
+    *
+    * @author $author$
+    * @param xmlData
+    * @param phsFiles
     */
-   public String writeList(String sRequest, String sResponse, XmlObject pArcticPnrElementInfos,
-                           XmlObject xmlData, Set<File> phsFiles)
+   public String writeList(String sRequest, String sResponse, XmlObject pArcticPnrElementInfos, XmlObject xmlData,
+                           Set<File> phsFiles)
    {
       StringBuffer sbFiles = new StringBuffer();
       if (sLastLoad.length() > 0) {
@@ -770,10 +779,8 @@ public class DtdData
          String sJava = Util.loadFromFile(sLastLoad + ".java");
 
          String sReq = sLastLoad.substring(sLastLoad.lastIndexOf("\\") + 1);
-         String sRef1 =
-            "<p>Request for <a href='" + sReq + "_req.html'><var>" + sReq + "</var></a></p>";
-         String sRef2 =
-            "<p>Response for <a href='" + sReq + "_res.html'><var>" + sReq + "</var></a></p>";
+         String sRef1 = "<p>Request for <a href='" + sReq + "_req.html'><var>" + sReq + "</var></a></p>";
+         String sRef2 = "<p>Response for <a href='" + sReq + "_res.html'><var>" + sReq + "</var></a></p>";
          String sAdd = "<!-- STARTREQUEST -->\n";
 
          sAdd += " * " + sRef1 + "\n";
@@ -782,8 +789,7 @@ public class DtdData
          sAdd += " * " + sRef2 + "\n";
          sAdd += " * <!-- ENDRESPONSE -->\n * ";
 
-         if ((sJava.indexOf("/**") > 0)
-               && ((sJava.indexOf(sRef1) < 0) || (sJava.indexOf(sRef2) < 0))) {
+         if ((sJava.indexOf("/**") > 0) && ((sJava.indexOf(sRef1) < 0) || (sJava.indexOf(sRef2) < 0))) {
 
             sJava = eliminateLines(sJava, "REQUEST");
             sJava = eliminateLines(sJava, "RESPONSE");
@@ -808,15 +814,15 @@ public class DtdData
       return sbFiles.toString();
    }
 
-   /** 
-    * Method eliminateLines 
-    * 
+   /**
+    * Method eliminateLines
+    *
     * <p> TODO rename sText to psText, sType to psType
-    * @param sText 
-    * @param sType 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param sText
+    * @param sType
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String eliminateLines(String sText, String sType)
    {
@@ -834,14 +840,14 @@ public class DtdData
       return sText;
    }
 
-   /** 
-    * Method loadList 
-    * 
+   /**
+    * Method loadList
+    *
     * <p> TODO rename sFileName to psFileName, bRequest to pbRequest
-    * @param sFileName 
-    * @param bRequest 
-    * 
-    * @author $author$ 
+    * @param sFileName
+    * @param bRequest
+    *
+    * @author $author$
     */
    private void loadList(String sFileName, boolean bRequest)
    {
@@ -880,14 +886,14 @@ public class DtdData
       }
    }
 
-   /** 
-    * Method put 
-    * 
+   /**
+    * Method put
+    *
     * <p> TODO rename sTitle to psTitles to another name
-    * @param sTitle 
-    * @param s 
-    * 
-    * @author $author$ 
+    * @param sTitle
+    * @param s
+    *
+    * @author $author$
     */
    public void put(String sTitle, String s)
    {
@@ -904,14 +910,14 @@ public class DtdData
       // System.out.println("PUT "+sTitle);
    }
 
-   /** 
-    * Method get 
-    * 
+   /**
+    * Method get
+    *
     * <p> TODO rename sTitle to psTitle
-    * @param sTitle 
-    * @return 
-    * 
-    * @author $author$ 
+    * @param sTitle
+    * @return
+    *
+    * @author $author$
     */
    public String get(String sTitle)
    {

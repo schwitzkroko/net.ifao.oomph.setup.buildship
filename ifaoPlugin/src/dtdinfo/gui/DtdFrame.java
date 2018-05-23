@@ -1,21 +1,61 @@
 package dtdinfo.gui;
 
 
-import ifaoplugin.Util;
-
-import java.awt.*;
-import java.awt.datatransfer.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
-import net.ifao.dialogs.swing.*;
+import dtdinfo.DtdData;
+import dtdinfo.DtdGenerator;
+import dtdinfo.DtdMain;
+import ifaoplugin.Util;
+import net.ifao.dialogs.swing.ConfimDialog;
+import net.ifao.dialogs.swing.FileChooserDialog;
+import net.ifao.dialogs.swing.InputString;
 import net.ifao.xml.XmlObject;
-import dtdinfo.*;
 
 
 /**
@@ -164,7 +204,7 @@ public class DtdFrame
       super.setVisible(bVisible);
       if (bVisible) {
          File f = Util.getConfFile(data.getPath(), "Arctic.xsd");
-         if (!f.exists()) {
+         if (f != null && !f.exists()) {
             getJDialogSettings().setVisible(true);
             setPath();
          }
@@ -401,8 +441,7 @@ public class DtdFrame
       jButtonAdditionalDocument.setBorder(BorderFactory.createEtchedBorder());
       jButtonAdditionalDocument.setText("Additional Document");
       jButtonAdditionalDocument.setToolTipText("copy the text 'not supported' to the textbox");
-      jButtonAdditionalDocument
-            .addActionListener(new DtdFrame_jButtonAdditionalDocument_actionAdapter(this));
+      jButtonAdditionalDocument.addActionListener(new DtdFrame_jButtonAdditionalDocument_actionAdapter(this));
 
 
       jPanel24.setLayout(borderLayout21);
@@ -644,8 +683,7 @@ public class DtdFrame
     */
    private String getArcticPnrElementInfos(String sSfx)
    {
-      return Util.getConfFile(jArcticPath.getText(), "ArcticPnrElementInfos." + sSfx)
-            .getAbsolutePath();
+      return Util.getConfFile(jArcticPath.getText(), "ArcticPnrElementInfos." + sSfx).getAbsolutePath();
    }
 
    /**
@@ -671,8 +709,8 @@ public class DtdFrame
          String sAgent = getAgentListItem(true);
 
          jLabelAgent.setText(sAgent + " " + sRequest);
-         jTree1.loadModel(jRequestResponse.getSelectedIndex() == 0, jArcticPath.getText()
-               + DtdData.SRCPATH + "\\" + sRequest, sAgent);
+         jTree1.loadModel(jRequestResponse.getSelectedIndex() == 0, jArcticPath.getText() + DtdData.SRCPATH + "\\" + sRequest,
+               sAgent);
 
          // save ArcticPnrElementInfos
 
@@ -684,8 +722,7 @@ public class DtdFrame
          loadProviderCombo(false);
 
          XmlObject infos =
-            arcticPnrElementInfos.createObject("Arctic").createObject("PnrElementInfos",
-                  "provider", getProvider(), true);
+            arcticPnrElementInfos.createObject("Arctic").createObject("PnrElementInfos", "provider", getProvider(), true);
 
          Util.writeToFile("Generator\\ArcticPnrElementInfos.info", infos.toString());
 
@@ -709,10 +746,8 @@ public class DtdFrame
       if (jComboRequest.getSelectedItem() != null) {
 
          if (bChanged) {
-            if (!ConfimDialog.getBoolean(
-                  this,
-                  "There are changed values !\nDo you really want to load \""
-                        + jComboRequest.getSelectedItem() + "\" ?\n(your changes will be lost)")) {
+            if (!ConfimDialog.getBoolean(this, "There are changed values !\nDo you really want to load \""
+                  + jComboRequest.getSelectedItem() + "\" ?\n(your changes will be lost)")) {
                return;
             }
          }
@@ -731,7 +766,7 @@ public class DtdFrame
       }
    }
 
-   Hashtable<String, Vector<String>> htPnrInfo = new Hashtable<String, Vector<String>>();
+   Hashtable<String, Vector<String>> htPnrInfo = new Hashtable<>();
    XmlObject arcticPnrElementInfos = null;
    JPanel jPanel20 = new JPanel();
    JButton jButtonEdit = new JButton();
@@ -745,14 +780,13 @@ public class DtdFrame
     */
    private void loadProviderCombo(boolean bCorrectClassName)
    {
-      htPnrInfo = new Hashtable<String, Vector<String>>();
+      htPnrInfo = new Hashtable<>();
 
       String sRequest = getRequest(false);
 
       // load the related Framework base Agent, which contains the
       // provider Indicator (for ArcticPnrElementsInfo).
-      String sFramework =
-         jArcticPath.getText() + "\\src\\net\\ifao\\arctic\\agents\\" + sRequest + "\\framework";
+      String sFramework = jArcticPath.getText() + "\\src\\net\\ifao\\arctic\\agents\\" + sRequest + "\\framework";
 
       File f = new File(sFramework);
 
@@ -777,16 +811,12 @@ public class DtdFrame
 
          if (sRequest.length() > 2) {
 
-            String sAgents =
-               Util.loadFromFile(Util.getConfFile(jArcticPath.getText(), "Agents.xml")
-                     .getAbsolutePath());
+            String sAgents = Util.loadFromFile(Util.getConfFile(jArcticPath.getText(), "Agents.xml").getAbsolutePath());
 
             if (sFramework.indexOf("  return PnrEnumProviderType.") > 0) {
+               sProvider = sFramework.substring(sFramework.indexOf("  return PnrEnumProviderType.")) + "\n;";
                sProvider =
-                  sFramework.substring(sFramework.indexOf("  return PnrEnumProviderType.")) + "\n;";
-               sProvider =
-                  sProvider.substring(sProvider.indexOf(".") + 1,
-                        Math.min(sProvider.indexOf("\n"), sProvider.indexOf(";")));
+                  sProvider.substring(sProvider.indexOf(".") + 1, Math.min(sProvider.indexOf("\n"), sProvider.indexOf(";")));
             } else if (sAgents.indexOf(sRequest) > 0) {
                sAgents = sAgents.substring(sAgents.indexOf(sRequest));
                sAgents = sAgents.substring(sAgents.indexOf(" providerType="));
@@ -819,9 +849,8 @@ public class DtdFrame
                   // validate the className
                   if (bCorrectClassName && element.getAttribute("code").equals("0")
                         && (element.getAttribute("className").length() == 0)) {
-                     element.setAttribute("className",
-                           "net.ifao.arctic.agents" + sRequest + "framework.elements.Element"
-                                 + DtdGenerator.getUnFormatedProvider(sType));
+                     element.setAttribute("className", "net.ifao.arctic.agents" + sRequest + "framework.elements.Element"
+                           + DtdGenerator.getUnFormatedProvider(sType));
 
                   }
                }
@@ -830,7 +859,7 @@ public class DtdFrame
                Vector<String> list = htPnrInfo.get(sType);
 
                if (list == null) {
-                  list = new Vector<String>();
+                  list = new Vector<>();
 
                   htPnrInfo.put(sType, list);
                }
@@ -863,8 +892,7 @@ public class DtdFrame
       for (Object key : keys) {
          String sKey = key.toString();
 
-         if (!sKey.startsWith("[ ")
-               || (htPnrInfo.get(sKey.substring(2, sKey.length() - 2)) == null)) {
+         if (!sKey.startsWith("[ ") || (htPnrInfo.get(sKey.substring(2, sKey.length() - 2)) == null)) {
             jComboPnrElement.addItem(sKey);
          }
       }
@@ -913,7 +941,7 @@ public class DtdFrame
 
       jComboPnrAttribute.removeAllItems();
 
-      HashSet<String> elements = new HashSet<String>();
+      HashSet<String> elements = new HashSet<>();
 
       String sElement = (String) jComboPnrElement.getSelectedItem();
 
@@ -998,8 +1026,8 @@ public class DtdFrame
       if ((jTxtRules.getText().trim() + jTxtRef.getText().trim() + getPnrElements()).length() > 0) {
          GregorianCalendar cal = new GregorianCalendar();
 
-         jTxtDate.setText(cal.get(Calendar.DATE) + "." + (cal.get(Calendar.MONTH) + 1) + "."
-               + cal.get(Calendar.YEAR) + " - " + jUser.getText().trim());
+         jTxtDate.setText(cal.get(Calendar.DATE) + "." + (cal.get(Calendar.MONTH) + 1) + "." + cal.get(Calendar.YEAR) + " - "
+               + jUser.getText().trim());
       } else {
          jTxtDate.setText("---");
       }
@@ -1078,16 +1106,14 @@ public class DtdFrame
       textChanged();
    }
 
-   public String save(boolean pbSave, StringBuffer sbFiles, XmlObject pArcticPnrElementInfos,
-                      Set<File> phsFiles)
+   public String save(boolean pbSave, StringBuffer sbFiles, XmlObject pArcticPnrElementInfos, Set<File> phsFiles)
    {
       DtdMain.startWaitThread("Save HTML");
 
       jTree1.storePath();
 
-      String sSourceList =
-         getSourceList(data, getRequest(false), getAgentListItem(false), jTree1, pbSave, sbFiles,
-               pArcticPnrElementInfos, phsFiles);
+      String sSourceList = getSourceList(data, getRequest(false), getAgentListItem(false), jTree1, pbSave, sbFiles,
+            pArcticPnrElementInfos, phsFiles);
 
       setChanged(false);
       jRequestResponse.setSelectedIndex(jTree1.getOldRequestResponseIndex());
@@ -1107,11 +1133,10 @@ public class DtdFrame
     *
     * @return
     * @author Andreas Brod
-    * @param pArcticPnrElementInfos 
-    * @param phsFiles 
+    * @param pArcticPnrElementInfos
+    * @param phsFiles
     */
-   public static String getSourceList(DtdData dtdData, String sRoot, String sAgentName,
-                                      boolean pbSave, StringBuffer sbFiles,
+   public static String getSourceList(DtdData dtdData, String sRoot, String sAgentName, boolean pbSave, StringBuffer sbFiles,
                                       XmlObject pArcticPnrElementInfos, Set<File> phsFiles)
    {
 
@@ -1119,15 +1144,13 @@ public class DtdFrame
       jTree1.init(dtdData);
       String sBasePath = sRoot + sAgentName.substring(0, sAgentName.indexOf("\\agents\\") + 8);
 
-      String sPath =
-         sAgentName.substring(sAgentName.indexOf("\\agents\\") + 8, sAgentName.lastIndexOf("\\"));
+      String sPath = sAgentName.substring(sAgentName.indexOf("\\agents\\") + 8, sAgentName.lastIndexOf("\\"));
 
       sAgentName = sAgentName.substring(sAgentName.lastIndexOf("\\") + 1);
 
       jTree1.loadModel(false, sBasePath + sPath, sAgentName);
 
-      return getSourceList(null, sPath, sAgentName, jTree1, pbSave, sbFiles,
-            pArcticPnrElementInfos, phsFiles);
+      return getSourceList(null, sPath, sAgentName, jTree1, pbSave, sbFiles, pArcticPnrElementInfos, phsFiles);
    }
 
    /**
@@ -1140,12 +1163,11 @@ public class DtdFrame
     *
     * @return
     * @author Andreas Brod
-    * @param pArcticPnrElementInfos 
-    * @param phsFiles 
+    * @param pArcticPnrElementInfos
+    * @param phsFiles
     */
-   public static String getSourceList(DtdData data, String sPath, String sAgentName,
-                                      DtdTree jTree1, boolean pbSave, StringBuffer sbFiles,
-                                      XmlObject pArcticPnrElementInfos, Set<File> phsFiles)
+   public static String getSourceList(DtdData data, String sPath, String sAgentName, DtdTree jTree1, boolean pbSave,
+                                      StringBuffer sbFiles, XmlObject pArcticPnrElementInfos, Set<File> phsFiles)
    {
       XmlObject xmlData = new XmlObject("<" + sAgentName + " />").getFirstObject();
       DtdMain.startWaitThread("Build HTML");
@@ -1171,8 +1193,7 @@ public class DtdFrame
 
       if (pbSave && (data != null)) {
 
-         sbFiles.append(data.writeList(sRequest, sResponse, pArcticPnrElementInfos, xmlData,
-               phsFiles));
+         sbFiles.append(data.writeList(sRequest, sResponse, pArcticPnrElementInfos, xmlData, phsFiles));
       }
 
       return sSourceList;
@@ -1205,11 +1226,9 @@ public class DtdFrame
     */
    private void saveSettings()
    {
-      data.setSettings(jUser.getText().trim(), (int) this.getLocation().getX(), (int) this
-            .getLocation().getY(), this.getWidth(), this.getHeight(), jSplitPane1
-            .getDividerLocation(), jSplitPane2.getDividerLocation(), jSplitPane3
-            .getDividerLocation(), getAgentListItem(false), getRequest(false), jArcticPath
-            .getText());
+      data.setSettings(jUser.getText().trim(), (int) this.getLocation().getX(), (int) this.getLocation().getY(), this.getWidth(),
+            this.getHeight(), jSplitPane1.getDividerLocation(), jSplitPane2.getDividerLocation(),
+            jSplitPane3.getDividerLocation(), getAgentListItem(false), getRequest(false), jArcticPath.getText());
 
    }
 
@@ -1317,8 +1336,7 @@ public class DtdFrame
 
                // if the slash is at the end and there is no space in front
                // and no "<" in front, insert a space at the slash position
-               if ((!Character.isWhitespace(sb.charAt(nextSlash - 1)))
-                     && (sb.charAt(nextSlash - 1) != '<')) {
+               if ((!Character.isWhitespace(sb.charAt(nextSlash - 1))) && (sb.charAt(nextSlash - 1) != '<')) {
                   sb.insert(nextSlash, ' ');
                }
             } else {
@@ -1448,9 +1466,8 @@ public class DtdFrame
       if (htElements.size() == 0) {
          save(true, sb, getProviderElementInfo(), phsFiles);
       } else if (sProvider.length() > 0) {
-         sb.append(DtdGenerator.generate(this, jArcticPath.getText(), DtdData.SRCPATH + "\\"
-               + getRequest(false), sProvider, getAgentListItem(false), htElements,
-               arcticPnrElementInfos, jUser.getText(), pbGenerateJavaFiles,
+         sb.append(DtdGenerator.generate(this, jArcticPath.getText(), DtdData.SRCPATH + "\\" + getRequest(false), sProvider,
+               getAgentListItem(false), htElements, arcticPnrElementInfos, jUser.getText(), pbGenerateJavaFiles,
                new Hashtable<String, String>(), phsFiles));
 
       }
@@ -1463,9 +1480,7 @@ public class DtdFrame
    {
       XmlObject pnrElementInfos = null;
       try {
-         pnrElementInfos =
-            arcticPnrElementInfos.getObject("Arctic").findSubObject("PnrElementInfos", "provider",
-                  getProvider());
+         pnrElementInfos = arcticPnrElementInfos.getObject("Arctic").findSubObject("PnrElementInfos", "provider", getProvider());
       }
       catch (RuntimeException e) {
          // make nothing
@@ -1526,31 +1541,28 @@ public class DtdFrame
     * @param sAttr
     * @author Andreas Brod
     */
-   private void showDtdPnrElementInfosDialog(String sProvider, String sPnr, String sAttr,
-                                             boolean pbModal)
+   private void showDtdPnrElementInfosDialog(String sProvider, String sPnr, String sAttr, boolean pbModal)
    {
       if (dtdPnrElementInfosDialog == null) {
-         Hashtable<String, List<String>> htOtherElements = new Hashtable<String, List<String>>();
+         Hashtable<String, List<String>> htOtherElements = new Hashtable<>();
          Object[] keys = htPnrInfo.keySet().toArray();
          for (Object key : keys) {
             String sKey = key.toString();
             Object[] elements = htPnrInfo.get(sKey).toArray();
-            List<String> newList = new ArrayList<String>();
+            List<String> newList = new ArrayList<>();
             htOtherElements.put(sKey, newList);
             for (Object element : elements) {
                newList.add(element.toString());
             }
          }
-         dtdPnrElementInfosDialog =
-            new DtdPnrElementInfosDialog(this, jArcticPath.getText() + DtdData.SRCPATH + "\\"
-                  + getRequest(false), pbModal, htOtherElements);
+         dtdPnrElementInfosDialog = new DtdPnrElementInfosDialog(this,
+               jArcticPath.getText() + DtdData.SRCPATH + "\\" + getRequest(false), pbModal, htOtherElements);
       }
       if (dtdPnrElementInfosDialog.isVisible()) {
          dtdPnrElementInfosDialog.setVisible(false);
       }
       dtdPnrElementInfosDialog.setModal(pbModal);
-      dtdPnrElementInfosDialog.load(this, arcticPnrElementInfos, sProvider, sPnr, sAttr,
-            jTxtComment.getText().trim());
+      dtdPnrElementInfosDialog.load(this, arcticPnrElementInfos, sProvider, sPnr, sAttr, jTxtComment.getText().trim());
       dtdPnrElementInfosDialog.setVisible(true);
 
    }
@@ -1604,8 +1616,7 @@ public class DtdFrame
             selectJComboPnrInfo(getPnrElements());
 
             if ((jComboPnrAttribute.getSelectedItem() == null)
-                  || (jPNRElement.getText().indexOf(
-                        "." + jComboPnrAttribute.getSelectedItem().toString()) <= 0)) {
+                  || (jPNRElement.getText().indexOf("." + jComboPnrAttribute.getSelectedItem().toString()) <= 0)) {
                jPNRElement.setText("");
             } else {}
          }
@@ -1618,9 +1629,7 @@ public class DtdFrame
 
       // search through directory
 
-      File f =
-         new File(jArcticPath.getText() + DtdData.SRCPATH + "\\" + getRequest(false)
-               + "\\framework");
+      File f = new File(jArcticPath.getText() + DtdData.SRCPATH + "\\" + getRequest(false) + "\\framework");
 
       StringBuffer sb = new StringBuffer();
 
@@ -1732,7 +1741,7 @@ public class DtdFrame
             String sKey = enumElements.nextElement();
             List<String> elements = htElements.get(sKey);
 
-            List<String> foundElements = new Vector<String>();
+            List<String> foundElements = new Vector<>();
 
             for (int i = 0; i < elements.size(); i++) {
                String sElement = elements.get(i);
@@ -1811,9 +1820,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jJMenuBar	
-    * 	
-    * @return javax.swing.JMenuBar	
+    * This method initializes jJMenuBar
+    *
+    * @return javax.swing.JMenuBar
     */
    private JMenuBar getJJMenuBar()
    {
@@ -1828,9 +1837,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuFile	
-    * 	
-    * @return javax.swing.JMenu	
+    * This method initializes jMenuFile
+    *
+    * @return javax.swing.JMenu
     */
    private JMenu getJMenuFile()
    {
@@ -1849,9 +1858,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemOpen	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemOpen
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemOpen()
    {
@@ -1873,9 +1882,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemSave	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemSave
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemSave()
    {
@@ -1891,7 +1900,7 @@ public class DtdFrame
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e)
             {
-               Set<File> hsFiles = new HashSet<File>();
+               Set<File> hsFiles = new HashSet<>();
                start2Generate(false, hsFiles);
                refresh(hsFiles);
             }
@@ -1933,7 +1942,7 @@ public class DtdFrame
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e)
             {
-               Set<File> hsFiles = new HashSet<File>();
+               Set<File> hsFiles = new HashSet<>();
                save(true, new StringBuffer(), getProviderElementInfo(), hsFiles);
                refresh(hsFiles);
 
@@ -1944,9 +1953,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemExit	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemExit
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemExit()
    {
@@ -1968,9 +1977,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuTools	
-    * 	
-    * @return javax.swing.JMenu	
+    * This method initializes jMenuTools
+    *
+    * @return javax.swing.JMenu
     */
    private JMenu getJMenuTools()
    {
@@ -1985,9 +1994,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemGenerate	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemGenerate
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemGenerate()
    {
@@ -2002,7 +2011,7 @@ public class DtdFrame
             public void actionPerformed(java.awt.event.ActionEvent e)
             {
                try {
-                  Set<File> hsFiles = new HashSet<File>();
+                  Set<File> hsFiles = new HashSet<>();
                   start2Generate(true, hsFiles);
                   refresh(hsFiles);
 
@@ -2017,9 +2026,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuProvider	
-    * 	
-    * @return javax.swing.JMenu	
+    * This method initializes jMenuProvider
+    *
+    * @return javax.swing.JMenu
     */
    private JMenu getJMenuProvider()
    {
@@ -2038,9 +2047,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemPnrElements	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemPnrElements
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemPnrElements()
    {
@@ -2063,9 +2072,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemToDo	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemToDo
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemToDo()
    {
@@ -2087,9 +2096,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuHelp	
-    * 	
-    * @return javax.swing.JMenu	
+    * This method initializes jMenuHelp
+    *
+    * @return javax.swing.JMenu
     */
    private JMenu getJMenuHelp()
    {
@@ -2103,9 +2112,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemHistory	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemHistory
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemHistory()
    {
@@ -2119,8 +2128,7 @@ public class DtdFrame
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e)
             {
-               DtdResultPage.show(getThisFrame(), "History", true,
-                     Util.loadFromFile("Generator\\History.txt"));
+               DtdResultPage.show(getThisFrame(), "History", true, Util.loadFromFile("Generator\\History.txt"));
 
             }
          });
@@ -2129,9 +2137,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemNew	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemNew
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemNew()
    {
@@ -2153,9 +2161,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jDialogSettings	
-    * 	
-    * @return javax.swing.JDialog	
+    * This method initializes jDialogSettings
+    *
+    * @return javax.swing.JDialog
     */
    private JDialog getJDialogSettings()
    {
@@ -2171,9 +2179,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jContentDialog	
-    * 	
-    * @return javax.swing.JPanel	
+    * This method initializes jContentDialog
+    *
+    * @return javax.swing.JPanel
     */
    private JPanel getJContentDialog()
    {
@@ -2188,9 +2196,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jPanel	
-    * 	
-    * @return javax.swing.JPanel	
+    * This method initializes jPanel
+    *
+    * @return javax.swing.JPanel
     */
    private JPanel getJPanel()
    {
@@ -2207,9 +2215,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jPanelClose	
-    * 	
-    * @return javax.swing.JPanel	
+    * This method initializes jPanelClose
+    *
+    * @return javax.swing.JPanel
     */
    private JPanel getJPanelClose()
    {
@@ -2222,9 +2230,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jButtonCloseSettings	
-    * 	
-    * @return javax.swing.JButton	
+    * This method initializes jButtonCloseSettings
+    *
+    * @return javax.swing.JButton
     */
    private JButton getJButtonCloseSettings()
    {
@@ -2261,8 +2269,7 @@ public class DtdFrame
             }
          }
          if (sName.length() > 0) {
-            jTxtRules.setText(DOC_REF + sName + ".html\">Additional Document for "
-                  + jTxtTitle.getText() + "</a>");
+            jTxtRules.setText(DOC_REF + sName + ".html\">Additional Document for " + jTxtTitle.getText() + "</a>");
             textChanged();
          }
       }
@@ -2270,9 +2277,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jMenuItemSchema	
-    * 	
-    * @return javax.swing.JMenuItem	
+    * This method initializes jMenuItemSchema
+    *
+    * @return javax.swing.JMenuItem
     */
    private JMenuItem getJMenuItemSchema()
    {
@@ -2311,9 +2318,9 @@ public class DtdFrame
    }
 
    /**
-    * This method initializes jPanel14	
-    * 	
-    * @return javax.swing.JPanel	
+    * This method initializes jPanel14
+    *
+    * @return javax.swing.JPanel
     */
    private JPanel getJPanel14()
    {
@@ -2334,9 +2341,9 @@ public class DtdFrame
 
 
    /**
-    * This method initializes jTextFieldMandatory	
-    * 	
-    * @return javax.swing.JTextField	
+    * This method initializes jTextFieldMandatory
+    *
+    * @return javax.swing.JTextField
     */
    private JTextField getJTextFieldMandatory()
    {
