@@ -2,7 +2,7 @@
 <feature
       id="net.ifao.feature"
       label="i:FAO Plugin Feature"
-      version="2.1.17"
+      version="2.1.18"
       provider-name="i:FAO"
       plugin="net.ifao.plugin">
 

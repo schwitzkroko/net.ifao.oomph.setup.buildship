@@ -172,9 +172,15 @@ public class Util
     *
     * @author Andreas Brod
     */
-   public static String loadFromFile(String psFileName)
+   public static String loadFromFile(String... psFileName)
    {
-      return loadFromFile(new File(psFileName));
+      for (String fileName : psFileName) {
+         String loadFromFile = loadFromFile(new File(fileName));
+         if (loadFromFile.length() > 0) {
+            return loadFromFile;
+         }
+      }
+      return "";
    }
 
    /**

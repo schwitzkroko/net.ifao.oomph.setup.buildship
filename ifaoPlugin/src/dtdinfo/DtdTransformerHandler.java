@@ -1,51 +1,61 @@
 package dtdinfo;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
 import ifaoplugin.Util;
-
-import java.io.*;
-import java.util.*;
-
 import net.ifao.xml.XmlObject;
 
 
-/** 
- * Class DtdTransformerHandler 
- * 
- * <p> 
- * Copyright &copy; 2002, i:FAO, AG. 
- * @author Andreas Brod 
+/**
+ * Class DtdTransformerHandler
+ *
+ * <p>
+ * Copyright &copy; 2002, i:FAO, AG.
+ * @author Andreas Brod
  */
 public class DtdTransformerHandler
 {
 
    private String _sArcticDir = "";
    protected static String ATTRIBUTEMASK = "!:, \n\r\t";
-   protected static String GENERATED_METHOD =
-      "// Do not remove the following line !\n    // Generated Method";
+   protected static String GENERATED_METHOD = "// Do not remove the following line !\n    // Generated Method";
    protected static String GENERATED_VERSION = "// Class generated with ";
 
-   private List<String> _abstractList = new ArrayList<String>();
+   private List<String> _abstractList = new ArrayList<>();
 
    // ----------------------------------------------------------------------------
-   // 
+   //
    // ----------------------------------------------------------------------------
 
    private Hashtable<String, String> _sourceCodes;
-   private Hashtable<String, String> _abstractMethods = new Hashtable<String, String>();
+   private Hashtable<String, String> _abstractMethods = new Hashtable<>();
 
    private TransformerMethod _defaultTransformerMethod;
    private XmlObject _xmlArcticPrnElementInfo;
    private Hashtable<String, String> _htElementNames;
 
-   /** 
-    * Method getSourceCode 
-    * 
-    * @param psType 
-    * @param psName 
+   /**
+    * Method getSourceCode
+    *
+    * @param psType
+    * @param psName
     * @return SourceCode
-    * 
-    * @author Andreas Brod 
+    *
+    * @author Andreas Brod
     */
    public String getSourceCode(String psType, String psName)
    {
@@ -58,41 +68,45 @@ public class DtdTransformerHandler
          return _sourceCodes.get(psType);
       }
 
+      String reqResType;
       if (psType.startsWith("Req")) {
-         sCode =
-            Util.loadFromFile(_sArcticDir + "..\\src-gen\\net\\ifao\\arctic\\xml\\request\\"
-                  + psType + ".java");
+         reqResType = "\\request\\";
       } else {
-         sCode =
-            Util.loadFromFile(_sArcticDir + "..\\src-gen\\net\\ifao\\arctic\\xml\\response\\"
-                  + psType + ".java");
+         reqResType = "\\response\\";
       }
+
+      String srcGenFolder = _sArcticDir + "..\\src-gen\\";
+      String configuration4ArcticFolder =
+         _sArcticDir + "..\\..\\..\\arctic_configurations\\Configuration4Arctic\\src\\main\\generated-sources\\castor\\";
+      String basePath = "net\\ifao\\arctic\\xml";
+      String path = basePath + reqResType + psType + ".java";
+      sCode = Util.loadFromFile(srcGenFolder + path, configuration4ArcticFolder + path);
 
       _sourceCodes.put(psType, sCode);
 
       return sCode;
    }
 
-   /** 
-    * Method getAbstractItems 
-    * 
+   /**
+    * Method getAbstractItems
+    *
     * @return AbstractItems
-    * 
-    * @author Andreas Brod 
+    *
+    * @author Andreas Brod
     */
    public Iterator<String> getAbstractItems()
    {
       return _abstractList.iterator();
    }
 
-   /** 
-    * Method setAttribute 
-    * 
-    * @param psType 
-    * @param psNAElement 
-    * @param psPNRElements 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method setAttribute
+    *
+    * @param psType
+    * @param psNAElement
+    * @param psPNRElements
+    *
+    * @author Andreas Brod
     */
    private void setAttribute(String psType, String psNAElement, String psPNRElements)
    {
@@ -165,15 +179,15 @@ public class DtdTransformerHandler
       }
    }
 
-   /** 
-    * Constructor DtdTransformerHandler2 
-    * 
-    * @param psProvider TODO (brod) add text for param psProvider 
-    * @param psSourceList 
-    * @param psArcticDir 
-    * @param pSourceCodes 
-    * @param sPackageRoot 
-    * 
+   /**
+    * Constructor DtdTransformerHandler2
+    *
+    * @param psProvider TODO (brod) add text for param psProvider
+    * @param psSourceList
+    * @param psArcticDir
+    * @param pSourceCodes
+    * @param sPackageRoot
+    *
     */
    public DtdTransformerHandler(String psProvider, String psSourceList, String psArcticDir,
                                 Hashtable<String, String> pSourceCodes, String psPackageRoot)
@@ -181,11 +195,9 @@ public class DtdTransformerHandler
       _sourceCodes = pSourceCodes;
       _sArcticDir = psArcticDir;
 
-      _htElementNames = new Hashtable<String, String>();
+      _htElementNames = new Hashtable<>();
       File fElements =
-         new File(_sArcticDir
-               + ("net.ifao.arctic.agents." + psPackageRoot + "framework.elements").replaceAll(
-                     "\\.", "/"));
+         new File(_sArcticDir + ("net.ifao.arctic.agents." + psPackageRoot + "framework.elements").replaceAll("\\.", "/"));
       if (fElements.exists()) {
          String[] listFiles = fElements.list();
          for (String listFile : listFiles) {
@@ -197,15 +209,13 @@ public class DtdTransformerHandler
          }
       }
 
-      _defaultTransformerMethod =
-         new TransformerMethod(this, null, "", "", "", "", _abstractMethods);
+      _defaultTransformerMethod = new TransformerMethod(this, null, "", "", "", "", _abstractMethods);
 
       Util.writeToFile("Generator\\DtdTransformerHandler.lst", psSourceList);
 
       try {
-         _xmlArcticPrnElementInfo =
-            new XmlObject(Util.getConfFile(_sArcticDir + "..", "ArcticPnrElementInfos.xml"))
-                  .getFirstObject().createObject("PnrElementInfos", "provider", psProvider, true);
+         _xmlArcticPrnElementInfo = new XmlObject(Util.getConfFile(_sArcticDir + "..", "ArcticPnrElementInfos.xml"))
+               .getFirstObject().createObject("PnrElementInfos", "provider", psProvider, true);
       }
       catch (FileNotFoundException e1) {
          _xmlArcticPrnElementInfo = null;
@@ -255,19 +265,18 @@ public class DtdTransformerHandler
 
    }
 
-   /** 
-    * TODO (brod) add comment for method getAttributeType 
-    * 
-    * @param psType TODO (brod) add text for param psType 
-    * @param psId TODO (brod) add text for param psId 
-    * @return TODO (brod) add text for returnValue 
-    * 
-    * @author brod 
+   /**
+    * TODO (brod) add comment for method getAttributeType
+    *
+    * @param psType TODO (brod) add text for param psType
+    * @param psId TODO (brod) add text for param psId
+    * @return TODO (brod) add text for returnValue
+    *
+    * @author brod
     */
    public String getAttributeType(String psType, String psId)
    {
-      XmlObject info =
-         _xmlArcticPrnElementInfo.createObject("PnrElementInfo", "type", psType, true);
+      XmlObject info = _xmlArcticPrnElementInfo.createObject("PnrElementInfo", "type", psType, true);
       XmlObject param = info.createObject("PnrElementParamInfo", "id", psId, true);
       String type = param.getAttribute("type");
       if (type.startsWith("DATE_")) {
@@ -283,8 +292,7 @@ public class DtdTransformerHandler
       } else if (type.equals("ENUMERATION")) {
          type = "Enum" + type;
 
-      } else if (type.equals("AMOUNT") || type.equals("PERCENTAGE")
-            || type.equals("GEO_COORDINATE")) {
+      } else if (type.equals("AMOUNT") || type.equals("PERCENTAGE") || type.equals("GEO_COORDINATE")) {
          type = "double";
       } else {
          type = "String";
@@ -292,18 +300,17 @@ public class DtdTransformerHandler
       return type;
    }
 
-   /** 
-    * Method getProtected 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getProtected
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getPrivateProtectedMembers()
    {
       StringBuffer sCode =
-         new StringBuffer(
-               "\n// ----------------------------------------------------------------------------\n");
+         new StringBuffer("\n// ----------------------------------------------------------------------------\n");
 
       sCode.append("//  D E F I N E   P R I V A T E / P R O T E C T E D   M E M B E R S\n");
       sCode.append("// ----------------------------------------------------------------------------\n");
@@ -314,13 +321,13 @@ public class DtdTransformerHandler
       return sCode.toString();
    }
 
-   /** 
-    * Method scrRequest returns the sourcecode accoring to _lstSource (which 
-    * was initialized in constructor) 
-    * 
-    * @return The complete courceCode for the transformer 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method scrRequest returns the sourcecode accoring to _lstSource (which
+    * was initialized in constructor)
+    *
+    * @return The complete courceCode for the transformer
+    *
+    * @author Andreas Brod
     */
    public String scrOfTransformer()
    {
@@ -367,8 +374,7 @@ public class DtdTransformerHandler
          //         sbCode.append("        } catch (Exception ex) {\n");
          //         sbCode.append("          // avoid nullpointer Exceptions\n");
          //         sbCode.append("        }\n");
-         sbCode.append("        add" + sAttr + "(pReqRequest.getRequestChoice().get" + sAttr
-               + "());\n");
+         sbCode.append("        add" + sAttr + "(pReqRequest.getRequestChoice().get" + sAttr + "());\n");
       }
 
       sbCode.append("    }\n\n");
@@ -401,8 +407,7 @@ public class DtdTransformerHandler
       sbCode.append("    {\n");
       sbCode.append("        _traveller = pTraveller;\n");
       sbCode.append("        _PTD = pPTD;\n");
-      sbCode.append("        _elementFactory = ThreadDataManager."
-            + "getInstance().getFactory();\n");
+      sbCode.append("        _elementFactory = ThreadDataManager." + "getInstance().getFactory();\n");
       sbCode.append("        \n");
 
       sbCode.append("        ResponseChoice choice = new ResponseChoice();\n");
@@ -410,8 +415,7 @@ public class DtdTransformerHandler
       if (sAttr.length() == 0) {
          sbCode.append("        // no PnrElements defined\n");
       } else {
-         sbCode.append("        choice.set" + sAttr + "(get" + sAttr
-               + "(new PnrElementBase[0]));\n");
+         sbCode.append("        choice.set" + sAttr + "(get" + sAttr + "(new PnrElementBase[0]));\n");
       }
 
       sbCode.append("        \n");
@@ -424,8 +428,7 @@ public class DtdTransformerHandler
 
       if (sbCode.indexOf("// set the Tag Object by default") > 0) {
          StringBuilder sText =
-            new StringBuilder(
-                  "\n    private Hashtable<String, Integer> _htTagList = new Hashtable<String, Integer>();\n");
+            new StringBuilder("\n    private Hashtable<String, Integer> _htTagList = new Hashtable<String, Integer>();\n");
 
          sText.append("\n");
          sText.append("    /**\n");
@@ -472,14 +475,11 @@ public class DtdTransformerHandler
 
             String sAbstractMethod = _abstractMethods.get(sKey);
 
-            String sAbstractMethod2 =
-               sAbstractMethod.substring(0, sAbstractMethod.indexOf("{")) + ";\n";
+            String sAbstractMethod2 = sAbstractMethod.substring(0, sAbstractMethod.indexOf("{")) + ";\n";
 
-            _abstractList.add(Util.replaceString(sAbstractMethod, "protected abstract ",
-                  "protected "));
+            _abstractList.add(Util.replaceString(sAbstractMethod, "protected abstract ", "protected "));
 
-            sAbstractMethod2 =
-               sAbstractMethod2.replaceAll(TransformerMethod.ANNOTATION_OVERRIDE, "");
+            sAbstractMethod2 = sAbstractMethod2.replaceAll(TransformerMethod.ANNOTATION_OVERRIDE, "");
             sbCode.append(sAbstractMethod2 + "\n");
          }
       }
@@ -492,10 +492,8 @@ public class DtdTransformerHandler
             iBooleanSetResponse = sCode.indexOf("return true", iBooleanSetResponse);
             if (iBooleanSetResponse > 0) {
                // add the validateMethod
-               sCode =
-                  sCode.substring(0, iBooleanSetResponse)
-                        + "validateResponseTraveller();\n        "
-                        + sCode.substring(iBooleanSetResponse);
+               sCode = sCode.substring(0, iBooleanSetResponse) + "validateResponseTraveller();\n        "
+                     + sCode.substring(iBooleanSetResponse);
                // and add the methods
                sCode += appendResponseTraveller();
             }
@@ -503,42 +501,36 @@ public class DtdTransformerHandler
       }
       if (sCode.indexOf("assignResponseSegment") > 0) {
          String sValidateResponseSegment = "";
-         List<String> lst = new ArrayList<String>();
+         List<String> lst = new ArrayList<>();
 
          if (sCode.indexOf("assignResponseSegmentAir") > 0) {
             lst.add("Air");
             sCode += appendResponseSegment("Air", null);
-            sValidateResponseSegment +=
-               "validateResponseSegment(htResSegmentAir, htResObjSegmentsAir);\n        ";
+            sValidateResponseSegment += "validateResponseSegment(htResSegmentAir, htResObjSegmentsAir);\n        ";
          }
          if (sCode.indexOf("assignResponseSegmentCar") > 0) {
             lst.add("Car");
             sCode += appendResponseSegment("Car", null);
-            sValidateResponseSegment +=
-               "validateResponseSegment(htResSegmentCar, htResObjSegmentsCar);\n        ";
+            sValidateResponseSegment += "validateResponseSegment(htResSegmentCar, htResObjSegmentsCar);\n        ";
          }
          if (sCode.indexOf("assignResponseSegmentHotel") > 0) {
             lst.add("Hotel");
             sCode += appendResponseSegment("Hotel", null);
-            sValidateResponseSegment +=
-               "validateResponseSegment(htResSegmentHotel, htResObjSegmentsHotel);\n        ";
+            sValidateResponseSegment += "validateResponseSegment(htResSegmentHotel, htResObjSegmentsHotel);\n        ";
          }
          if (sCode.indexOf("assignResponseSegmentCtwItem") > 0) {
             lst.add("CtwItem");
             sCode += appendResponseSegment("CtwItem", null);
-            sValidateResponseSegment +=
-               "validateResponseSegment(htResSegmentCtwItem, htResObjSegmentsCtwItem);\n        ";
+            sValidateResponseSegment += "validateResponseSegment(htResSegmentCtwItem, htResObjSegmentsCtwItem);\n        ";
          }
          if (sCode.indexOf("assignResponseSegmentRail") > 0) {
             lst.add("Rail");
             sCode += appendResponseSegment("Rail", null);
-            sValidateResponseSegment +=
-               "validateResponseSegment(htResSegmentRail, htResObjSegmentsRail);\n        ";
+            sValidateResponseSegment += "validateResponseSegment(htResSegmentRail, htResObjSegmentsRail);\n        ";
          }
          if (sCode.indexOf("assignResponseSegmentOther") > 0) {
             sCode += appendResponseSegment("Other", lst);
-            sValidateResponseSegment +=
-               "validateResponseSegment(htResSegmentOther, htResObjSegmentsOther);\n        ";
+            sValidateResponseSegment += "validateResponseSegment(htResSegmentOther, htResObjSegmentsOther);\n        ";
          }
 
 
@@ -548,9 +540,7 @@ public class DtdTransformerHandler
             iBooleanSetResponse = sCode.indexOf("return true", iBooleanSetResponse);
             if (iBooleanSetResponse > 0) {
                // add the validateMethod
-               sCode =
-                  sCode.substring(0, iBooleanSetResponse) + sValidateResponseSegment
-                        + sCode.substring(iBooleanSetResponse);
+               sCode = sCode.substring(0, iBooleanSetResponse) + sValidateResponseSegment + sCode.substring(iBooleanSetResponse);
                // and add the methods
                sCode += appendResponseSegment("", null);
             }
@@ -560,20 +550,21 @@ public class DtdTransformerHandler
       return sCode;
    }
 
-   /** 
-    * method appendResponseTraveller 
-    * creates code to correct the for attributes of the arctic response 
-    * 
-    * @return code to correct the for attributes of the arctic response 
-    * 
-    * @author brod 
+   /**
+    * method appendResponseTraveller
+    * creates code to correct the for attributes of the arctic response
+    *
+    * @return code to correct the for attributes of the arctic response
+    *
+    * @author brod
     */
    private String appendResponseTraveller()
    {
       StringBuffer sb = new StringBuffer();
       sb.append("   // private members, to handle Traveller assignments within response  \n");
       sb.append("\n");
-      sb.append("   private TreeMap<Integer, HashSet<PnrElementBase>> htResTraveller = new TreeMap<Integer, HashSet<PnrElementBase>>();\n");
+      sb.append(
+            "   private TreeMap<Integer, HashSet<PnrElementBase>> htResTraveller = new TreeMap<Integer, HashSet<PnrElementBase>>();\n");
       sb.append("   private List<ResponseTraveller> htResObjects = new ArrayList<ResponseTraveller>();\n");
       sb.append("\n");
       sb.append("   /** \n");
@@ -713,16 +704,16 @@ public class DtdTransformerHandler
       return sb.toString();
    }
 
-   /** 
-    * method appendResponseSegment 
-    * creates code to correct the segment attributes of the arctic response 
-    * 
+   /**
+    * method appendResponseSegment
+    * creates code to correct the segment attributes of the arctic response
+    *
     * <p> TODO rename sType to psType, lstTypes to pTypes
-    * @param sType TODO (brod) add text for param sType 
+    * @param sType TODO (brod) add text for param sType
     * @param lstTypes TODO (brod) add text for param lstTypes
-    * @return code to correct the segment attributes of the arctic response 
-    * 
-    * @author brod 
+    * @return code to correct the segment attributes of the arctic response
+    *
+    * @author brod
     */
    private String appendResponseSegment(String sType, List<String> lstTypes)
    {
@@ -732,13 +723,11 @@ public class DtdTransformerHandler
          sb.append("\n");
          sb.append("   private TreeMap<Integer, HashSet<PnrElementBase>> htResSegment" + sType
                + " = new TreeMap<Integer, HashSet<PnrElementBase>>();\n");
-         sb.append("   private List<ResponseSegment> htResObjSegments" + sType
-               + " = new ArrayList<ResponseSegment>();\n");
+         sb.append("   private List<ResponseSegment> htResObjSegments" + sType + " = new ArrayList<ResponseSegment>();\n");
          sb.append("\n");
          sb.append("   private int _iSegmentCounter" + sType + "=0;\n");
          sb.append("   /** \n");
-         sb.append("    * The method assignResponseSegment" + sType
-               + " assigns a pnrElement to an " + sType + "-Id \n");
+         sb.append("    * The method assignResponseSegment" + sType + " assigns a pnrElement to an " + sType + "-Id \n");
          sb.append("    * \n");
          sb.append("    * @param pnrBase The PnrElement\n");
          sb.append("    * \n");
@@ -748,19 +737,16 @@ public class DtdTransformerHandler
          sb.append("   {\n");
          sb.append("      // pnrBase may be assigned only once\n");
          sb.append("      for (int i = 1; i <= _iSegmentCounter" + sType + "; i++) {\n");
-         sb.append("         HashSet<PnrElementBase> lst = htResSegment" + sType
-               + ".get(Integer.valueOf(i));\n");
+         sb.append("         HashSet<PnrElementBase> lst = htResSegment" + sType + ".get(Integer.valueOf(i));\n");
          sb.append("         if ((lst != null) && lst.contains(pnrBase)) {\n");
          sb.append("            // ignore, because PnrElement is already assigned \n");
          sb.append("            return;\n");
          sb.append("         }\n");
          sb.append("      }\n");
 
-         sb.append("      Integer iCustomReferenceNumber" + sType
-               + " = pnrBase.getCustomReferenceNumber();\n");
+         sb.append("      Integer iCustomReferenceNumber" + sType + " = pnrBase.getCustomReferenceNumber();\n");
          sb.append("      if (iCustomReferenceNumber" + sType + " != null) {\n");
-         sb.append("         _iSegmentCounter" + sType + " = iCustomReferenceNumber" + sType
-               + ";\n");
+         sb.append("         _iSegmentCounter" + sType + " = iCustomReferenceNumber" + sType + ";\n");
          sb.append("      } else {\n");
          sb.append("         _iSegmentCounter" + sType + "++;\n");
          sb.append("      }\n");
@@ -775,8 +761,7 @@ public class DtdTransformerHandler
          sb.append("   }\n");
          sb.append("\n");
          sb.append("   /** \n");
-         sb.append("    * The method assignResponseSegment" + sType
-               + " assigns a response object \n");
+         sb.append("    * The method assignResponseSegment" + sType + " assigns a response object \n");
          sb.append("    * to a pnr Element \n");
          sb.append("    * \n");
          sb.append("    * @param pObject The ResponseObject with the method getSegment \n");
@@ -784,21 +769,18 @@ public class DtdTransformerHandler
          sb.append("    * \n");
          sb.append("    * @author _GENERATOR_\n");
          sb.append("    */\n");
-         sb.append("   protected void assignResponseSegment" + sType
-               + "(Object pObject, PnrElementBase pPnrBase)\n");
+         sb.append("   protected void assignResponseSegment" + sType + "(Object pObject, PnrElementBase pPnrBase)\n");
          sb.append("   {\n");
          if (lstTypes == null) {
             sb.append("      if ((pPnrBase != null) && (pObject != null)) {\n");
-            sb.append("         htResObjSegments" + sType
-                  + ".add(new ResponseSegment(pObject, pPnrBase));\n");
+            sb.append("         htResObjSegments" + sType + ".add(new ResponseSegment(pObject, pPnrBase));\n");
          } else {
             sb.append("      if ((pPnrBase != null) && (pObject != null)) {\n");
             if (!lstTypes.contains(sType)) {
                lstTypes.add(sType);
             }
             for (int i = 0; i < lstTypes.size(); i++) {
-               sb.append("         htResObjSegments" + lstTypes.get(i)
-                     + ".add(new ResponseSegment(pObject, pPnrBase));\n");
+               sb.append("         htResObjSegments" + lstTypes.get(i) + ".add(new ResponseSegment(pObject, pPnrBase));\n");
             }
          }
          sb.append("      }\n");
@@ -812,8 +794,7 @@ public class DtdTransformerHandler
          sb.append("    * @param phtResObjSegments List of responseSegments\n");
          sb.append("    * @author _GENERATOR_\n");
          sb.append("    */\n");
-         sb.append("   private void validateResponseSegment(TreeMap<Integer, "
-               + "HashSet<PnrElementBase>> phtResSegment,\n"
+         sb.append("   private void validateResponseSegment(TreeMap<Integer, " + "HashSet<PnrElementBase>> phtResSegment,\n"
                + "        List<ResponseSegment> phtResObjSegments)\n");
          sb.append("   {\n");
          sb.append("      StringBuffer sbAssociations = new StringBuffer(\n");
@@ -834,7 +815,8 @@ public class DtdTransformerHandler
          sb.append("                     && responseItem.pnrBase.getType().equals(base4SegmentId.getType())) {\n");
          sb.append("                  assocElements4SegmentId.addPnrElement(base4SegmentId);\n");
          sb.append("               }\n");
-         sb.append("               for (Enumeration<PnrElementBase> lstOfElements = assocElements4SegmentId.elements(); lstOfElements\n");
+         sb.append(
+               "               for (Enumeration<PnrElementBase> lstOfElements = assocElements4SegmentId.elements(); lstOfElements\n");
          sb.append("                     .hasMoreElements();) {\n");
          sb.append("\n");
          sb.append("                  PnrElementBase assocElement = lstOfElements.nextElement();\n");
@@ -849,7 +831,8 @@ public class DtdTransformerHandler
          sb.append("                              .append(\"associated to \" + assocElement.getShortDump() + \"\\n\");\n");
          sb.append("                     }\n");
          sb.append("                     catch (Exception e) {\n");
-         sb.append("                        // try to use setSegment(String); in case there is already something in the segment\n");
+         sb.append(
+               "                        // try to use setSegment(String); in case there is already something in the segment\n");
          sb.append("                        // attribute, concatenate the values (NMTOKEN)\n");
          sb.append("                        String sNewSegment = segmentId.toString();\n");
          sb.append("                        try {\n");
@@ -857,7 +840,8 @@ public class DtdTransformerHandler
          sb.append("                                 .getClass().getMethod(\"getSegment\", (Class[]) null).invoke(\n");
          sb.append("                                       responseItem.objWithSegmentMethod, (Object[]) null);\n");
          sb.append("                           if (sOldSegment != null) {\n");
-         sb.append("                              if ((\" \" + sOldSegment + \" \").indexOf(\" \" + sNewSegment + \" \") > -1) {\n");
+         sb.append(
+               "                              if ((\" \" + sOldSegment + \" \").indexOf(\" \" + sNewSegment + \" \") > -1) {\n");
          sb.append("                                 sbAssociations.append(\"was already \");\n");
          sb.append("                              } else {\n");
          sb.append("                                 sNewSegment = sOldSegment + \" \" + sNewSegment;\n");
@@ -922,28 +906,25 @@ public class DtdTransformerHandler
       return sb.toString();
    }
 
-   private Hashtable<String, List<String>> _lstNames = new Hashtable<String, List<String>>();
+   private Hashtable<String, List<String>> _lstNames = new Hashtable<>();
 
-   /** 
-    * TODO (brod) add comment for method getClassName 
-    * 
-    * @param psType TODO (brod) add text for param psType 
-    * @return TODO (brod) add text for returnValue 
-    * 
-    * @author brod 
+   /**
+    * TODO (brod) add comment for method getClassName
+    *
+    * @param psType TODO (brod) add text for param psType
+    * @return TODO (brod) add text for returnValue
+    *
+    * @author brod
     */
    public String getClassName(String psType)
    {
-      XmlObject info =
-         _xmlArcticPrnElementInfo.createObject("PnrElementInfo", "type", psType, true);
+      XmlObject info = _xmlArcticPrnElementInfo.createObject("PnrElementInfo", "type", psType, true);
       String sClassName = info.getAttribute("className");
       if (sClassName.length() > 0) {
-         String sDir =
-            _sArcticDir
-                  + sClassName.substring(0, sClassName.lastIndexOf(".")).replaceAll("\\.", "/");
+         String sDir = _sArcticDir + sClassName.substring(0, sClassName.lastIndexOf(".")).replaceAll("\\.", "/");
          List<String> listFiles = _lstNames.get(sDir);
          if (listFiles == null) {
-            listFiles = new ArrayList<String>();
+            listFiles = new ArrayList<>();
             _lstNames.put(sDir, listFiles);
 
             File f = new File(sDir);
@@ -992,43 +973,40 @@ public class DtdTransformerHandler
 //TransformerMethod
 //----------------------------------------------------------------------------
 
-/** 
- * Class TransformerMethod 
- * 
- * <p> 
- * Copyright &copy; 2002, i:FAO, AG. 
- * @author Andreas Brod 
+/**
+ * Class TransformerMethod
+ *
+ * <p>
+ * Copyright &copy; 2002, i:FAO, AG.
+ * @author Andreas Brod
  */
 class TransformerMethod
 {
 
    private String _sType, _sName, _sDeep, _sSourceCode;
    private boolean _bRebookingType = false;
-   private List<String> _pnrElements = new Vector<String>();
+   private List<String> _pnrElements = new Vector<>();
    private TransformerMethod _tmParent;
    private Hashtable<String, String> _abstractMethods;
    private String _sLastSegmentId = "";
 
-   private static final String SUPPRESS_WARNINGS_UNCHECKED =
-      "    @SuppressWarnings(\"unchecked\")\n";
+   private static final String SUPPRESS_WARNINGS_UNCHECKED = "    @SuppressWarnings(\"unchecked\")\n";
    protected static final String ANNOTATION_OVERRIDE = "    @Override\n";
 
-   /** 
-    * Constructor TransformerMethod 
-    * 
-    * @param pDtdTransformerHandler  
-    * @param pParent 
-    * @param psType 
-    * @param psName 
-    * @param psDeep 
-    * @param psSourceCode 
-    * @param pAbstractMethods 
-    * 
+   /**
+    * Constructor TransformerMethod
+    *
+    * @param pDtdTransformerHandler
+    * @param pParent
+    * @param psType
+    * @param psName
+    * @param psDeep
+    * @param psSourceCode
+    * @param pAbstractMethods
+    *
     */
-   protected TransformerMethod(DtdTransformerHandler pDtdTransformerHandler,
-                               TransformerMethod pParent, String psType, String psName,
-                               String psDeep, String psSourceCode,
-                               Hashtable<String, String> pAbstractMethods)
+   protected TransformerMethod(DtdTransformerHandler pDtdTransformerHandler, TransformerMethod pParent, String psType,
+                               String psName, String psDeep, String psSourceCode, Hashtable<String, String> pAbstractMethods)
    {
       _tmParent = pParent;
       _sType = psType;
@@ -1040,31 +1018,31 @@ class TransformerMethod
    }
 
    //--------------------------------------------------------------------------
-   //Attributes        
-   //--------------------------------------------------------------------------        
+   //Attributes
+   //--------------------------------------------------------------------------
 
-   private Hashtable<String, String> _htAttributes = new Hashtable<String, String>();
-   private List<String> _lstAttributeKeys = new Vector<String>();
+   private Hashtable<String, String> _htAttributes = new Hashtable<>();
+   private List<String> _lstAttributeKeys = new Vector<>();
 
-   /** 
-    * Method getAttributeKeys 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getAttributeKeys
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private Iterator<String> getAttributeKeys()
    {
       return _lstAttributeKeys.iterator();
    }
 
-   /** 
-    * Method getAttribute 
-    * 
-    * @param psKey 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getAttribute
+    *
+    * @param psKey
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getAttribute(String psKey)
    {
@@ -1075,13 +1053,13 @@ class TransformerMethod
       return string;
    }
 
-   /** 
-    * Method setAttribute 
-    * 
-    * @param psKey 
-    * @param psValue 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method setAttribute
+    *
+    * @param psKey
+    * @param psValue
+    *
+    * @author Andreas Brod
     */
    private void setAttribute(String psKey, String psValue)
    {
@@ -1093,47 +1071,46 @@ class TransformerMethod
    }
 
    //--------------------------------------------------------------------------
-   //Sub Methods         
-   //--------------------------------------------------------------------------        
-   private Hashtable<String, TransformerMethod> _subMethods =
-      new Hashtable<String, TransformerMethod>();
-   private List<String> _lstSubMethod = new Vector<String>();
+   //Sub Methods
+   //--------------------------------------------------------------------------
+   private Hashtable<String, TransformerMethod> _subMethods = new Hashtable<>();
+   private List<String> _lstSubMethod = new Vector<>();
    private DtdTransformerHandler _dtdTransformerHandler;
    private String _sLastCtwItemId = "";
 
-   /** 
-    * Method getSubMethodKeys 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getSubMethodKeys
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private Iterator<String> getSubMethodKeys()
    {
       return _lstSubMethod.iterator();
    }
 
-   /** 
-    * Method getSubMethod 
-    * 
-    * @param psKey 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getSubMethod
+    *
+    * @param psKey
+    * @return
+    *
+    * @author Andreas Brod
     */
    private TransformerMethod getSubMethod(String psKey)
    {
       return _subMethods.get(psKey);
    }
 
-   /** 
-    * Method getFirstSubMethod 
-    * 
+   /**
+    * Method getFirstSubMethod
+    *
     * <p> TODO rename sKey to psKey
-    * @param sKey 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param sKey
+    * @return
+    *
+    * @author Andreas Brod
     */
    protected TransformerMethod getFirstSubMethod(String sKey)
    {
@@ -1143,17 +1120,16 @@ class TransformerMethod
          }
       }
 
-      return new TransformerMethod(_dtdTransformerHandler, _tmParent, "", "", "", "",
-            _abstractMethods);
+      return new TransformerMethod(_dtdTransformerHandler, _tmParent, "", "", "", "", _abstractMethods);
    }
 
-   /** 
-    * Method setSubMethod 
-    * 
-    * @param psKey 
-    * @param pValue 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method setSubMethod
+    *
+    * @param psKey
+    * @param pValue
+    *
+    * @author Andreas Brod
     */
    private void setSubMethod(String psKey, TransformerMethod pValue)
    {
@@ -1166,30 +1142,30 @@ class TransformerMethod
       }
    }
 
-   /** 
-    * Method isResponse 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method isResponse
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private boolean isResponse()
    {
       return _sType.equals("Res");
    }
 
-   /** 
-    * Method getParameters 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getParameters
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private HashSet<String> getParameters()
    {
       HashSet<String> hsSubElements = isResponse() ? getSubPnrElements() : getParentPnrElements();
 
-      HashSet<String> hsParameters = new HashSet<String>();
+      HashSet<String> hsParameters = new HashSet<>();
 
       for (String sBase : hsSubElements) {
          if (parentContainsPnrElement(sBase)) {
@@ -1200,12 +1176,12 @@ class TransformerMethod
       return hsParameters;
    }
 
-   /** 
-    * Method getMethodHeader 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getMethodHeader
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getMethodHeader(String psFor)
    {
@@ -1227,8 +1203,7 @@ class TransformerMethod
          // PnrElements which are already created (in previous methods)
          // are submitted as parameters
          for (String sBase : hsParameters) {
-            sText.append("     * @param pnr" + sBase
-                  + " related element which is already created.\n");
+            sText.append("     * @param pnr" + sBase + " related element which is already created.\n");
          }
 
          // The returnvalue of a method is the related responseobject
@@ -1264,8 +1239,7 @@ class TransformerMethod
 
             sParams.append("pnr" + sBase);
 
-            sText.append(",\n" + new String(c) + "Element"
-                  + _dtdTransformerHandler.getClassName(sBase) + " pnr" + sBase);
+            sText.append(",\n" + new String(c) + "Element" + _dtdTransformerHandler.getClassName(sBase) + " pnr" + sBase);
          }
 
          sText.append(")\n    {\n");
@@ -1283,8 +1257,7 @@ class TransformerMethod
          if (!_lstSubMethod.contains("ResTag")) {
             if (_sSourceCode.indexOf("ResTag getTag(") > 0) {
                sText.append("        // set the Tag Object by default\n");
-               sText.append("        res" + _sName + ".setTag(getTag(\"" + getMethodName()
-                     + "\"));\n");
+               sText.append("        res" + _sName + ".setTag(getTag(\"" + getMethodName() + "\"));\n");
             }
          }
 
@@ -1299,8 +1272,7 @@ class TransformerMethod
          }
 
          for (String sBase : hsParameters) {
-            sText.append("     * @param pnr" + sBase
-                  + " related element which is already created.\n");
+            sText.append("     * @param pnr" + sBase + " related element which is already created.\n");
          }
          if (psFor.length() > 0) {
             sText.append("     * @param psFor this element is responsible for\n");
@@ -1312,8 +1284,7 @@ class TransformerMethod
          if (!_sName.equals("Person")) {
             sText.append("    private void " + sMethodName + "(Req" + _sName + " " + sReqName + "");
          } else {
-            sText.append("    private void " + sMethodName + "(int piPerson, Req" + _sName + " "
-                  + sReqName + "");
+            sText.append("    private void " + sMethodName + "(int piPerson, Req" + _sName + " " + sReqName + "");
 
          }
 
@@ -1342,9 +1313,9 @@ class TransformerMethod
             sText.append("        // validate if there are userdefined PnrElements\n");
             sText.append("        if (" + sReqName + ".getPnrElements() != null) {\n");
             sText.append("            // loop over all PnrElements\n");
-            sText.append("            ReqPnrElement[] reqPnrElements = " + sReqName
-                  + ".getPnrElements().getPnrElement();\n");
-            sText.append("            for (int iReqPnrElement = 0; iReqPnrElement < reqPnrElements.length; iReqPnrElement++) {\n");
+            sText.append("            ReqPnrElement[] reqPnrElements = " + sReqName + ".getPnrElements().getPnrElement();\n");
+            sText.append(
+                  "            for (int iReqPnrElement = 0; iReqPnrElement < reqPnrElements.length; iReqPnrElement++) {\n");
             sText.append("               _PTD.addPNRElementToPnrElementList(_traveller.userDefinedPnrElement(\n");
             sText.append("                     reqPnrElements[iReqPnrElement], false));\n");
             sText.append("            }\n");
@@ -1362,10 +1333,10 @@ class TransformerMethod
             sText.append("        // validate if there are removeable PnrElements\n");
             sText.append("        if (" + sReqName + ".getRemovePnrElements() != null) {\n");
             sText.append("            // loop over all PnrElements\n");
-            sText.append("            ReqPnrElement[] reqPnrElements = " + sReqName
-                  + ".getRemovePnrElements()\n");
+            sText.append("            ReqPnrElement[] reqPnrElements = " + sReqName + ".getRemovePnrElements()\n");
             sText.append("                    .getPnrElement();\n");
-            sText.append("            for (int iReqPnrElement = 0; iReqPnrElement < reqPnrElements.length; iReqPnrElement++) {\n");
+            sText.append(
+                  "            for (int iReqPnrElement = 0; iReqPnrElement < reqPnrElements.length; iReqPnrElement++) {\n");
             sText.append("                _PTD.addPNRElementToPnrElementList(_traveller.userDefinedPnrElement(\n");
             sText.append("                    reqPnrElements[iReqPnrElement], true));\n");
             sText.append("            }\n");
@@ -1381,9 +1352,8 @@ class TransformerMethod
          }
 
          if (_sSourceCode.indexOf("ReqEnumRebookingType getRebookingType(") > 0) {
-            sText.append("        boolean bKeepSegment = ((" + sReqName
-                  + ".getRebookingType() != null)\n            && (" + sReqName
-                  + ".getRebookingType().equals(ReqEnumRebookingType.OLD_SEGMENT)));\n");
+            sText.append("        boolean bKeepSegment = ((" + sReqName + ".getRebookingType() != null)\n            && ("
+                  + sReqName + ".getRebookingType().equals(ReqEnumRebookingType.OLD_SEGMENT)));\n");
             _bRebookingType = true;
          }
 
@@ -1392,12 +1362,12 @@ class TransformerMethod
       return sText.toString();
    }
 
-   /** 
-    * Method getMethodFooter 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getMethodFooter
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getMethodFooter()
    {
@@ -1415,8 +1385,7 @@ class TransformerMethod
             sText.append("        PnrElementControlAttributes pnrElementControlAttributes =\n");
             sText.append("            new PnrElementControlAttributes();\n");
             sText.append("        pnrElementControlAttributes\n");
-            sText.append("            .setIsActiveElement(" + sReqName + ".getType()==null || "
-                  + sReqName + ".getType()\n");
+            sText.append("            .setIsActiveElement(" + sReqName + ".getType()==null || " + sReqName + ".getType()\n");
             sText.append("                .equals(ReqEnumPnrType.ACTIVE));\n");
             sText.append("        _PTD.getPnrElementList()\n");
             sText.append("            .changeElementControlAttributes(pnrElementControlAttributes);\n");
@@ -1430,14 +1399,14 @@ class TransformerMethod
       return sText.toString();
    }
 
-   /** 
-    * Method assignParameterElements 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
-    * @param sbFor 
-    * @param psFor 
+   /**
+    * Method assignParameterElements
+    *
+    * @return
+    *
+    * @author Andreas Brod
+    * @param sbFor
+    * @param psFor
     */
    private String assignParameterElements(StringBuilder sbFor, String psFor)
    {
@@ -1452,16 +1421,15 @@ class TransformerMethod
       return sText.toString();
    }
 
-   /** 
-    * Method assignElements 
-    * 
-    * @param psBase 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method assignElements
+    *
+    * @param psBase
+    * @return
+    *
+    * @author Andreas Brod
     */
-   private String assignElements(String psBase, StringBuilder sbFor, String psFor,
-                                 boolean pbParameters)
+   private String assignElements(String psBase, StringBuilder sbFor, String psFor, boolean pbParameters)
    {
       StringBuilder sText = new StringBuilder();
 
@@ -1500,8 +1468,7 @@ class TransformerMethod
 
             if (bHasFor) {
                sText.append("        if (" + sMainName + ".hasFor()) {\n");
-               sText.append("            " + sFor + " = String.valueOf(" + sMainName + "."
-                     + "getFor());\n");
+               sText.append("            " + sFor + " = String.valueOf(" + sMainName + "." + "getFor());\n");
             } else {
                sText.append("        if (" + sMainName + ".getFor() != null) {\n");
                sText.append("            " + sFor + " = " + sMainName + "." + "getFor();\n");
@@ -1509,8 +1476,7 @@ class TransformerMethod
             sText.append("        }\n");
          }
          sText.append("        if (" + sFor + " != null) {\n");
-         sText.append("            _traveller.addTravellerAssociation(" + sFor + ", pnr" + psBase
-               + ");\n");
+         sText.append("            _traveller.addTravellerAssociation(" + sFor + ", pnr" + psBase + ");\n");
 
          // sText.append("        } else {\n");
          // sText.append("            _traveller.addTravellerAssociation(\"0\", pnr" + psBase + ");\n");
@@ -1518,8 +1484,7 @@ class TransformerMethod
       } else if (psFor.length() > 0 && !pbParameters) {
          sText.append("        // Assign pnr" + psBase + " to the correct traveller\n");
          sText.append("        if (psFor != null) {\n");
-         sText.append("            _traveller.addTravellerAssociation(psFor , pnr" + psBase
-               + ");\n");
+         sText.append("            _traveller.addTravellerAssociation(psFor , pnr" + psBase + ");\n");
          sText.append("        }\n\n");
 
       }
@@ -1529,34 +1494,28 @@ class TransformerMethod
          // add the Segment (if it is created within this method)
          sText.append("        // Assign pnr" + psBase + " to the correct segment\n");
          sText.append("        if (" + sMainName + ".hasSegment()) {\n");
-         sText.append("            _traveller.addSegmentAssociation(" + getReqEnumSegmentType()
-               + "," + sMainName + ".getSegment(), pnr" + psBase + ");\n        } else {\n");
-         sText.append("            _traveller.addSegmentAssociation(" + getReqEnumSegmentType()
-               + ",0, pnr" + psBase + ");\n");
+         sText.append("            _traveller.addSegmentAssociation(" + getReqEnumSegmentType() + "," + sMainName
+               + ".getSegment(), pnr" + psBase + ");\n        } else {\n");
+         sText.append("            _traveller.addSegmentAssociation(" + getReqEnumSegmentType() + ",0, pnr" + psBase + ");\n");
          sText.append("        }\n");
       } else if (_sName.endsWith("Segment") && !_sName.endsWith("SubSegment")) {
          if (!_sName.startsWith("Cancel")) {
             // add the Segment (if it is created within this method)
             if (!hsParameters.contains(psBase)) {
                if (_sLastSegmentId.length() == 0) {
-                  _sLastSegmentId =
-                     "int iSegmentId = _traveller.getNextSegmentId(" + getReqEnumSegmentType()
-                           + ");";
+                  _sLastSegmentId = "int iSegmentId = _traveller.getNextSegmentId(" + getReqEnumSegmentType() + ");";
                   sText.append("        // get the new SegmentId\n");
                   sText.append("        " + _sLastSegmentId + "\n");
                }
 
                sText.append("        // Assign pnr" + psBase + " to the correct segment\n");
-               sText.append("        _traveller.setSegment(" + getReqEnumSegmentType()
-                     + ",iSegmentId , pnr" + psBase + ");\n\n");
+               sText.append("        _traveller.setSegment(" + getReqEnumSegmentType() + ",iSegmentId , pnr" + psBase + ");\n\n");
             }
          } else {
             // add the Cancel Segment (if it is created within this method)
             if (!hsParameters.contains(psBase)) {
                if (_sLastSegmentId.length() == 0) {
-                  _sLastSegmentId =
-                     "int iSegmentId = _traveller.getNextSegmentId(" + getReqEnumSegmentType()
-                           + ", \"Cancel\");";
+                  _sLastSegmentId = "int iSegmentId = _traveller.getNextSegmentId(" + getReqEnumSegmentType() + ", \"Cancel\");";
                   sText.append("        // get the new SegmentId\n");
                   sText.append("        " + _sLastSegmentId + "\n");
                }
@@ -1568,21 +1527,18 @@ class TransformerMethod
             }
 
          }
-      } else if (_sName.endsWith("CtwItem") && !_sName.endsWith("SubCtwItem")
-            && !_sName.startsWith("Cancel")) {
+      } else if (_sName.endsWith("CtwItem") && !_sName.endsWith("SubCtwItem") && !_sName.startsWith("Cancel")) {
 
          // add the CtwItem (if it is created within this method)
          if (!hsParameters.contains(psBase)) {
             if (_sLastCtwItemId.length() == 0) {
-               _sLastCtwItemId =
-                  "int iCtwItemId = _traveller.getNextSegmentId(" + getReqEnumSegmentType() + ");";
+               _sLastCtwItemId = "int iCtwItemId = _traveller.getNextSegmentId(" + getReqEnumSegmentType() + ");";
                sText.append("        // get the new CtwItemId\n");
                sText.append("        " + _sLastCtwItemId + "\n");
             }
 
             sText.append("        // Assign pnr" + psBase + " to the correct CtwItem\n");
-            sText.append("        _traveller.setSegment(" + getReqEnumSegmentType()
-                  + ",iCtwItemId , pnr" + psBase + ");\n\n");
+            sText.append("        _traveller.setSegment(" + getReqEnumSegmentType() + ",iCtwItemId , pnr" + psBase + ");\n\n");
          }
       }
 
@@ -1590,12 +1546,12 @@ class TransformerMethod
 
    }
 
-   /** 
-    * Method getReqEnumSegmentType 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getReqEnumSegmentType
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getReqEnumSegmentType()
    {
@@ -1628,19 +1584,19 @@ class TransformerMethod
       return "null";
    }
 
-   /** 
-    * Method createElement 
-    * 
+   /**
+    * Method createElement
+    *
     * <p> TODO rename createdElements to pElements
-    * @param psBase 
-    * @param pbCancel 
-    * @param pHsLocalElements 
-    * @param createdElements 
-    * @return 
-    * 
-    * @author Andreas Brod 
-    * @param sbFor 
-    * @param psFor 
+    * @param psBase
+    * @param pbCancel
+    * @param pHsLocalElements
+    * @param createdElements
+    * @return
+    *
+    * @author Andreas Brod
+    * @param sbFor
+    * @param psFor
     */
    private String createElement(String psBase, boolean pbCancel, HashSet<String> pHsLocalElements,
                                 HashSet<String> createdElements, StringBuilder sbFor, String psFor)
@@ -1673,8 +1629,7 @@ class TransformerMethod
             }
          }
 
-         sText.append("        Element" + sClassName + " pnr" + sBase + " = (Element" + sClassName
-               + ")\n");
+         sText.append("        Element" + sClassName + " pnr" + sBase + " = (Element" + sClassName + ")\n");
 
          if (createdElements.size() > 0) {
             sText.append("            (");
@@ -1707,17 +1662,14 @@ class TransformerMethod
       } else if (sBase.length() > 0) {
 
          String sElementName = sClassName;
-         sText.append("\n        Element" + sElementName + " pnr" + sBase + " = (Element"
-               + sElementName + ") _elementFactory\n");
+         sText.append("\n        Element" + sElementName + " pnr" + sBase + " = (Element" + sElementName + ") _elementFactory\n");
          sText.append("            .createPnrElement(PnrEnumPnrElementType." + sBase + ");\n");
-         sText.append("        pnr" + sBase + ".getControlAttributes().setSource("
-               + "EnumPnrElementSource.FIX_CODED);\n");
+         sText.append("        pnr" + sBase + ".getControlAttributes().setSource(" + "EnumPnrElementSource.FIX_CODED);\n");
 
          if (pbCancel) {
             sText.append("\n        // set to deleted because this or parent type\n");
             sText.append("        // starts with 'Cancel'.\n");
-            sText.append("        pnr" + sBase + ".getControlAttributes().setAction("
-                  + "EnumPnrElementAction.DELETE);\n\n");
+            sText.append("        pnr" + sBase + ".getControlAttributes().setAction(" + "EnumPnrElementAction.DELETE);\n\n");
          }
 
          // If the request element contains an attribute of the
@@ -1726,8 +1678,7 @@ class TransformerMethod
          // the method get as actionType EnumPnrElementAction.KEEP.
          if (_bRebookingType) {
             sText.append("\n        if (bKeepSegment) {\n");
-            sText.append("            pnr" + sBase + ".getControlAttributes().setAction("
-                  + "EnumPnrElementAction.KEEP);\n");
+            sText.append("            pnr" + sBase + ".getControlAttributes().setAction(" + "EnumPnrElementAction.KEEP);\n");
             sText.append("        }\n");
 
          }
@@ -1751,20 +1702,20 @@ class TransformerMethod
       return sText.toString();
    }
 
-   /** 
-    * Method callSub 
-    * 
+   /**
+    * Method callSub
+    *
     * <p> TODO rename bChoice to pbChoice
-    * @param psSubElement 
-    * @param pTransformerMethod 
-    * @param pbIsResponse 
-    * @param bChoice 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param psSubElement
+    * @param pTransformerMethod
+    * @param pbIsResponse
+    * @param bChoice
+    * @return
+    *
+    * @author Andreas Brod
     */
-   private String callSub(String psSubElement, TransformerMethod pTransformerMethod,
-                          boolean pbIsResponse, boolean bChoice, String psFor)
+   private String callSub(String psSubElement, TransformerMethod pTransformerMethod, boolean pbIsResponse, boolean bChoice,
+                          String psFor)
    {
       StringBuffer sCode = new StringBuffer();
 
@@ -1807,28 +1758,27 @@ class TransformerMethod
 
          }
       } else {
-         sCode.append(callSubDirect(_sSourceCode, _sName, pTransformerMethod, pbIsResponse,
-               bChoice, psFor));
+         sCode.append(callSubDirect(_sSourceCode, _sName, pTransformerMethod, pbIsResponse, bChoice, psFor));
 
       }
 
       return sCode.toString();
    }
 
-   /** 
-    * Method callSub 
-    * 
+   /**
+    * Method callSub
+    *
     * <p> TODO rename bChoice to pbChoice
-    * @param psSubElement 
-    * @param pTransformerMethod 
-    * @param psAdd 
-    * @param bChoice 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param psSubElement
+    * @param pTransformerMethod
+    * @param psAdd
+    * @param bChoice
+    * @return
+    *
+    * @author Andreas Brod
     */
-   private String callSubListElement(String psSubElement, TransformerMethod pTransformerMethod,
-                                     String psAdd, boolean bChoice, String psFor)
+   private String callSubListElement(String psSubElement, TransformerMethod pTransformerMethod, String psAdd, boolean bChoice,
+                                     String psFor)
    {
       StringBuilder sText = new StringBuilder();
       String psTransform2 = pTransformerMethod.getMethodName();
@@ -1878,26 +1828,22 @@ class TransformerMethod
          String sGetSubElementList = "" + psSubElement + "";
 
          if (bChoice) {
-            sText.append("        // Validate only once, because " + _sName
-                  + " is defined as CHOICE (within dtd)\n");
+            sText.append("        // Validate only once, because " + _sName + " is defined as CHOICE (within dtd)\n");
             sText.append("        if (");
          } else if (!pbAvoidEndlessLoop) {
-            sText.append("        while ((" + psReqName + ".get" + sGetSubElementList
-                  + "Count() < 20000)\n" + "                && ");
+            sText.append(
+                  "        while ((" + psReqName + ".get" + sGetSubElementList + "Count() < 20000)\n" + "                && ");
          } else {
             sText.append("        // Validate only once (to avoid enlessLoop)\n");
-            sText.append("        // because submitted pnrElement is used in " + psTransform2
-                  + "().\n");
+            sText.append("        // because submitted pnrElement is used in " + psTransform2 + "().\n");
             sText.append("        if (");
          }
          psNextSub = new StringBuilder("pnrElements" + psNextSub.toString());
 
-         sText.append("(res" + psSubElement + " = " + psTransform2 + "(" + psAdd + psNextSub
-               + ")) != null) {\n");
+         sText.append("(res" + psSubElement + " = " + psTransform2 + "(" + psAdd + psNextSub + ")) != null) {\n");
          sText.append("            bFound = true;\n");
 
-         sText.append("            " + psReqName + ".add" + sGetSubElementList + "(res"
-               + psSubElement + ");\n");
+         sText.append("            " + psReqName + ".add" + sGetSubElementList + "(res" + psSubElement + ");\n");
          if (bChoice) {
             sText.append("\n            // return " + psReqName + " as CHOICE element\n");
             sText.append("            logEndResponse(\"" + _sName + "\", bFound);\n");
@@ -1908,31 +1854,29 @@ class TransformerMethod
       } else {
          String psReqName = "pReq" + _sName;
 
-         sText.append("        for (int i = 0; i < " + psReqName + ".get" + psSubElement
-               + "Count();i++) {\n");
+         sText.append("        for (int i = 0; i < " + psReqName + ".get" + psSubElement + "Count();i++) {\n");
 
-         sText.append("            " + psTransform2 + "(" + psAdd + psReqName + ".get"
-               + psSubElement + "(i)" + psNextSub + ");\n");
+         sText.append(
+               "            " + psTransform2 + "(" + psAdd + psReqName + ".get" + psSubElement + "(i)" + psNextSub + ");\n");
          sText.append("        }\n");
       }
 
       return sText.toString();
    }
 
-   /** 
-    * Method callSub2 
-    * 
-    * @param psCode 
-    * @param psReqName 
-    * @param pTransformerMethod 
-    * @param pbResponse 
-    * @return 
-    * 
-    * @author Andreas Brod 
-    * @param pbChoice 
+   /**
+    * Method callSub2
+    *
+    * @param psCode
+    * @param psReqName
+    * @param pTransformerMethod
+    * @param pbResponse
+    * @return
+    *
+    * @author Andreas Brod
+    * @param pbChoice
     */
-   private String callSubDirect(String psCode, String psReqName,
-                                TransformerMethod pTransformerMethod, boolean pbResponse,
+   private String callSubDirect(String psCode, String psReqName, TransformerMethod pTransformerMethod, boolean pbResponse,
                                 boolean pbChoice, String psFor)
    {
       StringBuilder sText = new StringBuilder();
@@ -1967,8 +1911,7 @@ class TransformerMethod
          sText.append(");\n\n");
 
          sText.append("        if (res" + psSubElement + " != null) {\n");
-         sText.append("            res" + psReqName + ".set" + psSubElement + "(res" + psSubElement
-               + ");\n");
+         sText.append("            res" + psReqName + ".set" + psSubElement + "(res" + psSubElement + ");\n");
          if (pbChoice) {
             sText.append("            logEndResponse(\"" + psReqName + "\", true);\n");
             sText.append("            // return because choice object found\n");
@@ -1984,11 +1927,9 @@ class TransformerMethod
          }
 
          if (psSubElement.equals("Person")) {
-            sText.append("        " + psTransform2 + "(-1, pReq" + psReqName + ".get"
-                  + psSubElement + "()" + psNextSub + ");\n");
+            sText.append("        " + psTransform2 + "(-1, pReq" + psReqName + ".get" + psSubElement + "()" + psNextSub + ");\n");
          } else {
-            sText.append("        " + psTransform2 + "(pReq" + psReqName + ".get" + psSubElement
-                  + "()" + psNextSub + ");\n");
+            sText.append("        " + psTransform2 + "(pReq" + psReqName + ".get" + psSubElement + "()" + psNextSub + ");\n");
 
          }
       }
@@ -1996,13 +1937,13 @@ class TransformerMethod
       return sText.toString();
    }
 
-   /** 
-    * Method getPnrAttribute 
-    * 
-    * @param psText 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getPnrAttribute
+    *
+    * @param psText
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getPnrAttribute(String psText)
    {
@@ -2011,14 +1952,14 @@ class TransformerMethod
       return psText.substring(psText.lastIndexOf(".") + 1);
    }
 
-   /** 
-    * Method getReqHasMethod 
-    * 
-    * @param psCode 
-    * @param psName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getReqHasMethod
+    *
+    * @param psCode
+    * @param psName
+    * @return
+    *
+    * @author Andreas Brod
     */
    private boolean getReqHasMethod(String psCode, String psName)
    {
@@ -2028,20 +1969,19 @@ class TransformerMethod
       return iStart > 0;
    }
 
-   /** 
-    * Method getMethod 
-    * 
-    * @param psCode 
-    * @param psName 
-    * @param pbResponse 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getMethod
+    *
+    * @param psCode
+    * @param psName
+    * @param pbResponse
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getMethod(String psCode, String psName, boolean pbResponse)
    {
-      String sFind =
-         pbResponse ? " SET" + psName.toUpperCase() + "(" : " GET" + psName.toUpperCase() + "(";
+      String sFind = pbResponse ? " SET" + psName.toUpperCase() + "(" : " GET" + psName.toUpperCase() + "(";
       int iStart = psCode.toUpperCase().indexOf(sFind);
       String sType = "";
 
@@ -2083,8 +2023,7 @@ class TransformerMethod
                }
                return sType + " " + sMethod;
             }
-            return psCode.substring(psCode.lastIndexOf(" ", iStart - 1) + 1,
-                  psCode.indexOf("(", iStart));
+            return psCode.substring(psCode.lastIndexOf(" ", iStart - 1) + 1, psCode.indexOf("(", iStart));
          }
          catch (Exception ex) {}
       }
@@ -2092,27 +2031,27 @@ class TransformerMethod
       return "";
    }
 
-   /** 
-    * Method getPnrAttr 
-    * 
-    * @param psText 
-    * @param pbHasHasMethod 
-    * @param psBase 
-    * @param psType TODO (brod) add text for param psType 
-    * @param psPath 
-    * @param psName 
-    * @param psReqName 
-    * @param psMethod 
-    * @param psPnrAttr 
-    * @param pbResponse 
-    * @param pbSelfDefinedTransformer 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getPnrAttr
+    *
+    * @param psText
+    * @param pbHasHasMethod
+    * @param psBase
+    * @param psType TODO (brod) add text for param psType
+    * @param psPath
+    * @param psName
+    * @param psReqName
+    * @param psMethod
+    * @param psPnrAttr
+    * @param pbResponse
+    * @param pbSelfDefinedTransformer
+    * @return
+    *
+    * @author Andreas Brod
     */
-   private String getPnrAttr(String psText, boolean pbHasHasMethod, String psBase, String psType,
-                             String psPath, String psName, String psReqName, String psMethod,
-                             String psPnrAttr, boolean pbResponse, boolean pbSelfDefinedTransformer)
+   private String getPnrAttr(String psText, boolean pbHasHasMethod, String psBase, String psType, String psPath, String psName,
+                             String psReqName, String psMethod, String psPnrAttr, boolean pbResponse,
+                             boolean pbSelfDefinedTransformer)
    {
       StringBuilder sText = new StringBuilder("\n");
 
@@ -2123,19 +2062,16 @@ class TransformerMethod
          String sType = psType.substring(psType.lastIndexOf(".") + 1);
 
          String sList = psMethod.substring(3);
-         String sException =
-            "            }\n            catch (Exception ex) {\n                logException(\""
-                  + psName + "." + sList + "\", ex);\n" + "            }\n";
-         String sParamValue =
-            psPnrAttr.indexOf("(") > 0 ? psPnrAttr : getParamValue(psBase, psPnrAttr);
+         String sException = "            }\n            catch (Exception ex) {\n                logException(\"" + psName + "."
+               + sList + "\", ex);\n" + "            }\n";
+         String sParamValue = psPnrAttr.indexOf("(") > 0 ? psPnrAttr : getParamValue(psBase, psPnrAttr);
          String sType2 = _dtdTransformerHandler.getAttributeType(psBase, psPnrAttr);
 
          String sHas = "";
          if (sParamValue.startsWith("get")) {
             if (" int float double boolean ".indexOf(sType2) > 0) {
-               sHas =
-                  "            if (pnr" + psBase + ".has" + sParamValue.substring(3)
-                        + ") {\n                // add Param only if exist\n";
+               sHas = "            if (pnr" + psBase + ".has" + sParamValue.substring(3)
+                     + ") {\n                // add Param only if exist\n";
             }
          }
 
@@ -2148,26 +2084,18 @@ class TransformerMethod
             String sRemark = "";
 
             if (sType.equals("void")) {
-               sAdd.append("            if ("
-                     + getResAbstractMethod(psPath, "boolean", psBase, psPnrAttr, psName, psMethod,
-                           true) + ") {\n");
+               sAdd.append("            if (" + getResAbstractMethod(psPath, "boolean", psBase, psPnrAttr, psName, psMethod, true)
+                     + ") {\n");
                sAdd.append("               bFound = true;\n");
                sAdd.append("           }\n");
 
-               sRemark =
-                  "// ... " + psReqName + "." + psMethod + "(" + psBase + "." + psPnrAttr + ")\n";
+               sRemark = "// ... " + psReqName + "." + psMethod + "(" + psBase + "." + psPnrAttr + ")\n";
 
             } else {
-               sAdd.append("            res"
-                     + psName
-                     + ".set"
-                     + sList
-                     + "("
-                     + getResAbstractMethod(psPath, psType, psBase, psPnrAttr, psName, psMethod,
-                           false) + ");\n");
+               sAdd.append("            res" + psName + ".set" + sList + "("
+                     + getResAbstractMethod(psPath, psType, psBase, psPnrAttr, psName, psMethod, false) + ");\n");
 
-               sRemark =
-                  "// ... " + psReqName + "." + psMethod + "(" + psBase + "." + psPnrAttr + ")\n";
+               sRemark = "// ... " + psReqName + "." + psMethod + "(" + psBase + "." + psPnrAttr + ")\n";
             }
 
             if (psText.indexOf(sAdd.toString()) < 0) {
@@ -2190,8 +2118,7 @@ class TransformerMethod
                sText.append("            }\n");
             }
          } else if (sType.equals("String[]")) {
-            sText.append("            while (pnr" + psBase + " != null  && res" + psName + ".get"
-                  + sList + "Count()<2000) {\n");
+            sText.append("            while (pnr" + psBase + " != null  && res" + psName + ".get" + sList + "Count()<2000) {\n");
             sText.append("               res" + psName + ".add" + sList);
             sText.append("(pnr" + psBase + "\n                   ." + sParamValue + ");\n");
             String sCamelCaseBase = Util.camelCase(psBase.toLowerCase());
@@ -2207,8 +2134,8 @@ class TransformerMethod
                sText.append("            res" + psName + ".set" + sList);
             }
 
-            sText.append("(" + (!sType2.equals("String") ? "\"\" + " : "") + "pnr" + psBase
-                  + "\n                ." + sParamValue + ");\n");
+            sText.append("(" + (!sType2.equals("String") ? "\"\" + " : "") + "pnr" + psBase + "\n                ." + sParamValue
+                  + ");\n");
             if (sHas.length() > 0) {
                sText.append("            }\n");
             }
@@ -2216,10 +2143,8 @@ class TransformerMethod
          } else if (sType.startsWith("ResEnum")) {
             sText.append("            try {\n");
             sText.append("              if (pnr" + psBase + "." + sParamValue + " != null) {\n");
-            sText.append("                res" + psName + ".set" + sList + "(" + sType
-                  + ".valueOf(pnr" + psBase + "\n");
-            sText.append("                    ." + sParamValue
-                  + (sType2.equals("String") ? "" : ".toString()") + "));\n");
+            sText.append("                res" + psName + ".set" + sList + "(" + sType + ".valueOf(pnr" + psBase + "\n");
+            sText.append("                    ." + sParamValue + (sType2.equals("String") ? "" : ".toString()") + "));\n");
             sText.append("              }\n");
             sText.append(sException);
          } else if (sType.equals("int")) {
@@ -2227,17 +2152,14 @@ class TransformerMethod
             sText.append("            try {\n");
             if (sType2.equals("String")) {
                sText.append("              if (pnr" + psBase + "." + sParamValue + " != null) {\n");
-               sText.append("                res" + psName + ".set" + sList
-                     + "(Integer.parseInt(pnr" + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "(Integer.parseInt(pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + "));\n");
                sText.append("              }\n");
             } else if (sType2.equals("int")) {
-               sText.append("                res" + psName + ".set" + sList + "(pnr" + psBase
-                     + "\n");
+               sText.append("                res" + psName + ".set" + sList + "(pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + ");\n");
             } else {
-               sText.append("                res" + psName + ".set" + sList + "((int) pnr" + psBase
-                     + "\n");
+               sText.append("                res" + psName + ".set" + sList + "((int) pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + ");\n");
             }
             sText.append(sException);
@@ -2249,17 +2171,14 @@ class TransformerMethod
             sText.append("            try {\n");
             if (sType2.equals("String")) {
                sText.append("              if (pnr" + psBase + "." + sParamValue + " != null) {\n");
-               sText.append("                res" + psName + ".set" + sList + "(Long.parseLong(pnr"
-                     + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "(Long.parseLong(pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + "));\n");
                sText.append("              }\n");
             } else if (sType2.equals("long")) {
-               sText.append("                res" + psName + ".set" + sList + "(pnr" + psBase
-                     + "\n");
+               sText.append("                res" + psName + ".set" + sList + "(pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + ");\n");
             } else {
-               sText.append("                res" + psName + ".set" + sList + "((long) pnr"
-                     + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "((long) pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + ");\n");
             }
             sText.append(sException);
@@ -2272,13 +2191,11 @@ class TransformerMethod
             sText.append("            try {\n");
             if (sType2.equals("String")) {
                sText.append("              if (pnr" + psBase + "." + sParamValue + " != null) {\n");
-               sText.append("                res" + psName + ".set" + sList
-                     + "(Float.parseFloat(pnr" + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "(Float.parseFloat(pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + "));\n");
                sText.append("              }\n");
             } else {
-               sText.append("                res" + psName + ".set" + sList + "((float)pnr"
-                     + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "((float)pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + ");\n");
 
             }
@@ -2292,13 +2209,11 @@ class TransformerMethod
             sText.append("            try {\n");
             if (sType2.equals("String")) {
                sText.append("              if (pnr" + psBase + "." + sParamValue + " != null) {\n");
-               sText.append("                res" + psName + ".set" + sList
-                     + "(Double.parseDouble(pnr" + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "(Double.parseDouble(pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + "));\n");
                sText.append("              }\n");
             } else {
-               sText.append("                res" + psName + ".set" + sList + "((double)pnr"
-                     + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "((double)pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + ");\n");
             }
             sText.append(sException);
@@ -2311,14 +2226,12 @@ class TransformerMethod
             sText.append("            try {\n");
             if (sType2.equals("String")) {
                sText.append("              if (pnr" + psBase + "." + sParamValue + " != null) {\n");
-               sText.append("                res" + psName + ".set" + sList
-                     + "(Short.parseShort(pnr" + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "(Short.parseShort(pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + "));\n");
                sText.append("              }\n");
             } else {
 
-               sText.append("                res" + psName + ".set" + sList + "((short)pnr"
-                     + psBase + "\n");
+               sText.append("                res" + psName + ".set" + sList + "((short)pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + ");\n");
             }
             sText.append(sException);
@@ -2328,46 +2241,36 @@ class TransformerMethod
 
          } else if (psType.equalsIgnoreCase("java.util.Date")) {
             if (sType2.equals("Date")) {
-               sText.append("                res" + psName + ".set" + sList + "(pnr" + psBase
-                     + "\n");
+               sText.append("                res" + psName + ".set" + sList + "(pnr" + psBase + "\n");
                sText.append("                    ." + sParamValue + ");\n");
             } else {
                sText.append("            res" + psName + ".set" + sList + "(pnr" + psBase + "\n");
-               sText.append("                    .getParamValueDate(PnrEnumPnrElementParameterId."
-                     + psPnrAttr + "));\n");
+               sText.append("                    .getParamValueDate(PnrEnumPnrElementParameterId." + psPnrAttr + "));\n");
             }
          } else if (sType.equals("Date")) {
             if (sType2.equals("Date")) {
                sText.append("            try {\n" + "                res" + psName + ".set" + sList
                      + "(new org.exolab.castor.types.Date(pnr" + psBase + "\n");
-               sText.append("                    ." + sParamValue + "));\n"
-                     + "            } catch (Exception e) {\n"
-                     + "               // catch Nullpointer and ParseExceptions\n"
-                     + "            }\n");
+               sText.append("                    ." + sParamValue + "));\n" + "            } catch (Exception e) {\n"
+                     + "               // catch Nullpointer and ParseExceptions\n" + "            }\n");
             } else {
                sText.append("            try {\n" + "                res" + psName + ".set" + sList
-                     + "(new org.exolab.castor.types.Date(net.ifao.util.CommonDate\n"
-                     + "                     .getDate(pnr" + psBase + "."
-                     + getParamValue(psBase, psPnrAttr) + ")));\n"
-                     + "            } catch (Exception e) {\n"
-                     + "               // catch Nullpointer and ParseExceptions\n"
-                     + "            }\n");
+                     + "(new org.exolab.castor.types.Date(net.ifao.util.CommonDate\n" + "                     .getDate(pnr"
+                     + psBase + "." + getParamValue(psBase, psPnrAttr) + ")));\n" + "            } catch (Exception e) {\n"
+                     + "               // catch Nullpointer and ParseExceptions\n" + "            }\n");
             }
          } else if (sType.equals("Duration")) {
             sText.append("            try {\n");
             if (sType2.equals("Duration")) {
-               sText.append("               if (pnr" + psBase + "."
-                     + getParamValue(psBase, psPnrAttr) + " != null) {\n");
-               sText.append("                   res" + psName + ".set" + sList + "(pnr" + psBase
-                     + "." + getParamValue(psBase, psPnrAttr) + ");\n");
+               sText.append("               if (pnr" + psBase + "." + getParamValue(psBase, psPnrAttr) + " != null) {\n");
+               sText.append("                   res" + psName + ".set" + sList + "(pnr" + psBase + "."
+                     + getParamValue(psBase, psPnrAttr) + ");\n");
                sText.append("               }\n");
             } else {
-               sText.append("               if (pnr" + psBase + "."
-                     + getParamValue(psBase, psPnrAttr) + " != null) {\n");
-               sText.append("                   res" + psName + ".set" + sList
-                     + "(new org.exolab.castor.types.Duration(pnr" + psBase + "\n");
-               sText.append("                           ." + getParamValue(psBase, psPnrAttr)
-                     + "));\n");
+               sText.append("               if (pnr" + psBase + "." + getParamValue(psBase, psPnrAttr) + " != null) {\n");
+               sText.append("                   res" + psName + ".set" + sList + "(new org.exolab.castor.types.Duration(pnr"
+                     + psBase + "\n");
+               sText.append("                           ." + getParamValue(psBase, psPnrAttr) + "));\n");
                sText.append("               }\n");
 
             }
@@ -2383,10 +2286,8 @@ class TransformerMethod
             } else {
                sText.append("              if (pnr" + psBase + "." + sParamValue + " != null) {\n");
                sText.append("                res" + psName + ".set" + sList + "(\n");
-               sText.append("                    pnr" + psBase + "." + sParamValue
-                     + ".equalsIgnoreCase(\"yes\") ||\n");
-               sText.append("                    pnr" + psBase + "." + sParamValue
-                     + ".equalsIgnoreCase(\"true\"));\n");
+               sText.append("                    pnr" + psBase + "." + sParamValue + ".equalsIgnoreCase(\"yes\") ||\n");
+               sText.append("                    pnr" + psBase + "." + sParamValue + ".equalsIgnoreCase(\"true\"));\n");
                sText.append("               }\n");
             }
             sText.append(sException);
@@ -2405,8 +2306,8 @@ class TransformerMethod
          }
 
          if (psType.indexOf("ReqEnum") >= 0) {
-            sText.append("        if (" + psReqName + "." + psMethod
-                  + " != null) {\n            // add Param only if exist\n    ");
+            sText.append(
+                  "        if (" + psReqName + "." + psMethod + " != null) {\n            // add Param only if exist\n    ");
             psMethod += ".toString()";
             sClose += "        }\n";
 
@@ -2417,13 +2318,10 @@ class TransformerMethod
                psPnrAttr = psPnrAttr.substring(0, psPnrAttr.length() - 1);
             }
 
-            String sAdd =
-               "        " + getReqAbstractMethod(psPath, psBase, psPnrAttr, psName, psMethod) + "("
-                     + psReqName + (psBase.length() > 0 ? ", pnr" + psBase : "") + ");\n";
+            String sAdd = "        " + getReqAbstractMethod(psPath, psBase, psPnrAttr, psName, psMethod) + "(" + psReqName
+                  + (psBase.length() > 0 ? ", pnr" + psBase : "") + ");\n";
 
-            String sRemark =
-               "// ... set " + psBase + "." + psPnrAttr + " with " + psReqName + "." + psMethod
-                     + "\n";
+            String sRemark = "// ... set " + psBase + "." + psPnrAttr + " with " + psReqName + "." + psMethod + "\n";
 
             if (psText.indexOf(sAdd) < 0) {
                sText.append(sAdd + "        " + sRemark);
@@ -2439,21 +2337,17 @@ class TransformerMethod
                // If there is an assignment of an element (not attribute)
                // to a parameter, the name of the element is written
                // into this parameter.
-               sAdd.append("        pnr"
-                     + psBase
-                     + "."
-                     + setParamValue(psType, psBase, psPnrAttr,
-                           psMethod.substring(0, psMethod.lastIndexOf("\"") + 1)) + ");\n");
+               sAdd.append("        pnr" + psBase + "."
+                     + setParamValue(psType, psBase, psPnrAttr, psMethod.substring(0, psMethod.lastIndexOf("\"") + 1)) + ");\n");
             } else {
                boolean bOk = psType.indexOf("Date") > 0 || psType.indexOf("Duration") > 0;
                if (bOk) {
-                  sAdd.append("        if (" + psReqName + "." + psMethod
-                        + " != null) {\n            // add Param only if exist\n");
+                  sAdd.append(
+                        "        if (" + psReqName + "." + psMethod + " != null) {\n            // add Param only if exist\n");
                   sAdd.append("          try {  \n");
                }
 
-               sAdd.append("          pnr" + psBase + "."
-                     + setParamValue(psType, psBase, psPnrAttr, psReqName + "." + psMethod)
+               sAdd.append("          pnr" + psBase + "." + setParamValue(psType, psBase, psPnrAttr, psReqName + "." + psMethod)
                      + ");\n");
                if (bOk) {
                   sAdd.append("          }\n");
@@ -2464,10 +2358,8 @@ class TransformerMethod
                }
             }
             if (sAdd.indexOf(".parse") > 0) {
-               sAdd =
-                  new StringBuilder("        try {\n  " + sAdd.toString().replaceAll("\\n", "\n  ")
-                        + "      }\n        catch (Exception ex) {\n"
-                        + "          // make nothing\n" + "        }\n");
+               sAdd = new StringBuilder("        try {\n  " + sAdd.toString().replaceAll("\\n", "\n  ")
+                     + "      }\n        catch (Exception ex) {\n" + "          // make nothing\n" + "        }\n");
             }
             sText.append(sAdd);
          }
@@ -2477,14 +2369,14 @@ class TransformerMethod
       return sText.toString();
    }
 
-   /** 
-    * TODO (brod) add comment for method getParamValue 
-    * 
-    * @param psBase TODO (brod) add text for param psBase 
-    * @param psPnrAttr TODO (brod) add text for param psPnrAttr 
-    * @return TODO (brod) add text for returnValue 
-    * 
-    * @author brod 
+   /**
+    * TODO (brod) add comment for method getParamValue
+    *
+    * @param psBase TODO (brod) add text for param psBase
+    * @param psPnrAttr TODO (brod) add text for param psPnrAttr
+    * @return TODO (brod) add text for returnValue
+    *
+    * @author brod
     */
    private String getParamValue(String psBase, String psPnrAttr)
    {
@@ -2496,17 +2388,17 @@ class TransformerMethod
       return sRet;
    }
 
-   /** 
-    * TODO (brod) add comment for method setParamValue 
-    * 
+   /**
+    * TODO (brod) add comment for method setParamValue
+    *
     * <p> TODO rename substring to psSubstring
-    * @param psType TODO (brod) add text for param psType 
-    * @param psBase TODO (brod) add text for param psBase 
-    * @param psPnrAttr TODO (brod) add text for param psPnrAttr 
-    * @param substring TODO (brod) add text for param substring 
-    * @return TODO (brod) add text for returnValue 
-    * 
-    * @author brod 
+    * @param psType TODO (brod) add text for param psType
+    * @param psBase TODO (brod) add text for param psBase
+    * @param psPnrAttr TODO (brod) add text for param psPnrAttr
+    * @param substring TODO (brod) add text for param substring
+    * @return TODO (brod) add text for returnValue
+    *
+    * @author brod
     */
    private String setParamValue(String psType, String psBase, String psPnrAttr, String substring)
    {
@@ -2544,10 +2436,8 @@ class TransformerMethod
                sRet = "set" + sBase + sAttr + "(" + substring;
             }
          } else if (sType2.startsWith("Enum")) {
-            sRet =
-               "set" + sBase + sAttr + "("
-                     + _dtdTransformerHandler.getRealClassName("Element" + sClass) + "." + "Enum"
-                     + sAttr + ".parse(" + substring + ")";
+            sRet = "set" + sBase + sAttr + "(" + _dtdTransformerHandler.getRealClassName("Element" + sClass) + "." + "Enum"
+                  + sAttr + ".parse(" + substring + ")";
          } else if (sType2.equalsIgnoreCase("Date")) {
             if (psType.equalsIgnoreCase("java.util.Date")) {
                sRet = "set" + sBase + sAttr + "(" + substring;
@@ -2562,8 +2452,7 @@ class TransformerMethod
             } else if (psType.equalsIgnoreCase("java.util.Date")) {
 
                sRet = "set" + sBase + sAttr + "(new org.exolab.castor.types.Duration(\n";
-               sRet +=
-                  "              new java.text.SimpleDateFormat(\"'P'yyyy'Y'MM'M'dd'DT'HH'H'mm'M'ss.SSS'S'\").format(\n";
+               sRet += "              new java.text.SimpleDateFormat(\"'P'yyyy'Y'MM'M'dd'DT'HH'H'mm'M'ss.SSS'S'\").format(\n";
                sRet += "                " + substring + "))";
 
                //               sRet = "set" + sBase + sAttr + "(new org.exolab.castor.types.Duration(\n"
@@ -2574,8 +2463,7 @@ class TransformerMethod
 
          } else {
             if (psType.endsWith(".Date")) {
-               sRet =
-                  "set" + sBase + sAttr + "(net.ifao.util.Common.getDateString(" + substring + ")";
+               sRet = "set" + sBase + sAttr + "(net.ifao.util.Common.getDateString(" + substring + ")";
             } else {
                sRet = "set" + sBase + sAttr + "(\"\" + " + substring;
             }
@@ -2584,27 +2472,25 @@ class TransformerMethod
       return sRet;
    }
 
-   /** 
-    * Method getReqAbstractMethod 
-    * 
-    * @param psPath 
-    * @param psBase 
-    * @param psAttr 
-    * @param psRequest 
-    * @param psReqMethod 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getReqAbstractMethod
+    *
+    * @param psPath
+    * @param psBase
+    * @param psAttr
+    * @param psRequest
+    * @param psReqMethod
+    * @return
+    *
+    * @author Andreas Brod
     */
-   private String getReqAbstractMethod(String psPath, String psBase, String psAttr,
-                                       String psRequest, String psReqMethod)
+   private String getReqAbstractMethod(String psPath, String psBase, String psAttr, String psRequest, String psReqMethod)
    {
       if (psAttr.endsWith("()")) {
          psAttr = psAttr.substring(0, psAttr.length() - 2);
       }
 
-      String sMethod =
-         DtdGenerator.getUnFormatedProvider(psBase) + DtdGenerator.getUnFormatedProvider(psAttr);
+      String sMethod = DtdGenerator.getUnFormatedProvider(psBase) + DtdGenerator.getUnFormatedProvider(psAttr);
 
       if (sMethod.length() == 0) {
          sMethod = psPath + psRequest;
@@ -2620,19 +2506,16 @@ class TransformerMethod
          sbText.append("    /**\n");
          sbText.append("     * Method set" + sMethod + "\n");
          sbText.append("     *\n");
-         sbText.append("     * @param " + sReqName + " Request object of type Req" + psRequest
-               + "\n");
+         sbText.append("     * @param " + sReqName + " Request object of type Req" + psRequest + "\n");
 
          if (psBase.length() > 0) {
-            sbText.append("     * @param pBase PnrElementBase of type PnrEnumPnrElementType."
-                  + psBase + "\n");
+            sbText.append("     * @param pBase PnrElementBase of type PnrEnumPnrElementType." + psBase + "\n");
          }
 
          sbText.append("     * @author _GENERATOR_\n");
          sbText.append("     */\n");
          sbText.append(ANNOTATION_OVERRIDE);
-         sbText.append("    protected abstract void set" + sMethod + "(Req" + psRequest + " "
-               + sReqName);
+         sbText.append("    protected abstract void set" + sMethod + "(Req" + psRequest + " " + sReqName);
 
          if (psBase.length() > 0) {
             sbText.append(", PnrElementBase pBase");
@@ -2641,17 +2524,15 @@ class TransformerMethod
          sbText.append(")\n");
          sbText.append("    {\n");
          sbText.append("        /**\n");
-         sbText.append("         * @todo The method set" + sMethod
-               + " has to be modified, because it is defined\n");
+         sbText.append("         * @todo The method set" + sMethod + " has to be modified, because it is defined\n");
          sbText.append("         * as a user defined method within DtdInfo.\n");
          sbText.append("         */\n");
 
          if (psBase.length() > 0) {
-            sbText.append("    } " + DtdTransformerHandler.GENERATED_METHOD + " set" + sMethod
-                  + "(Req" + psRequest + " , PnrElementBase)\n");
+            sbText.append("    } " + DtdTransformerHandler.GENERATED_METHOD + " set" + sMethod + "(Req" + psRequest
+                  + " , PnrElementBase)\n");
          } else {
-            sbText.append("    } " + DtdTransformerHandler.GENERATED_METHOD + " set" + sMethod
-                  + "(Req" + psRequest + " )\n");
+            sbText.append("    } " + DtdTransformerHandler.GENERATED_METHOD + " set" + sMethod + "(Req" + psRequest + " )\n");
          }
          sText = sbText.toString();
       }
@@ -2664,13 +2545,10 @@ class TransformerMethod
 
       if (psAttr.length() > 0) {
          int lastIndexOf = sText.lastIndexOf("}");
-         sText =
-            sText.substring(0, lastIndexOf)
-                  + "    pBase.setParamValue(PnrEnumPnrElementParameterId." + psAttr + ", "
-                  + sReqName + psReqMethod + ");\n    "
-                  + "    getLog().finer(toString() + \" is setting " + psBase + "." + psAttr
-                  + " to \\\"\"\n            + pBase." + getParamValue(psBase, psAttr)
-                  + "\n            + \"\\\"\");\n    " + sText.substring(lastIndexOf);
+         sText = sText.substring(0, lastIndexOf) + "    pBase.setParamValue(PnrEnumPnrElementParameterId." + psAttr + ", "
+               + sReqName + psReqMethod + ");\n    " + "    getLog().finer(toString() + \" is setting " + psBase + "." + psAttr
+               + " to \\\"\"\n            + pBase." + getParamValue(psBase, psAttr) + "\n            + \"\\\"\");\n    "
+               + sText.substring(lastIndexOf);
       }
 
       _abstractMethods.put(sMethod + "." + psRequest, sText);
@@ -2679,22 +2557,22 @@ class TransformerMethod
 
    }
 
-   /** 
-    * Method getResAbstractMethod 
-    * 
-    * @param psPath 
-    * @param psType 
-    * @param psBase 
-    * @param psAttr 
-    * @param psRequest 
-    * @param psReqMethod 
-    * @param pbUpdate 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getResAbstractMethod
+    *
+    * @param psPath
+    * @param psType
+    * @param psBase
+    * @param psAttr
+    * @param psRequest
+    * @param psReqMethod
+    * @param pbUpdate
+    * @return
+    *
+    * @author Andreas Brod
     */
-   private String getResAbstractMethod(String psPath, String psType, String psBase, String psAttr,
-                                       String psRequest, String psReqMethod, boolean pbUpdate)
+   private String getResAbstractMethod(String psPath, String psType, String psBase, String psAttr, String psRequest,
+                                       String psReqMethod, boolean pbUpdate)
    {
       String sType = psType;
       if (sType.indexOf(".") > 0) {
@@ -2714,13 +2592,12 @@ class TransformerMethod
          sbText.append("     *\n");
 
          if (pbUpdate) {
-            sbText.append("     * @param p" + psReqMethod + " " + psReqMethod
-                  + "-Element which has to be modified." + psBase + "\n");
+            sbText.append(
+                  "     * @param p" + psReqMethod + " " + psReqMethod + "-Element which has to be modified." + psBase + "\n");
          }
 
          if (psBase.length() > 0) {
-            sbText.append("     * @param " + sReqName
-                  + " PnrElementBase of type PnrEnumPnrElementType." + psBase + "\n");
+            sbText.append("     * @param " + sReqName + " PnrElementBase of type PnrEnumPnrElementType." + psBase + "\n");
          }
          sbText.append("     * @return " + psType + " object\n");
          sbText.append("     * @author _GENERATOR_\n");
@@ -2745,31 +2622,25 @@ class TransformerMethod
          sbText.append(sParameters + ")\n");
          sbText.append("    {\n");
          sbText.append("        /**\n");
-         sbText.append("         * @todo The method  " + sMethodName
-               + " has to be modified, because it is defined\n");
+         sbText.append("         * @todo The method  " + sMethodName + " has to be modified, because it is defined\n");
          sbText.append("         * as a user defined method within DtdInfo.\n");
          sbText.append("         */\n");
          sbText.append("        throw new UnsupportedOperationException(\n");
          sbText.append("            \"Method " + sMethodName + "() not implemented\");\n");
-         sbText.append("    } " + DtdTransformerHandler.GENERATED_METHOD + " " + sMethodName + "("
-               + sParameters + " )\n");
+         sbText.append("    } " + DtdTransformerHandler.GENERATED_METHOD + " " + sMethodName + "(" + sParameters + " )\n");
          sText = sbText.toString();
       }
 
       String sExample = "";
 
       if (psAttr.length() > 0) {
-         sExample =
-            sReqName + "." + psReqMethod + "(getParamValue(PnrEnumPnrElementParameterId." + psAttr
-                  + "));";
+         sExample = sReqName + "." + psReqMethod + "(getParamValue(PnrEnumPnrElementParameterId." + psAttr + "));";
       } else if (!pbUpdate) {
          sExample = "return new " + psType + "();";
       }
 
       int lastIndexOf = sText.lastIndexOf("}");
-      sText =
-         sText.substring(0, lastIndexOf) + "    // " + sExample + "\n    "
-               + sText.substring(lastIndexOf);
+      sText = sText.substring(0, lastIndexOf) + "    // " + sExample + "\n    " + sText.substring(lastIndexOf);
 
       _abstractMethods.put(sMethod + "." + psRequest, sText);
 
@@ -2802,12 +2673,12 @@ class TransformerMethod
 
    }
 
-   /** 
-    * Method getContent 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getContent
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getContent()
    {
@@ -2899,15 +2770,15 @@ class TransformerMethod
       //      return sCode;
    }
 
-   /** 
-    * Method getAttributes 
-    * 
+   /**
+    * Method getAttributes
+    *
     * <p> TODO rename htAttr to pAttr
-    * @param sCode 
-    * @param htAttr 
-    * @return 
-    * 
-    * @author Andreas Brod 
+    * @param sCode
+    * @param htAttr
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getAttributes(String psCode, Hashtable<String, String> htAttr)
    {
@@ -2926,27 +2797,20 @@ class TransformerMethod
             sArcticElement = sArcticElement.substring(0, sArcticElement.length() - 1);
             sPnrAttribute = getAttribute(sArcticElement);
             if (sPnrAttribute.indexOf(")") > 0) {
-               String sException =
-                  sPnrAttribute.substring(sPnrAttribute.indexOf("(") + 1,
-                        sPnrAttribute.indexOf(")"));
+               String sException = sPnrAttribute.substring(sPnrAttribute.indexOf("(") + 1, sPnrAttribute.indexOf(")"));
                sPnrAttribute = sPnrAttribute.substring(sPnrAttribute.indexOf(")") + 1);
                sbCode.append("        // " + sArcticElement + " is defined as mandatory\n");
-               String sMethod =
-                  getMethod(_sSourceCode, getPnrAttribute(sArcticElement), pbResponse).trim();
+               String sMethod = getMethod(_sSourceCode, getPnrAttribute(sArcticElement), pbResponse).trim();
                if (sMethod.indexOf(" get") >= 0) {
                   sMethod = sMethod.substring(sMethod.indexOf(" ") + 4);
                   if (getReqHasMethod(_sSourceCode, getPnrAttribute(sArcticElement))) {
                      sbCode.append("        if (!" + sMainName + ".has" + sMethod + "()) {\n");
                   } else {
-                     sbCode.append("        if (" + sMainName + ".get" + sMethod
-                           + "() == null) {\n");
+                     sbCode.append("        if (" + sMainName + ".get" + sMethod + "() == null) {\n");
                   }
                   sbCode.append("            throw new net.ifao.arctic.agents.common.elements.MandatoryException(\n"
-                        + "                 \""
-                        + _sName
-                        + "."
-                        + sMethod
-                        + " is defined as mandatory (within DTDInfo)\", " + sException + ");\n");
+                        + "                 \"" + _sName + "." + sMethod + " is defined as mandatory (within DTDInfo)\", "
+                        + sException + ");\n");
                   sbCode.append("        }\n");
                }
             }
@@ -2982,11 +2846,9 @@ class TransformerMethod
                   sMethod += "()";
                }
 
-               boolean bSelfDefinedTransformer =
-                  sPnrAttribute.endsWith("*") || sPnrAttribute.endsWith("*.");
+               boolean bSelfDefinedTransformer = sPnrAttribute.endsWith("*") || sPnrAttribute.endsWith("*.");
 
-               StringTokenizer st =
-                  new StringTokenizer(sPnrAttribute, DtdTransformerHandler.ATTRIBUTEMASK);
+               StringTokenizer st = new StringTokenizer(sPnrAttribute, DtdTransformerHandler.ATTRIBUTEMASK);
 
                while (st.hasMoreTokens()) {
                   String sToken = st.nextToken();
@@ -3014,19 +2876,16 @@ class TransformerMethod
                      }
 
                      if (sPnrAttr.length() > 0) {
-                        sAttr +=
-                           getPnrAttr(sAttr, hasHasMethod, sBase, sType, psPath, _sName, sMainName,
-                                 sMethod, sPnrAttr, pbResponse, bSelfDefinedTransformer);
+                        sAttr += getPnrAttr(sAttr, hasHasMethod, sBase, sType, psPath, _sName, sMainName, sMethod, sPnrAttr,
+                              pbResponse, bSelfDefinedTransformer);
 
                         htAttr.put(sBase, sAttr);
 
                      } else {
                         if (sAttribute.equals("*")) {
 
-                           sAttr +=
-                              getPnrAttr(sAttr, hasHasMethod, sBase, "void", psPath, _sName,
-                                    sMainName, sMethod, sPnrAttr, pbResponse,
-                                    bSelfDefinedTransformer);
+                           sAttr += getPnrAttr(sAttr, hasHasMethod, sBase, "void", psPath, _sName, sMainName, sMethod, sPnrAttr,
+                                 pbResponse, bSelfDefinedTransformer);
 
                            htAttr.put(sBase, sAttr);
 
@@ -3034,27 +2893,22 @@ class TransformerMethod
 
                            if (bSelfDefinedTransformer) {
                               sAttr += "            try {\n  ";
-                              sAttr +=
-                                 getPnrAttr(sAttr, hasHasMethod, sBase, sType, psPath, _sName,
-                                       sMainName, sMethod, "getForFromCorrespondingTraveller()",
-                                       pbResponse, bSelfDefinedTransformer);
+                              sAttr += getPnrAttr(sAttr, hasHasMethod, sBase, sType, psPath, _sName, sMainName, sMethod,
+                                    "getForFromCorrespondingTraveller()", pbResponse, bSelfDefinedTransformer);
 
                               sAttr += "            }\n            catch (Exception ex) {\n";
                               sAttr += "                res" + _sName + ".setFor(1);\n";
                               sAttr += "            }\n";
                            } else {
 
-                              sAttr +=
-                                 "\n            assignResponseTraveller(res" + _sName + "" + ",pnr"
-                                       + sBase + ");\n";
+                              sAttr += "\n            assignResponseTraveller(res" + _sName + "" + ",pnr" + sBase + ");\n";
                            }
                            htAttr.put(sBase, sAttr);
 
                         } else if (pbResponse && sAttribute.equals("segment")) {
 
-                           sAttr +=
-                              "\n            assignResponseSegment" + getType(_sName + psPath)
-                                    + "(res" + _sName + "" + ",pnr" + sBase + ");\n";
+                           sAttr += "\n            assignResponseSegment" + getType(_sName + psPath) + "(res" + _sName + ""
+                                 + ",pnr" + sBase + ");\n";
                            htAttr.put(sBase, sAttr);
 
                         }
@@ -3077,10 +2931,8 @@ class TransformerMethod
             // replace all bFound = true;
 
             String sMethodCode = sbCode.substring(sbCode.lastIndexOf("*/"));
-            sbCode =
-               new StringBuilder(sbCode.substring(0, sbCode.lastIndexOf("*/"))
-                     + sMethodCode.replaceAll("bFound = true",
-                           "// bFound will be set within attributes"));
+            sbCode = new StringBuilder(sbCode.substring(0, sbCode.lastIndexOf("*/"))
+                  + sMethodCode.replaceAll("bFound = true", "// bFound will be set within attributes"));
 
             for (String sPnrElement : htAttr.keySet()) {
 
@@ -3092,12 +2944,11 @@ class TransformerMethod
                }
 
                if (sMethodCode.indexOf("(int piPersonId,") > 0) {
-                  sbCode.append("            assignResponseTraveller(piPersonId, pnr"
-                        + sPnrElementName + ");\n\n");
+                  sbCode.append("            assignResponseTraveller(piPersonId, pnr" + sPnrElementName + ");\n\n");
                }
                if (sMethodCode.indexOf("Segment(") > 0 && sMethodCode.indexOf("SubSegment(") < 0) {
-                  sbCode.append("            assignResponseSegment" + getType(_sName + psPath)
-                        + "(pnr" + sPnrElementName + ");\n\n");
+                  sbCode.append(
+                        "            assignResponseSegment" + getType(_sName + psPath) + "(pnr" + sPnrElementName + ");\n\n");
                }
 
                String sAttr = htAttr.get(sPnrElement);
@@ -3121,13 +2972,13 @@ class TransformerMethod
       return sbCode.toString();
    }
 
-   /** 
-    * TODO (brod) add comment for method getType 
-    * 
-    * @param psPath TODO (brod) add text for param psPath 
-    * @return TODO (brod) add text for returnValue 
-    * 
-    * @author brod 
+   /**
+    * TODO (brod) add comment for method getType
+    *
+    * @param psPath TODO (brod) add text for param psPath
+    * @return TODO (brod) add text for returnValue
+    *
+    * @author brod
     */
    private String getType(String psPath)
    {
@@ -3157,27 +3008,27 @@ class TransformerMethod
       return "Other";
    }
 
-   /** 
-    * Method getMethodName 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getMethodName
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    protected String getMethodName()
    {
       return (_sType.startsWith("Res") ? "get" : "add") + getName();
    }
 
-   /** 
-    * Method getSubMethod 
-    * 
-    * @param psType 
-    * @param psName 
-    * @param psSourceCode 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getSubMethod
+    *
+    * @param psType
+    * @param psName
+    * @param psSourceCode
+    * @return
+    *
+    * @author Andreas Brod
     */
    protected TransformerMethod getSubMethod(String psType, String psName, String psSourceCode)
    {
@@ -3185,8 +3036,7 @@ class TransformerMethod
 
       if (subMethod == null) {
          subMethod =
-            new TransformerMethod(_dtdTransformerHandler, this, psType, psName, _sDeep + "  ",
-                  psSourceCode, _abstractMethods);
+            new TransformerMethod(_dtdTransformerHandler, this, psType, psName, _sDeep + "  ", psSourceCode, _abstractMethods);
 
          setSubMethod(psType + psName, subMethod);
       }
@@ -3194,14 +3044,14 @@ class TransformerMethod
       return subMethod;
    }
 
-   /** 
-    * Method addAttribute 
-    * 
+   /**
+    * Method addAttribute
+    *
     * <p> TODO rename sName to psName, sValue to psValue
-    * @param sName 
-    * @param sValue 
-    * 
-    * @author Andreas Brod 
+    * @param sName
+    * @param sValue
+    *
+    * @author Andreas Brod
     */
    protected void addAttribute(String sName, String sValue)
    {
@@ -3225,14 +3075,14 @@ class TransformerMethod
       }
    }
 
-   /** 
-    * TODO (brod) add comment for method contains 
-    * 
+   /**
+    * TODO (brod) add comment for method contains
+    *
     * @param pLstElements TODO (brod) add text for param pLstElements
     * @param psItem TODO (brod) add text for param psItem
     * @return TODO (brod) add text for returnValue
-    * 
-    * @author brod 
+    *
+    * @author brod
     */
    private boolean contains(List<String> pLstElements, String psItem)
    {
@@ -3255,25 +3105,25 @@ class TransformerMethod
       return false;
    }
 
-   /** 
-    * Method getName 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getName
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private String getName()
    {
       return (_tmParent != null ? _tmParent.getName() : "") + _sName;
    }
 
-   /** 
-    * Method parentContainsPnrElement 
-    * 
-    * @param psElement 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method parentContainsPnrElement
+    *
+    * @param psElement
+    * @return
+    *
+    * @author Andreas Brod
     */
    private boolean parentContainsPnrElement(String psElement)
    {
@@ -3288,17 +3138,17 @@ class TransformerMethod
       return false;
    }
 
-   /** 
-    * Method parentContainsPnrElement 
-    * 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method parentContainsPnrElement
+    *
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private HashSet<String> getSubPnrElements()
    {
-      HashSet<String> hsElements = new HashSet<String>();
+      HashSet<String> hsElements = new HashSet<>();
 
       for (String element1 : _pnrElements) {
          if (element1.trim().length() > 0) {
@@ -3317,16 +3167,16 @@ class TransformerMethod
       return hsElements;
    }
 
-   /** 
-    * Method getParentPnrElements 
-    * 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getParentPnrElements
+    *
+    * @return
+    *
+    * @author Andreas Brod
     */
    private HashSet<String> getParentPnrElements()
    {
-      HashSet<String> hsElements = new HashSet<String>();
+      HashSet<String> hsElements = new HashSet<>();
 
       if (_tmParent != null) {
 
@@ -3343,12 +3193,12 @@ class TransformerMethod
       return hsElements;
    }
 
-   /** 
-    * Method toSourceCode 
-    * 
+   /**
+    * Method toSourceCode
+    *
     * @return SourceCode
-    * 
-    * @author Andreas Brod 
+    *
+    * @author Andreas Brod
     */
    public String toSourceCode(String psFor)
    {
@@ -3372,7 +3222,7 @@ class TransformerMethod
       boolean firstElement = true;
 
       HashSet<String> localElements = getParameters();
-      HashSet<String> createdElements = new HashSet<String>();
+      HashSet<String> createdElements = new HashSet<>();
       String sChoice = "";
 
       // create new Pnr Elements
@@ -3385,9 +3235,8 @@ class TransformerMethod
                firstElement = false;
             }
 
-            sbCurrentMethod.append(createElement(element,
-                  _sName.startsWith("Cancel") && !_sName.startsWith("Cancellation"), localElements,
-                  createdElements, sbFor, psFor));
+            sbCurrentMethod.append(createElement(element, _sName.startsWith("Cancel") && !_sName.startsWith("Cancellation"),
+                  localElements, createdElements, sbFor, psFor));
          }
       }
 
@@ -3396,7 +3245,7 @@ class TransformerMethod
       }
       firstElement = true;
 
-      Hashtable<String, String> htAttr = new Hashtable<String, String>();
+      Hashtable<String, String> htAttr = new Hashtable<>();
 
       // Display the attributes
       sbCurrentMethod = new StringBuilder(getAttributes(sbCurrentMethod.toString(), htAttr));
@@ -3423,8 +3272,7 @@ class TransformerMethod
             firstElement = false;
          }
 
-         sbCurrentMethod.append(callSub(element.substring(3), value, isResponse(),
-               sChoice.length() > 0, sbFor.toString()));
+         sbCurrentMethod.append(callSub(element.substring(3), value, isResponse(), sChoice.length() > 0, sbFor.toString()));
       }
 
       sbCurrentMethod.append(getContent());
@@ -3469,30 +3317,24 @@ class TransformerMethod
       if (iPos > 0) {
          int iStart = sRet.indexOf("bKeepSegment", iPos + 20);
          if (iStart < 0) {
-            sRet =
-               sRet.substring(0, iPos) + "// Rebook Segment"
-                     + sRet.substring(sRet.indexOf(";", iPos) + 1);
+            sRet = sRet.substring(0, iPos) + "// Rebook Segment" + sRet.substring(sRet.indexOf(";", iPos) + 1);
          }
       }
       return sRet;
    }
 
-   /** 
-    * Method removeUnnecessarySuppressWarningsAnnotation 
-    * 
-    * @param psbRet TODO (brod) add text for param psbRet 
-    * 
-    * @author kaufmann 
+   /**
+    * Method removeUnnecessarySuppressWarningsAnnotation
+    *
+    * @param psbRet TODO (brod) add text for param psbRet
+    *
+    * @author kaufmann
     */
    private void removeUnnecessarySuppressWarningsAnnotation(StringBuilder psbRet)
    {
-      if (psbRet.indexOf(SUPPRESS_WARNINGS_UNCHECKED) >= 0
-            && !psbRet.toString().matches("(?s).*res.*\\.add\\(res.*?\\).*")) {
+      if (psbRet.indexOf(SUPPRESS_WARNINGS_UNCHECKED) >= 0 && !psbRet.toString().matches("(?s).*res.*\\.add\\(res.*?\\).*")) {
          String sNew =
-            psbRet.toString()
-                  .replaceFirst(
-                        SUPPRESS_WARNINGS_UNCHECKED.replaceAll("\\(", "\\\\(").replaceAll("\\)",
-                              "\\\\)"), "");
+            psbRet.toString().replaceFirst(SUPPRESS_WARNINGS_UNCHECKED.replaceAll("\\(", "\\\\(").replaceAll("\\)", "\\\\)"), "");
          psbRet.setLength(0);
          psbRet.append(sNew);
       }
