@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: IfaoPlugin
 Bundle-SymbolicName: net.ifao.plugin; singleton:=true 
-Bundle-Version: 2.1.18
+Bundle-Version: 2.1.19
 Bundle-Activator: ifaoplugin.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -77,22 +78,12 @@ public class TestcaseRunner
 
             List<File> classesFolder = ClassPathBuilder.getClassesFolders(project);
 
-            File baseFolder = new File(sBase);
-            try {
-               baseFolder = baseFolder.getCanonicalFile();
-            }
-            catch (IOException e1) {
-               // TODO Auto-generated catch block
-               e1.printStackTrace();
-            }
+            File baseFolder = getBaseFolder(sBase);
 
             Set<String> duplicate = new HashSet<>();
 
             String sClassPaths = classesFolder.stream().distinct().filter(f -> f.isDirectory() || duplicate.add(f.getName()))
-                  .map(f -> f.getAbsolutePath()).collect(Collectors.joining(";"));
-
-            sClassPaths =
-               sClassPaths.replace(baseFolder.getAbsolutePath(), ".").replace(baseFolder.getParentFile().getAbsolutePath(), "..");
+                  .map(f -> getRelativePath(f, baseFolder)).collect(Collectors.joining(";"));
 
             if (!classesFolder.stream().filter(f -> f.isDirectory()
                   && new File(f, "net/ifao/" + TestcaseData._sBaseDir4Components + "/framework/TestCaseRunner.class").exists())
@@ -106,8 +97,12 @@ public class TestcaseRunner
                try {
                   File workDir = baseFolder.getCanonicalFile();
 
-                  String sCommand = "@echo off\ncd \"" + workDir.getCanonicalPath() + "\"\njava -classpath \"" + sClassPaths
-                        + "\" " + "net.ifao." + TestcaseData._sBaseDir4Components + ".framework.TestCaseRunner " + "ui=text test="
+                  String canonicalPath = workDir.getCanonicalPath();
+                  String sCommand = "@echo off\n"
+                        + (canonicalPath.length() > 2 && canonicalPath.charAt(1) == ':' ? canonicalPath.substring(0, 2) + "\n"
+                              : "")
+                        + "cd \"" + canonicalPath + "\"\njava -classpath \"" + sClassPaths + "\" " + "net.ifao."
+                        + TestcaseData._sBaseDir4Components + ".framework.TestCaseRunner " + "ui=text test="
                         + sFile2Run.substring(sFile2Run.indexOf("/net/ifao/arctic/agents/") + 24) + "";
 
                   File f = JUnitWait.getTempFile("RunJUnitTest.bat");
@@ -153,6 +148,48 @@ public class TestcaseRunner
       }
    }
 
+
+   private File getBaseFolder(String sBase)
+   {
+      File baseFolder = new File(sBase);
+      try {
+         return baseFolder.getCanonicalFile();
+      }
+      catch (IOException e1) {
+         // should not happen ... use default file in this case
+      }
+      return baseFolder;
+   }
+
+
+   private static String getRelativePath(File f, File baseFolder)
+   {
+      Path pathBase;
+      Path pathFile;
+      try {
+         pathBase = baseFolder.getCanonicalFile().toPath();
+         pathFile = f.getCanonicalFile().toPath();
+      }
+      catch (IOException e) {
+         // CanonicalFile failed
+         pathBase = baseFolder.toPath();
+         pathFile = f.toPath();
+      }
+      String path = pathBase.relativize(pathFile).toString();
+      String pathFileString = pathFile.toString();
+      if (pathFileString.length() <= path.length()) {
+         return pathFileString;
+      }
+
+      return path;
+   }
+
+   public static void main(String[] args)
+   {
+      File f1 = new File("c:\\tmp\\eas\\old");
+      File base = new File("c:\\tmp\\eas\\hello");
+      System.out.println(getRelativePath(f1, base));
+   }
 
    private String getFilesOfDir(File f, String sPre)
    {
