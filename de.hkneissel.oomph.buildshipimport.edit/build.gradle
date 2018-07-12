@@ -1,5 +1,4 @@
 apply plugin: eclipsebuild.BundlePlugin
-apply plugin: 'eclipse'
 
 sourceSets {
    main {
@@ -17,14 +16,8 @@ eclipse {
         buildCommand 'org.eclipse.pde.SchemaBuilder'
     }  
 
-    classpath {
-        
-        containers 'org.eclipse.pde.core.requiredPlugins'
-
-        file.whenMerged { 
-                classpath ->
-                    classpath.entries.removeAll { entry -> entry.kind == 'con' && entry.path == 'org.eclipse.buildship.core.gradleclasspathcontainer' 
-            }
-        }
-    }
+ classpath {
+     
+     // containers 'org.eclipse.pde.core.requiredPlugins'
+}
 }

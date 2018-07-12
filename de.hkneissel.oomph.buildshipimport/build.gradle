@@ -1,11 +1,16 @@
 apply plugin: eclipsebuild.BundlePlugin
-apply plugin: 'eclipse'
 
 sourceSets {
    main {
       java { srcDirs = ['src'] }
    }
 }
+
+
+dependencies {
+    compile withEclipseBundle("org.eclipse.swt.${ECLIPSE_WS}.${ECLIPSE_OS}.${ECLIPSE_ARCH}")
+}
+
 
 eclipse {
   
@@ -15,10 +20,10 @@ eclipse {
 
       buildCommand 'org.eclipse.pde.ManifestBuilder'
       buildCommand 'org.eclipse.pde.SchemaBuilder'
-   }  
+   }
 
    classpath {
 
-      containers 'org.eclipse.pde.core.requiredPlugins'
+      // containers 'org.eclipse.pde.core.requiredPlugins'
    }
 }

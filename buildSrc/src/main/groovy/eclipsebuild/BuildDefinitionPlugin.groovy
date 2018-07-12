@@ -105,6 +105,8 @@ class BuildDefinitionPlugin implements Plugin<Project> {
             closure.call()
             // convert GStrings to Strings in the versionMapping key to avoid lookup misses
             versionMapping = versionMapping.collectEntries { k, v -> [k.toString(), v]}
+
+            println "\n" + eclipseVersion + "\n" + targetDefinition + "\n" + versionMapping
         }
     }
 

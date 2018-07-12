@@ -20,6 +20,9 @@ class DependencyUtils {
         // for the argument it returns eclipse:pluginName:versionNumber
         // otherwise it returns eclipse:pluginName:+
         def mappedVersion = mappedVersion(project, pluginName)
+
+         println "" + project + "/" + pluginName + " -> " + mappedVersion
+
         def version = mappedVersion == null ? "${minimumVersion}+" : mappedVersion
         project.logger.debug("Plugin $pluginName mapped to version $version")
         "${Constants.mavenizedEclipsePluginGroupName}:${pluginName}:${version}"

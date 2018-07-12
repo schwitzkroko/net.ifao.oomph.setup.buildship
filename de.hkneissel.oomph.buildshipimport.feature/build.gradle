@@ -1,6 +1,4 @@
 apply plugin: eclipsebuild.FeaturePlugin
-apply plugin: 'eclipse'
-
 
 eclipse {
   project {
