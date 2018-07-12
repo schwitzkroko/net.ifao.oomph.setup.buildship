@@ -2,8 +2,9 @@ import eclipsebuild.*
 
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '4.8.1'
+   gradleVersion = '4.8.1'
 }
+
 
 apply plugin: eclipsebuild.BuildDefinitionPlugin
 apply plugin: 'eclipse'
@@ -11,7 +12,6 @@ apply plugin: 'eclipse'
 
 ext.toolingCommonsBundleVersion = getBundleVersion(toolingCommonsVersion)
 ext.toolingApiBundleVersion = getBundleVersion(toolingApiVersion)
-
 
 def oomphDependencies = [
   'org.eclipse.oomph.base'                    : '1.9.0',
@@ -157,9 +157,8 @@ def getBundleVersion(String version) {
    }
 }
 
-
 eclipse {
-    project {
-        name = 'de.hkneissel.oomph.buildshipimport.ROOT'
-    }
+   project {
+      name = 'de.hkneissel.oomph.buildshipimport.ROOT'
+   }
 }
