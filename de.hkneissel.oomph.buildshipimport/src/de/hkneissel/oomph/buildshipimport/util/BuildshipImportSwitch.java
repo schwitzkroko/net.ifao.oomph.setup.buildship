@@ -135,8 +135,3 @@ public class BuildshipImportSwitch<T>
    }
  }
 
-
-/* Location:              C:\Users\fliedner\Desktop\buildship-import-4-oomph-8.0.0\plugins\de.hkneissel.oomph.buildshipimport_0.7.0.201604211538.jar!\de\hkneissel\oomph\buildshipimport\util\BuildshipImportSwitch.class
- * Java compiler version: 7 (51.0)
- * JD-Core Version:       0.7.1
- */

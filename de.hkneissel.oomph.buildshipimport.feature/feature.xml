@@ -12,7 +12,7 @@
 <feature
       id="de.hkneissel.oomph.buildshipimport"
       label="%featureName"
-      version="0.5.3.qualifier"
+      version="1.0.0.snapshot"
       provider-name="%providerName">
 
    <description>
