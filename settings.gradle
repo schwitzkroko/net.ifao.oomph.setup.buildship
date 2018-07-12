@@ -1,0 +1,4 @@
+include ':de.hkneissel.oomph.buildshipimport'
+include ':de.hkneissel.oomph.buildshipimport.edit'
+include ':de.hkneissel.oomph.buildshipimport-feature'
+include ':de.hkneissel.oomph.buildshipimport.site'
