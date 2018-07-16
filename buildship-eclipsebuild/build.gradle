@@ -1,0 +1,105 @@
+task wrapper(type: Wrapper) {
+   gradleVersion = '4.8.1'
+}
+
+buildscript  {
+   repositories {
+      // local .m2 folder in user directory
+      mavenLocal()
+      
+      // for all internal and public gradle plug-ins use a NON-PCI-DSS complaint URL (group)
+      maven {
+         url 'https://nexus.secure.ifao.net:8443/repository/ifao-buildtool_gradle-public-maven2/'
+      }
+   }
+
+   dependencies {
+      classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1' // for maven-publish-auth
+   }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'maven' // for task install
+apply plugin: 'maven-publish' // for task publish
+apply plugin: 'maven-publish-auth' // for task publish reading ~/.m2/settings.xml
+
+
+group = 'net.ifao.3rdparty.eclipse'
+version = '1.0.0-SNAPSHOT'
+
+
+repositories {
+    // local .m2 folder in user directory
+    mavenLocal()
+    
+    // for all internal and public gradle plug-ins use a NON-PCI-DSS complaint URL (group)
+    maven {
+        url 'https://nexus.secure.ifao.net:8443/repository/ifao-buildtool_gradle-public-maven2/'
+    }
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'nu.studer:java-ordered-properties:1.0.1'
+    compile 'org.apache.maven:maven-ant-tasks:2.1.3'
+    compile 'bcel:bcel:5.1'
+}
+
+task sourcesJar(type: Jar) {
+   description = 'generate a jar file with the source code'
+   
+   classifier = 'sources'
+   from sourceSets.main.allSource
+}
+
+publishing {
+   publications {
+      mavenJava(MavenPublication) {
+         from components.java
+         
+         // resolves the artifact tasks
+         artifact sourcesJar
+      }
+   }
+   
+   repositories {
+      // Nexus upload URL's for Jenkins
+      if (project.version.endsWith('SNAPSHOT')) {
+         maven {
+            name = 'nexus-secure-arctic-repositories'
+            url 'https://nexus.secure.ifao.net:8443/repository/ifao-buildtool_gradle-snapshot-maven2/'
+         }
+      } else {
+         maven {
+            name = 'nexus-secure-arctic-repositories'
+            url 'https://nexus.secure.ifao.net:8443/repository/ifao-buildtool_gradle-release-maven2/'
+         }
+      }
+   }
+}
+
+eclipse {
+   classpath {
+      if (project.hasProperty('downloadJavadoc')) {
+         downloadJavadoc = project.ext.downloadJavadoc
+      } else {
+         downloadJavadoc = true
+      }
+
+      if (project.hasProperty('downloadSources')) {
+         downloadSources = project.ext.downloadSources
+      } else {
+         downloadSources = true
+      }
+   }
+}
+
+afterEvaluate {
+   logger.quiet '------------------------------------------------'
+   logger.quiet project.group + ":" + archivesBaseName + ":" + project.version
+   logger.quiet '------------------------------------------------'
+}
