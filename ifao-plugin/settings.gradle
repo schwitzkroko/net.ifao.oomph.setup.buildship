@@ -1,2 +1,5 @@
-include 'ifaoFeature'
-include 'ifaoPlugin'
+// include 'ifaoPlugin'
+include 'net.ifao.plugin'
+// include 'ifaoFeature
+include 'net.ifao.plugin
+include 'net.ifao.dite'
