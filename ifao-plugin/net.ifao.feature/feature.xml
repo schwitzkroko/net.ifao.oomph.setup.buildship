@@ -1,47 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- don't modify the feature's version attribute as it will be replaced by the build -->
 <feature
-      id="org.eclipse.buildship"
+      id="net.ifao.feature"
       label="%featureName"
-      version="1.0.0.qualifier"
+      version="2.2.0.snapshot"
       provider-name="%providerName"
-      plugin="org.eclipse.buildship.branding">
+      plugin="net.ifao.plugin">
 
-   <description>
+   <description url="%descriptionUrl>
       %description
    </description>
 
-   <copyright>
+   <copyright url="%copyrightUrl">
       %copyright
    </copyright>
 
    <license url="%licenseUrl">
       %license
+
    </license>
 
-   <plugin
-         id="org.eclipse.buildship.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+   <url>
+      <update label="Local iFAO Update Site for Eclipse" url="file:/H:/cytric_development/new-arctic/Tools/Eclipse/Updates3.4"/>
+      <discovery label="Local Update Site for Eclipse 3.4 features" url="file:/H:/cytric_development/new-arctic/Tools/Eclipse/Updates3.4"/>
+   </url>
+
+   <!-- <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+   </requires> -->
 
    <plugin
-         id="org.eclipse.buildship.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.buildship.branding"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.buildship.stsmigration"
+         id="net.ifao.plugin"
          download-size="0"
          install-size="0"
          version="0.0.0"
