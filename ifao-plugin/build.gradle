@@ -1,46 +1,30 @@
-plugins {
-    id 'com.jfrog.bintray' version '0.4.1'
+ptask wrapper(type: Wrapper) {
+   gradleVersion = '4.8.1'
 }
 
+buildscript {
 
-task wrapper(type: Wrapper) {
-   gradleVersion = '4.8.1'
+   repositories {
+      mavenLocal()
+      
+      // for all internal and public gradle plug-ins use a NON-PCI-DSS complaint URL (group)
+      maven {
+         url "${repositoryManagerURL}/ifao-buildtool_gradle-maven2/"
+      }
+      maven {
+         url "${repositoryManagerURL}/ifao-buildtool_gradle-public-maven2/"
+      }
+   }
+
+   dependencies {
+      classpath "net.ifao.3rdparty.eclipse:buildship-eclipsebuild:1.0.0-SNAPSHOT"
+   }
 }
 
 
 apply plugin: eclipsebuild.BuildDefinitionPlugin
 apply plugin: 'eclipse'
 
-
-ext.toolingCommonsBundleVersion = getBundleVersion(toolingCommonsVersion)
-ext.toolingApiBundleVersion = getBundleVersion(toolingApiVersion)
-
-def oomphDependencies = [
-   'org.eclipse.oomph.base'                    : '1.9.0',
-   'org.eclipse.oomph.base.edit'               : '1.9.0',
-   'org.eclipse.oomph.setup'                   : '1.9.0',
-   'org.eclipse.oomph.setup.edit'              : '1.9.0',
- ]
- def buildshipDependencies = [
-   'org.eclipse.buildship.core'                : '2.2.1'
- ]
-
-// define version mapping for the 3rd-party dependencies that are not specific to a particular Eclipse version
-def eclipseVersionAgnosticDependencies = [
-    'com.gradleware.tooling.utils'          : toolingCommonsBundleVersion,
-    'com.gradleware.tooling.client'         : toolingCommonsBundleVersion,
-    'com.gradleware.tooling.model'          : toolingCommonsBundleVersion,
-    'org.gradle.toolingapi'                 : toolingApiBundleVersion,
-    'org.slf4j.api'                         : '1.7.2',
-    'org.slf4j.simple'                      : '1.7.2',
-    'com.google.guava'                      : '15.0.0',
-    'com.google.gson'                       : '2.7.0',
-    'org.apache.log4j'                      : '1.2.15',
-    'org.eclipse.swtbot.eclipse.finder'     : '2.2.1',
-    'org.eclipse.swtbot.junit4_x'           : '2.2.1',
-    'org.jetbrains.kotlin.bundled-compiler' : '0.8.2',
-    'org.jetbrains.kotlin.core'             : '0.8.2'
-]
 
 eclipseBuild {
   defaultEclipseVersion = '48'
@@ -76,7 +60,7 @@ eclipseBuild {
       'org.eclipse.ui.views'                  : '3.9.0',
       'org.eclipse.ui.workbench.texteditor'   : '3.10.100',
       'org.junit'                             : '4.12.0'
-    ] + eclipseVersionAgnosticDependencies // + oomphDependencies + buildshipDependencies
+    ] // + eclipseVersionAgnosticDependencies // + oomphDependencies + buildshipDependencies
   }
 
   targetPlatform {
@@ -112,7 +96,7 @@ eclipseBuild {
       'org.eclipse.ui.workbench'              : '3.111.0',
       'org.eclipse.ui.workbench.texteditor'   : '3.11.0',
       'org.junit'                             : '4.12.0'
-    ] + eclipseVersionAgnosticDependencies + oomphDependencies + buildshipDependencies
+    ] // + eclipseVersionAgnosticDependencies + oomphDependencies + buildshipDependencies
   }
 }
 
