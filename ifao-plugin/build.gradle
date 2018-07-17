@@ -1,28 +1,187 @@
+plugins {
+    id 'com.jfrog.bintray' version '0.4.1'
+}
+
+
+task wrapper(type: Wrapper) {
+   gradleVersion = '4.8.1'
+}
+
+
+apply plugin: eclipsebuild.BuildDefinitionPlugin
 apply plugin: 'eclipse'
 
-// deactivate sorting of classpath ... use the same classpath independant from pathname 
-tasks.eclipseProject.doFirst {
-	def props = new Properties()
-	File f = file('.settings/gradle/org.springsource.ide.eclipse.gradle.core.prefs');
-	if (f.exists()) {
-		f.withInputStream {stream -> props.load(stream)}
-	}
-	if (!'false'.equals(props.getProperty('org.springsource.ide.eclipse.gradle.classpath.enableSorting'))) {
-		props.setProperty('org.springsource.ide.eclipse.gradle.classpath.enableSorting', 'false')
-		f.withOutputStream {
-			stream -> props.store(stream, null)
-			println 'update of settings file '+f
-		}	
-	}
+
+ext.toolingCommonsBundleVersion = getBundleVersion(toolingCommonsVersion)
+ext.toolingApiBundleVersion = getBundleVersion(toolingApiVersion)
+
+def oomphDependencies = [
+   'org.eclipse.oomph.base'                    : '1.9.0',
+   'org.eclipse.oomph.base.edit'               : '1.9.0',
+   'org.eclipse.oomph.setup'                   : '1.9.0',
+   'org.eclipse.oomph.setup.edit'              : '1.9.0',
+ ]
+ def buildshipDependencies = [
+   'org.eclipse.buildship.core'                : '2.2.1'
+ ]
+
+// define version mapping for the 3rd-party dependencies that are not specific to a particular Eclipse version
+def eclipseVersionAgnosticDependencies = [
+    'com.gradleware.tooling.utils'          : toolingCommonsBundleVersion,
+    'com.gradleware.tooling.client'         : toolingCommonsBundleVersion,
+    'com.gradleware.tooling.model'          : toolingCommonsBundleVersion,
+    'org.gradle.toolingapi'                 : toolingApiBundleVersion,
+    'org.slf4j.api'                         : '1.7.2',
+    'org.slf4j.simple'                      : '1.7.2',
+    'com.google.guava'                      : '15.0.0',
+    'com.google.gson'                       : '2.7.0',
+    'org.apache.log4j'                      : '1.2.15',
+    'org.eclipse.swtbot.eclipse.finder'     : '2.2.1',
+    'org.eclipse.swtbot.junit4_x'           : '2.2.1',
+    'org.jetbrains.kotlin.bundled-compiler' : '0.8.2',
+    'org.jetbrains.kotlin.core'             : '0.8.2'
+]
+
+eclipseBuild {
+  defaultEclipseVersion = '48'
+
+  final def swtPluginId = "org.eclipse.swt.${ECLIPSE_WS}.${ECLIPSE_OS}.${ECLIPSE_ARCH}"
+
+  targetPlatform {
+    eclipseVersion = '47'
+    targetDefinition = file('tooling-e47.target')
+    versionMapping = [
+      "$swtPluginId"                          : '3.106.1',
+      'com.ibm.icu'                           : '58.2.0',
+      'org.eclipse.core.expressions'          : '3.6.0',
+      'org.eclipse.core.filesystem'           : '1.7.0',
+      'org.eclipse.core.net'                  : '1.3.100',
+      'org.eclipse.core.resources'            : '3.12.0',
+      'org.eclipse.core.runtime'              : '3.13.0',
+      'org.eclipse.core.variables'            : '3.4.0',
+      'org.eclipse.debug.core'                : '3.11.0',
+      'org.eclipse.debug.ui'                  : '3.12.50',
+      'org.eclipse.help'                      : '3.8.1',
+      'org.eclipse.jdt.core'                  : '3.11.0',
+      'org.eclipse.jdt.junit.core'            : '3.9.50',
+      'org.eclipse.jdt.launching'             : '3.9.50',
+      'org.eclipse.jdt.ui'                    : '3.13.50',
+      'org.eclipse.jface.databinding'         : '1.8.100',
+      'org.eclipse.jface.text'                : '3.12.0',
+      'org.eclipse.ui'                        : '3.109.0',
+      'org.eclipse.ui.console'                : '3.7.1',
+      'org.eclipse.ui.editors'                : '3.11.0',
+      'org.eclipse.ui.ide'                    : '3.13.1',
+      'org.eclipse.ui.navigator'              : '3.7.0',
+      'org.eclipse.ui.views'                  : '3.9.0',
+      'org.eclipse.ui.workbench.texteditor'   : '3.10.100',
+      'org.junit'                             : '4.12.0'
+    ] + eclipseVersionAgnosticDependencies // + oomphDependencies + buildshipDependencies
+  }
+
+  targetPlatform {
+    eclipseVersion = '48'
+    targetDefinition = file('tooling-e48.target')
+    versionMapping = [
+      "$swtPluginId"                          : '3.107.0',
+      'org.eclipse.swt'                       : '3.107.0',
+      'org.eclipse.emf.ecore'                 : '2.14.0',
+      'org.eclipse.emf.edit'                  : '2.13.0',
+      'com.ibm.icu'                           : '58.2.0',
+      'org.eclipse.core.expressions'          : '3.6.100',
+      'org.eclipse.core.filesystem'           : '1.7.100',
+      'org.eclipse.core.net'                  : '1.3.200',
+      'org.eclipse.core.resources'            : '3.13.0',
+      'org.eclipse.core.runtime'              : '3.14.0',
+      'org.eclipse.core.variables'            : '3.4.100',
+      'org.eclipse.debug.core'                : '3.12.0',
+      'org.eclipse.debug.ui'                  : '3.13.0',
+      'org.eclipse.help'                      : '3.8.100',
+      'org.eclipse.jdt.core'                  : '3.14.0',
+      'org.eclipse.jdt.junit.core'            : '3.10.0',
+      'org.eclipse.jdt.launching'             : '3.10.0',
+      'org.eclipse.jdt.ui'                    : '3.14.0',
+      'org.eclipse.jface.databinding'         : '1.8.200',
+      'org.eclipse.jface.text'                : '3.13.0',
+      'org.eclipse.ui'                        : '3.109.100',
+      'org.eclipse.ui.console'                : '3.8.0',
+      'org.eclipse.ui.editors'                : '3.11.100',
+      'org.eclipse.ui.ide'                    : '3.14.0',
+      'org.eclipse.ui.navigator'              : '3.7.100',
+      'org.eclipse.ui.views'                  : '3.9.100',
+      'org.eclipse.ui.workbench'              : '3.111.0',
+      'org.eclipse.ui.workbench.texteditor'   : '3.11.0',
+      'org.junit'                             : '4.12.0'
+    ] + eclipseVersionAgnosticDependencies + oomphDependencies + buildshipDependencies
+  }
 }
 
-// check each time for new versions (default would be 24 hours)
-allprojects {
-	configurations.all {	
-		resolutionStrategy {		
-			cacheChangingModulesFor 1, 'seconds'		
-			cacheDynamicVersionsFor 1, 'seconds'		
-		}	
-	} 
+version = '1.0.0.snapshot'
+
+subprojects {
+    version = rootProject.version
+
+   apply plugin: 'eclipse'
+
+    plugins.withType(JavaPlugin) {
+      sourceCompatibility = 1.8
+      targetCompatibility = 1.8
+   }
+
+
+    // configure the repositories where the external dependencies can be found
+    repositories {
+
+      maven {
+         name = 'mavenized-target-platform'
+         url "${eclipsebuild.Config.on(project).mavenizedTargetPlatformDir}"
+      }
+
+      // maven {
+      //     name = 'gradle-snapshots'
+      //     url gradleSnapshotsRepositoryUrl
+      // }
+
+      maven {
+         name = 'gradle-releases'
+         url gradleReleasesRepositoryUrl
+      }
+
+      // maven {
+      //    name = 'gradle-remote'
+      //     url gradleRemoteRepositoryUrl
+      // }
+    }
 }
 
+
+tasks.withType(eclipsebuild.DownloadEclipseSdkTask) {
+   def os = org.gradle.internal.os.OperatingSystem.current()
+   def arch = System.getProperty("os.arch").contains("64") ? "64" : "32"
+   if (os.windows) {
+       downloadUrl = "http://builds.gradle.org:8000/eclipse/sdk/eclipse-sdk-4.4.2-windows-${arch}.zip"
+   } else if (os.macOsX) {
+       downloadUrl = "http://builds.gradle.org:8000/eclipse/sdk/eclipse-sdk-4.4.2-macosx-${arch}.tar.gz"
+   } else if (os.linux) {
+       downloadUrl = "http://builds.gradle.org:8000/eclipse/sdk/eclipse-sdk-4.4.2-linux-${arch}.tar.gz"
+   }
+}
+
+
+def getBundleVersion(String version) {
+   def matcher = version =~ /(\d+)\.(\d+)(?:-.*|\.(\d+)(?:-.*)?)?/
+   if (matcher.matches()) {
+      def major = matcher.group(1)
+      def minor = matcher.group(2)
+      def service = matcher.group(3) ?: '0'
+      return "$major.$minor.$service"
+   } else {
+      throw new IllegalArgumentException("Invalid bundle version: $version")
+   }
+}
+
+eclipse {
+   project {
+      name = 'de.hkneissel.oomph.buildshipimport.ROOT'
+   }
+}
