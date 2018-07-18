@@ -38,7 +38,7 @@ def eclipseVersionAgnosticDependencies = [
 ]
 
 eclipseBuild {
-  defaultEclipseVersion = '47'
+  defaultEclipseVersion = '48'
 
   final def swtPluginId = "org.eclipse.swt.${ECLIPSE_WS}.${ECLIPSE_OS}.${ECLIPSE_ARCH}"
 

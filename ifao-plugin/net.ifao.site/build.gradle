@@ -9,6 +9,7 @@ buildscript {
 }
 
 updateSite {
+   extraResources = files('p2.index')
 //    extraResources = files('epl-v10.html', 'notice.html', 'p2.index')
 //    signing { File unsignedFolder, File signedFolder ->
 //        if (gradle.taskGraph.hasTask(uploadUpdateSite)) {
@@ -17,9 +18,9 @@ updateSite {
 //            signLocally(unsignedFolder, signedFolder)
 //        }
 //    }
-    mutateArtifactsXml { Node artifactsXml ->
-        addExtraPropertiesToArtifactsXml(artifactsXml)
-    }
+   mutateArtifactsXml { Node artifactsXml ->
+      addExtraPropertiesToArtifactsXml(artifactsXml)
+   }
 }
 
 remotes {
