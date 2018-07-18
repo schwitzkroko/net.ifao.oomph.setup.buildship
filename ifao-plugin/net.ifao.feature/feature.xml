@@ -6,7 +6,7 @@
       provider-name="%providerName"
       plugin="net.ifao.plugin">
 
-   <description url="%descriptionUrl>
+   <description url="%descriptionUrl">
       %description
    </description>
 

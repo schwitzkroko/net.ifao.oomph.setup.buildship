@@ -1,7 +1,3 @@
-ptask wrapper(type: Wrapper) {
-   gradleVersion = '4.8.1'
-}
-
 buildscript {
 
    repositories {
@@ -21,13 +17,28 @@ buildscript {
    }
 }
 
+task wrapper(type: Wrapper) {
+   gradleVersion = '4.8.1'
+}
+
 
 apply plugin: eclipsebuild.BuildDefinitionPlugin
 apply plugin: 'eclipse'
 
 
+// define version mapping for the 3rd-party dependencies that are not specific to a particular Eclipse version
+def eclipseVersionAgnosticDependencies = [
+    'org.slf4j.api'                         : '1.7.2',
+    'org.slf4j.simple'                      : '1.7.2',
+    'com.google.guava'                      : '15.0.0',
+    'com.google.gson'                       : '2.7.0',
+    'org.apache.log4j'                      : '1.2.15',
+    'org.eclipse.swtbot.eclipse.finder'     : '2.2.1',
+    'org.eclipse.swtbot.junit4_x'           : '2.2.1',
+]
+
 eclipseBuild {
-  defaultEclipseVersion = '48'
+  defaultEclipseVersion = '47'
 
   final def swtPluginId = "org.eclipse.swt.${ECLIPSE_WS}.${ECLIPSE_OS}.${ECLIPSE_ARCH}"
 
@@ -35,7 +46,8 @@ eclipseBuild {
     eclipseVersion = '47'
     targetDefinition = file('tooling-e47.target')
     versionMapping = [
-      "$swtPluginId"                          : '3.106.1',
+      "$swtPluginId"                          : '3.106.3',
+      'org.eclipse.jgit'                      : '4.9.2', // !!!!
       'com.ibm.icu'                           : '58.2.0',
       'org.eclipse.core.expressions'          : '3.6.0',
       'org.eclipse.core.filesystem'           : '1.7.0',
@@ -46,10 +58,10 @@ eclipseBuild {
       'org.eclipse.debug.core'                : '3.11.0',
       'org.eclipse.debug.ui'                  : '3.12.50',
       'org.eclipse.help'                      : '3.8.1',
-      'org.eclipse.jdt.core'                  : '3.11.0',
+      'org.eclipse.jdt.core'                  : '3.13.102',
       'org.eclipse.jdt.junit.core'            : '3.9.50',
       'org.eclipse.jdt.launching'             : '3.9.50',
-      'org.eclipse.jdt.ui'                    : '3.13.50',
+      'org.eclipse.jdt.ui'                    : '3.13.100',
       'org.eclipse.jface.databinding'         : '1.8.100',
       'org.eclipse.jface.text'                : '3.12.0',
       'org.eclipse.ui'                        : '3.109.0',
@@ -60,7 +72,7 @@ eclipseBuild {
       'org.eclipse.ui.views'                  : '3.9.0',
       'org.eclipse.ui.workbench.texteditor'   : '3.10.100',
       'org.junit'                             : '4.12.0'
-    ] // + eclipseVersionAgnosticDependencies // + oomphDependencies + buildshipDependencies
+    ] + eclipseVersionAgnosticDependencies
   }
 
   targetPlatform {
@@ -68,6 +80,7 @@ eclipseBuild {
     targetDefinition = file('tooling-e48.target')
     versionMapping = [
       "$swtPluginId"                          : '3.107.0',
+      'org.eclipse.jgit'                      : '5.0.0', // !!!!
       'org.eclipse.swt'                       : '3.107.0',
       'org.eclipse.emf.ecore'                 : '2.14.0',
       'org.eclipse.emf.edit'                  : '2.13.0',
@@ -96,7 +109,7 @@ eclipseBuild {
       'org.eclipse.ui.workbench'              : '3.111.0',
       'org.eclipse.ui.workbench.texteditor'   : '3.11.0',
       'org.junit'                             : '4.12.0'
-    ] // + eclipseVersionAgnosticDependencies + oomphDependencies + buildshipDependencies
+    ]  + eclipseVersionAgnosticDependencies
   }
 }
 
@@ -120,21 +133,6 @@ subprojects {
          name = 'mavenized-target-platform'
          url "${eclipsebuild.Config.on(project).mavenizedTargetPlatformDir}"
       }
-
-      // maven {
-      //     name = 'gradle-snapshots'
-      //     url gradleSnapshotsRepositoryUrl
-      // }
-
-      maven {
-         name = 'gradle-releases'
-         url gradleReleasesRepositoryUrl
-      }
-
-      // maven {
-      //    name = 'gradle-remote'
-      //     url gradleRemoteRepositoryUrl
-      // }
     }
 }
 
@@ -166,6 +164,6 @@ def getBundleVersion(String version) {
 
 eclipse {
    project {
-      name = 'de.hkneissel.oomph.buildshipimport.ROOT'
+      name = 'net.ifao.ROOT'
    }
 }
