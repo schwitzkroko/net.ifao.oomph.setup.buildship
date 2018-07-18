@@ -6,6 +6,10 @@ buildscript  {
    repositories {
       mavenLocal()
       
+      // for all internal and public gradle plug-ins use a NON-PCI-DSS complaint URL (group)
+      maven {
+         url "${repositoryManagerURL}/ifao-buildtool_gradle-maven2/"
+      }
       maven {
          url "${repositoryManagerURL}/ifao-buildtool_gradle-public-maven2/"
       }
@@ -40,12 +44,34 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'nu.studer:java-ordered-properties:1.0.1'
-    compile 'org.apache.maven:maven-ant-tasks:2.1.3'
-    compile 'bcel:bcel:5.1'
+   compile gradleApi()
+   compile localGroovy()
+
+
+   // compile fileTree(dir: 'libs', include: ['*.jar'])
+   
+   // lib/org.eclipse.osgi_3.10.1.v20140909-1633.jar ->
+   // compile'org.eclipse.tycho:org.eclipse.osgi:3.10.101.v20150820-1432'
+   
+   // lib/org.eclipse.osgi.compatibility.state_1.0.1.v20140709-1414.jar ->
+   compile 'org.eclipse.tycho:org.eclipse.osgi.compatibility.state:1.0.200.v20160504-1419'
+   
+   // lib/org.eclipse.jdt.junit.core_3.7.300.v20140409-1618.jar ->
+   compile 'org.eclipse.jdt:org.eclipse.jdt.junit.core:3.8.0'
+
+   // lib/org.eclipse.equinox.common_3.6.200.v20130402-1505.jar ->
+   // compile group: 'org.eclipse.equinox', name: 'org.eclipse.equinox.common', version: '3.6.0.v20100503'
+   
+   // lib/org.eclipse.equinox.common_3.6.200.v20130402-1505.jar ->
+   // compile 'org.eclipse.platform:org.eclipse.equinox.common:3.8.0'
+
+   // lib/org.eclipse.core.runtime_3.9.100.v20131218-1515.jar ->
+   // compile group: 'org.eclipse.core', name: 'org.eclipse.core.runtime', version: '3.7.0'
+
+    
+   compile 'nu.studer:java-ordered-properties:1.0.1'
+   compile 'org.apache.maven:maven-ant-tasks:2.1.3'
+   compile 'bcel:bcel:5.1'
 }
 
 gradlePlugin {
