@@ -1,9 +1,26 @@
-import eclipsebuild.*
+buildscript {
 
+   repositories {
+      mavenLocal()
+      
+      // for all internal and public gradle plug-ins use a NON-PCI-DSS complaint URL (group)
+      maven {
+         url "${repositoryManagerURL}/ifao-buildtool_gradle-maven2/"
+      }
+      maven {
+         url "${repositoryManagerURL}/ifao-buildtool_gradle-public-maven2/"
+      }
+   }
+
+   dependencies {
+      classpath "net.ifao.3rdparty.eclipse:buildship-eclipsebuild:1.0.0-SNAPSHOT"
+   }
+}
 
 task wrapper(type: Wrapper) {
    gradleVersion = '4.8.1'
 }
+
 
 
 apply plugin: eclipsebuild.BuildDefinitionPlugin
