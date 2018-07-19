@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--XML-Beispieldatei von XMLSpy generiert v2005 rel. 3 U (http://www.altova.com)-->
+<SWT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\Swt.xsd" package="net.ifao.plugins.editor.testcase">
+	<Shell name="Add TestCase" background="COLOR_LIST_BACKGROUND">
+		<Composite numColumns="2" fill="HORIZONTAL" background="COLOR_LIST_BACKGROUND">
+			<Composite fill="FULL" background="COLOR_LIST_BACKGROUND">
+				<Label text="Create a new Testcase" font="HEADER_FONT"/>
+				<Label text="Select a new Template or create from existing one"/>
+			</Composite>
+			<Canvas image="testcase_big.png"/>
+		</Composite>
+		<Composite border="SHADOW_ETCHED_OUT" fill="FULL" background="COLOR_WIDGET_BACKGROUND">
+			<Composite border="SHADOW_ETCHED_IN" fill="FULL" numColumns="2" background="COLOR_WIDGET_LIGHT_SHADOW">
+				<Label text="Name:"/>
+				<Text name="TestCaseName" fill="HORIZONTAL" border="BORDER"/>
+				<Button name="Check" text="Use from existing template:" checked="false" colSpan="2" type="CHECK"/>
+				<List name="Templates" colSpan="2" fill="FULL" border="BORDER" enabled="false"/>
+				<Text name="Detail" colSpan="2" fill="FULL" border="SHADOW_ETCHED_OUT" background="COLOR_WIDGET_LIGHT_SHADOW"/>
+			</Composite>
+		</Composite>
+		<Composite numColumns="2" fill="HORIZONTAL" background="COLOR_WIDGET_BACKGROUND">
+			<Composite fill="FULL">
+			</Composite>
+			<Composite numColumns="2">
+				<Button name="Finish" text="  OK  " enabled="false" fill="HORIZONTAL"/>
+				<Button name="Cancel" text="  Cancel  " fill="HORIZONTAL"/>
+			</Composite>
+		</Composite>
+	</Shell>
+</SWT>

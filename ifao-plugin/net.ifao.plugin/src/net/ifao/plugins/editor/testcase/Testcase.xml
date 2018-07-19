@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--XML-Beispieldatei von XMLSpy generiert v2005 rel. 3 U (http://www.altova.com)-->
+<SWT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\Swt.xsd" package="net.ifao.plugins.editor.testcase">
+	<Composite fill="FULL" background="COLOR_LIST_BACKGROUND">
+		<Composite numColumns="2" fill="HORIZONTAL">
+			<Label name="Title" text="TestObject:" font="HEADER_FONT" fill="HORIZONTAL"/>
+			<Label name="Type" text="Type:" font="BANNER_FONT"/>
+		</Composite>
+		<SashForm fill="FULL" sashDirection="HORIZONTAL">
+			<Group text="Testcases" fill="FULL" numColumns="2" font="BANNER_FONT">
+				<Tree name="Testcases" fill="FULL">
+					<Menu name="TestcaseMenu">
+						<MenuItem name="MenuPre" text="Add new precondition ..." image="precondition.gif"/>
+						<MenuItem name="MenuValid" text="Add new expecation ..." image="validator.gif"/>
+						<MenuItem/>
+						<MenuItem name="ActivateAllTestcases" text="Activate all testcases" image="testcase.gif"/>
+						<MenuItem name="ActivateTestcase" text="Activate testcase" image="testcase.gif"/>
+						<MenuItem name="DisableTestcase" text="Disable testcase" image="testcaseDisabled.gif"/>
+						<MenuItem/>
+						<MenuItem name="MenuRunTestcase" text="Run as JUnit-Test" image="junit.gif"/>
+						<MenuItem name="MenuAdd2Template" text="Add Testcase to Template"/>
+					</Menu>
+				</Tree>
+				<Composite fill="VERTICAL">
+					<Button name="TCAdd" text="Add ..." fill="HORIZONTAL"/>
+					<Button name="TCDelete" text="Delete" fill="HORIZONTAL" enabled="false"/>
+					<Button name="TCCopy" text="Copy" fill="HORIZONTAL" enabled="false"/>
+					<Button name="TCPaste" text="Paste" fill="HORIZONTAL"/>
+					<Button name="TCUp" text="Up" fill="HORIZONTAL"/>
+					<Button name="TCDown" text="Down" fill="HORIZONTAL"/>
+					<Composite fill="FULL"/>
+					<Button name="TCRun" text="Run" fill="HORIZONTAL" image="junit.gif"/>
+					<Button name="TCSrc" text="Src" fill="HORIZONTAL" image="javaSrc.gif"/>
+				</Composite>
+			</Group>
+			<Group name="Detail" text="Testcase detail" fill="FULL" font="BANNER_FONT">
+				<Composite fill="FULL">
+  			    </Composite>
+				<Composite numColumns="2" fill="FULL">
+					<Label text="Set the properties for selected Testcase" colSpan="2"/>
+					<Label text="Name:"/>
+					<Text name="NameCase" fill="HORIZONTAL"/>
+					<Label text="Description:" fill="HORIZONTAL" colSpan="2"/>
+					<Text name="DescriptionCase" fill="FULL" colSpan="2"/>
+				</Composite>
+				<Composite numColumns="2" fill="FULL">
+					<Label text="Class:"/>
+					<Text name="CompClass" fill="HORIZONTAL" border="NONE"/>
+					<Label colSpan="2" text="Description:"/>
+					<Text colSpan="2" name="CompDesc" fill="FULL" border="SHADOW_ETCHED_OUT" background="COLOR_WIDGET_LIGHT_SHADOW"/>
+				</Composite>
+				<Composite fill="FULL">
+					<Label name="DetailText" text="Detail Value ..." fill="HORIZONTAL"/>
+					<Composite fill="HORIZONTAL">
+						<Text name="DetailDesc" fill="FULL" border="SHADOW_ETCHED_OUT" background="COLOR_WIDGET_LIGHT_SHADOW"/>
+					</Composite>
+					<Text name="Detail" fill="FULL"/>
+				</Composite>
+			</Group>
+		</SashForm>
+	</Composite>
+</SWT>

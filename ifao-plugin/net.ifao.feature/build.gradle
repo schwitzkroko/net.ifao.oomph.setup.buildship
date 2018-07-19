@@ -1,0 +1,12 @@
+apply plugin: eclipsebuild.FeaturePlugin
+
+eclipse {
+  project {
+
+    //if you want to assign natures in a groovy fashion:
+    natures = ['org.eclipse.pde.FeatureNature']
+
+    //if you want to append some extra build command:
+    buildCommand 'org.eclipse.pde.FeatureBuilder'
+  }  
+}
