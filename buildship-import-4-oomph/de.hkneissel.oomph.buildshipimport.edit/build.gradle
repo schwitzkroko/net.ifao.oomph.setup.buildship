@@ -1,0 +1,23 @@
+apply plugin: eclipsebuild.BundlePlugin
+
+sourceSets {
+   main {
+      java { srcDirs = ['src'] }
+   }
+}
+
+eclipse {
+  
+    project {
+
+        natures = ['org.eclipse.pde.PluginNature']
+
+        buildCommand 'org.eclipse.pde.ManifestBuilder'
+        buildCommand 'org.eclipse.pde.SchemaBuilder'
+    }  
+
+ classpath {
+     
+     // containers 'org.eclipse.pde.core.requiredPlugins'
+}
+}
