@@ -16,6 +16,7 @@ public final class BuildshipImportEditPlugin extends EMFPlugin {
       super(new ResourceLocator[] { BaseEditPlugin.INSTANCE, SetupEditPlugin.INSTANCE });
    }
 
+   @Override
    public ResourceLocator getPluginResourceLocator() {
       return plugin;
    }
@@ -31,9 +32,3 @@ public final class BuildshipImportEditPlugin extends EMFPlugin {
       }
    }
 }
-
-/*
- * Location: C:\Users\fliedner\Desktop\buildship-import-4-oomph-8.0.0\plugins\de.hkneissel.oomph.
- * buildshipimport.edit_0.7.0.201604211538.jar!\de\hkneissel\oomph\buildshipimport\provider\
- * BuildshipImportEditPlugin.class Java compiler version: 7 (51.0) JD-Core Version: 0.7.1
- */
