@@ -3,9 +3,9 @@
 package de.hkneissel.oomph.buildshipimport;
 
 
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.oomph.setup.SetupPackage;
 
 
@@ -23,6 +23,8 @@ import org.eclipse.oomph.setup.SetupPackage;
  * @see de.hkneissel.oomph.buildshipimport.BuildshipImportFactory
  * @model kind="package"
  *        annotation="http://www.eclipse.org/emf/2002/Ecore schemaLocation='http://www.hkneissel.de/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore'"
+ *        annotation="http://www.eclipse.org/oomph/setup/Enablement variableName='setup.projects.p2' repository='${oomph.update.url}' installableUnits='de.hkneissel.oomph.buildshipimport.feature.group'"
+ *        annotation="http://www.eclipse.org/oomph/base/LabelProvider imageBaseURI='http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/de.hkneissel.oomph.buildshipimport.edit/icons/full/obj16'"
  * @generated
  */
 public interface BuildshipImportPackage
@@ -161,76 +163,13 @@ public interface BuildshipImportPackage
    int BUILDSHIP_IMPORT_TASK__FILTER = SetupPackage.SETUP_TASK__FILTER;
 
    /**
-    * The feature id for the '<em><b>Project Root Directory</b></em>' attribute.
+    * The feature id for the '<em><b>Source Locators</b></em>' containment reference list.
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
     * @generated
     * @ordered
     */
-   int BUILDSHIP_IMPORT_TASK__PROJECT_ROOT_DIRECTORY = SetupPackage.SETUP_TASK_FEATURE_COUNT + 0;
-
-   /**
-    * The feature id for the '<em><b>Java Home</b></em>' attribute.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    * @ordered
-    */
-   int BUILDSHIP_IMPORT_TASK__JAVA_HOME = SetupPackage.SETUP_TASK_FEATURE_COUNT + 1;
-
-   /**
-    * The feature id for the '<em><b>Gradle User Home</b></em>' attribute.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    * @ordered
-    */
-   int BUILDSHIP_IMPORT_TASK__GRADLE_USER_HOME = SetupPackage.SETUP_TASK_FEATURE_COUNT + 2;
-
-   /**
-    * The feature id for the '<em><b>Jvm Arguments</b></em>' attribute.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    * @ordered
-    */
-   int BUILDSHIP_IMPORT_TASK__JVM_ARGUMENTS = SetupPackage.SETUP_TASK_FEATURE_COUNT + 3;
-
-   /**
-    * The feature id for the '<em><b>Arguments</b></em>' attribute.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    * @ordered
-    */
-   int BUILDSHIP_IMPORT_TASK__ARGUMENTS = SetupPackage.SETUP_TASK_FEATURE_COUNT + 4;
-
-   /**
-    * The feature id for the '<em><b>Import Wait Time</b></em>' attribute.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    * @ordered
-    */
-   int BUILDSHIP_IMPORT_TASK__IMPORT_WAIT_TIME = SetupPackage.SETUP_TASK_FEATURE_COUNT + 5;
-
-   /**
-    * The feature id for the '<em><b>Gradle Task</b></em>' attribute.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    * @ordered
-    */
-   int BUILDSHIP_IMPORT_TASK__GRADLE_TASK = SetupPackage.SETUP_TASK_FEATURE_COUNT + 6;
-
-   /**
-    * The feature id for the '<em><b>Gradle Build Directory</b></em>' attribute.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    * @ordered
-    */
-   int BUILDSHIP_IMPORT_TASK__GRADLE_BUILD_DIRECTORY = SetupPackage.SETUP_TASK_FEATURE_COUNT + 7;
+   int BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS = SetupPackage.SETUP_TASK_FEATURE_COUNT + 0;
 
    /**
     * The number of structural features of the '<em>Task</em>' class.
@@ -239,7 +178,7 @@ public interface BuildshipImportPackage
     * @generated
     * @ordered
     */
-   int BUILDSHIP_IMPORT_TASK_FEATURE_COUNT = SetupPackage.SETUP_TASK_FEATURE_COUNT + 8;
+   int BUILDSHIP_IMPORT_TASK_FEATURE_COUNT = SetupPackage.SETUP_TASK_FEATURE_COUNT + 1;
 
 
    /**
@@ -253,92 +192,15 @@ public interface BuildshipImportPackage
    EClass getBuildshipImportTask();
 
    /**
-    * Returns the meta object for the attribute '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getProjectRootDirectory <em>Project Root Directory</em>}'.
+    * Returns the meta object for the containment reference list '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getSourceLocators <em>Source Locators</em>}'.
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
-    * @return the meta object for the attribute '<em>Project Root Directory</em>'.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getProjectRootDirectory()
+    * @return the meta object for the containment reference list '<em>Source Locators</em>'.
+    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getSourceLocators()
     * @see #getBuildshipImportTask()
     * @generated
     */
-   EAttribute getBuildshipImportTask_ProjectRootDirectory();
-
-   /**
-    * Returns the meta object for the attribute '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getJavaHome <em>Java Home</em>}'.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @return the meta object for the attribute '<em>Java Home</em>'.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getJavaHome()
-    * @see #getBuildshipImportTask()
-    * @generated
-    */
-   EAttribute getBuildshipImportTask_JavaHome();
-
-   /**
-    * Returns the meta object for the attribute '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getGradleUserHome <em>Gradle User Home</em>}'.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @return the meta object for the attribute '<em>Gradle User Home</em>'.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getGradleUserHome()
-    * @see #getBuildshipImportTask()
-    * @generated
-    */
-   EAttribute getBuildshipImportTask_GradleUserHome();
-
-   /**
-    * Returns the meta object for the attribute '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getJvmArguments <em>Jvm Arguments</em>}'.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @return the meta object for the attribute '<em>Jvm Arguments</em>'.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getJvmArguments()
-    * @see #getBuildshipImportTask()
-    * @generated
-    */
-   EAttribute getBuildshipImportTask_JvmArguments();
-
-   /**
-    * Returns the meta object for the attribute '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getArguments <em>Arguments</em>}'.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @return the meta object for the attribute '<em>Arguments</em>'.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getArguments()
-    * @see #getBuildshipImportTask()
-    * @generated
-    */
-   EAttribute getBuildshipImportTask_Arguments();
-
-   /**
-    * Returns the meta object for the attribute '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getImportWaitTime <em>Import Wait Time</em>}'.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @return the meta object for the attribute '<em>Import Wait Time</em>'.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getImportWaitTime()
-    * @see #getBuildshipImportTask()
-    * @generated
-    */
-   EAttribute getBuildshipImportTask_ImportWaitTime();
-
-   /**
-    * Returns the meta object for the attribute '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}'.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @return the meta object for the attribute '<em>Gradle Task</em>'.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getGradleTask()
-    * @see #getBuildshipImportTask()
-    * @generated
-    */
-   EAttribute getBuildshipImportTask_GradleTask();
-
-   /**
-    * Returns the meta object for the attribute '{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getGradleBuildDirectory <em>Gradle Build Directory</em>}'.
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @return the meta object for the attribute '<em>Gradle Build Directory</em>'.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getGradleBuildDirectory()
-    * @see #getBuildshipImportTask()
-    * @generated
-    */
-   EAttribute getBuildshipImportTask_GradleBuildDirectory();
+   EReference getBuildshipImportTask_SourceLocators();
 
    /**
     * Returns the factory that creates the instances of the model.
@@ -374,68 +236,12 @@ public interface BuildshipImportPackage
       EClass BUILDSHIP_IMPORT_TASK = eINSTANCE.getBuildshipImportTask();
 
       /**
-       * The meta object literal for the '<em><b>Project Root Directory</b></em>' attribute feature.
+       * The meta object literal for the '<em><b>Source Locators</b></em>' containment reference list feature.
        * <!-- begin-user-doc -->
        * <!-- end-user-doc -->
        * @generated
        */
-      EAttribute BUILDSHIP_IMPORT_TASK__PROJECT_ROOT_DIRECTORY = eINSTANCE.getBuildshipImportTask_ProjectRootDirectory();
-
-      /**
-       * The meta object literal for the '<em><b>Java Home</b></em>' attribute feature.
-       * <!-- begin-user-doc -->
-       * <!-- end-user-doc -->
-       * @generated
-       */
-      EAttribute BUILDSHIP_IMPORT_TASK__JAVA_HOME = eINSTANCE.getBuildshipImportTask_JavaHome();
-
-      /**
-       * The meta object literal for the '<em><b>Gradle User Home</b></em>' attribute feature.
-       * <!-- begin-user-doc -->
-       * <!-- end-user-doc -->
-       * @generated
-       */
-      EAttribute BUILDSHIP_IMPORT_TASK__GRADLE_USER_HOME = eINSTANCE.getBuildshipImportTask_GradleUserHome();
-
-      /**
-       * The meta object literal for the '<em><b>Jvm Arguments</b></em>' attribute feature.
-       * <!-- begin-user-doc -->
-       * <!-- end-user-doc -->
-       * @generated
-       */
-      EAttribute BUILDSHIP_IMPORT_TASK__JVM_ARGUMENTS = eINSTANCE.getBuildshipImportTask_JvmArguments();
-
-      /**
-       * The meta object literal for the '<em><b>Arguments</b></em>' attribute feature.
-       * <!-- begin-user-doc -->
-       * <!-- end-user-doc -->
-       * @generated
-       */
-      EAttribute BUILDSHIP_IMPORT_TASK__ARGUMENTS = eINSTANCE.getBuildshipImportTask_Arguments();
-
-      /**
-       * The meta object literal for the '<em><b>Import Wait Time</b></em>' attribute feature.
-       * <!-- begin-user-doc -->
-       * <!-- end-user-doc -->
-       * @generated
-       */
-      EAttribute BUILDSHIP_IMPORT_TASK__IMPORT_WAIT_TIME = eINSTANCE.getBuildshipImportTask_ImportWaitTime();
-
-      /**
-       * The meta object literal for the '<em><b>Gradle Task</b></em>' attribute feature.
-       * <!-- begin-user-doc -->
-       * <!-- end-user-doc -->
-       * @generated
-       */
-      EAttribute BUILDSHIP_IMPORT_TASK__GRADLE_TASK = eINSTANCE.getBuildshipImportTask_GradleTask();
-
-      /**
-       * The meta object literal for the '<em><b>Gradle Build Directory</b></em>' attribute feature.
-       * <!-- begin-user-doc -->
-       * <!-- end-user-doc -->
-       * @generated
-       */
-      EAttribute BUILDSHIP_IMPORT_TASK__GRADLE_BUILD_DIRECTORY = eINSTANCE.getBuildshipImportTask_GradleBuildDirectory();
+      EReference BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS = eINSTANCE.getBuildshipImportTask_SourceLocators();
 
    }
 

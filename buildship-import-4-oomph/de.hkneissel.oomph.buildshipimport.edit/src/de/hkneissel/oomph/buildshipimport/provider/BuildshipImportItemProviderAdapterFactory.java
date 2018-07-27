@@ -1,11 +1,9 @@
 package de.hkneissel.oomph.buildshipimport.provider;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import de.hkneissel.oomph.buildshipimport.BuildshipImportFactory;
-import de.hkneissel.oomph.buildshipimport.util.BuildshipImportAdapterFactory;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
@@ -34,21 +32,27 @@ import org.eclipse.oomph.setup.SetupPackage;
 import org.eclipse.oomph.setup.SetupTaskContainer;
 import org.eclipse.oomph.setup.util.SetupSwitch;
 
-public class BuildshipImportItemProviderAdapterFactory extends BuildshipImportAdapterFactory
-      implements ComposeableAdapterFactory, IChangeNotifier, IDisposable, IChildCreationExtender {
+import de.hkneissel.oomph.buildshipimport.BuildshipImportFactory;
+import de.hkneissel.oomph.buildshipimport.util.BuildshipImportAdapterFactory;
+
+
+public class BuildshipImportItemProviderAdapterFactory
+   extends BuildshipImportAdapterFactory
+   implements ComposeableAdapterFactory, IChangeNotifier, IDisposable, IChildCreationExtender
+{
 
    protected ComposedAdapterFactory parentAdapterFactory;
    protected IChangeNotifier changeNotifier = new ChangeNotifier();
 
-   protected ChildCreationExtenderManager childCreationExtenderManager
-      = new ChildCreationExtenderManager(BuildshipImportEditPlugin.INSTANCE,
-         "http://www.hkneissel.de/oomph/buildshipimport/1.0");
+   protected ChildCreationExtenderManager childCreationExtenderManager =
+      new ChildCreationExtenderManager(BuildshipImportEditPlugin.INSTANCE, "http://www.hkneissel.de/oomph/buildshipimport/1.0");
 
    protected Collection<Object> supportedTypes = new ArrayList();
 
    protected BuildshipImportTaskItemProvider buildshipImportTaskItemProvider;
 
-   public BuildshipImportItemProviderAdapterFactory() {
+   public BuildshipImportItemProviderAdapterFactory()
+   {
       this.supportedTypes.add(IEditingDomainItemProvider.class);
       this.supportedTypes.add(IStructuredItemContentProvider.class);
       this.supportedTypes.add(ITreeItemContentProvider.class);
@@ -57,7 +61,8 @@ public class BuildshipImportItemProviderAdapterFactory extends BuildshipImportAd
    }
 
    @Override
-   public Adapter createBuildshipImportTaskAdapter() {
+   public Adapter createBuildshipImportTaskAdapter()
+   {
       if (this.buildshipImportTaskItemProvider == null) {
          this.buildshipImportTaskItemProvider = new BuildshipImportTaskItemProvider(this);
       }
@@ -66,27 +71,32 @@ public class BuildshipImportItemProviderAdapterFactory extends BuildshipImportAd
    }
 
    @Override
-   public ComposeableAdapterFactory getRootAdapterFactory() {
+   public ComposeableAdapterFactory getRootAdapterFactory()
+   {
       return this.parentAdapterFactory == null ? this : this.parentAdapterFactory.getRootAdapterFactory();
    }
 
    @Override
-   public void setParentAdapterFactory(ComposedAdapterFactory parentAdapterFactory) {
+   public void setParentAdapterFactory(ComposedAdapterFactory parentAdapterFactory)
+   {
       this.parentAdapterFactory = parentAdapterFactory;
    }
 
    @Override
-   public boolean isFactoryForType(Object type) {
+   public boolean isFactoryForType(Object type)
+   {
       return (this.supportedTypes.contains(type)) || (super.isFactoryForType(type));
    }
 
    @Override
-   public Adapter adapt(Notifier notifier, Object type) {
+   public Adapter adapt(Notifier notifier, Object type)
+   {
       return super.adapt(notifier, this);
    }
 
    @Override
-   public Object adapt(Object object, Object type) {
+   public Object adapt(Object object, Object type)
+   {
       if (isFactoryForType(type)) {
          Object adapter = super.adapt(object, type);
          if ((!(type instanceof Class)) || (((Class) type).isInstance(adapter))) {
@@ -97,32 +107,38 @@ public class BuildshipImportItemProviderAdapterFactory extends BuildshipImportAd
       return null;
    }
 
-   public List<IChildCreationExtender> getChildCreationExtenders() {
+   public List<IChildCreationExtender> getChildCreationExtenders()
+   {
       return this.childCreationExtenderManager.getChildCreationExtenders();
    }
 
    @Override
-   public Collection<?> getNewChildDescriptors(Object object, EditingDomain editingDomain) {
+   public Collection<?> getNewChildDescriptors(Object object, EditingDomain editingDomain)
+   {
       return this.childCreationExtenderManager.getNewChildDescriptors(object, editingDomain);
    }
 
    @Override
-   public ResourceLocator getResourceLocator() {
+   public ResourceLocator getResourceLocator()
+   {
       return this.childCreationExtenderManager;
    }
 
    @Override
-   public void addListener(INotifyChangedListener notifyChangedListener) {
+   public void addListener(INotifyChangedListener notifyChangedListener)
+   {
       this.changeNotifier.addListener(notifyChangedListener);
    }
 
    @Override
-   public void removeListener(INotifyChangedListener notifyChangedListener) {
+   public void removeListener(INotifyChangedListener notifyChangedListener)
+   {
       this.changeNotifier.removeListener(notifyChangedListener);
    }
 
    @Override
-   public void fireNotifyChanged(Notification notification) {
+   public void fireNotifyChanged(Notification notification)
+   {
       this.changeNotifier.fireNotifyChanged(notification);
 
       if (this.parentAdapterFactory != null) {
@@ -131,84 +147,105 @@ public class BuildshipImportItemProviderAdapterFactory extends BuildshipImportAd
    }
 
    @Override
-   public void dispose() {
+   public void dispose()
+   {
       if (this.buildshipImportTaskItemProvider != null) {
          this.buildshipImportTaskItemProvider.dispose();
       }
    }
 
-   public static class BaseChildCreationExtender implements IChildCreationExtender {
+   public static class BaseChildCreationExtender
+      implements IChildCreationExtender
+   {
 
-      protected static class CreationSwitch extends BaseSwitch<Object> {
+      protected static class CreationSwitch
+         extends BaseSwitch<Object>
+      {
 
          protected List<Object> newChildDescriptors;
 
          protected EditingDomain editingDomain;
 
-         CreationSwitch(List<Object> newChildDescriptors, EditingDomain editingDomain) {
+         CreationSwitch(List<Object> newChildDescriptors, EditingDomain editingDomain)
+         {
             this.newChildDescriptors = newChildDescriptors;
             this.editingDomain = editingDomain;
          }
 
          @Override
-         public Object caseAnnotation(Annotation object) {
-            this.newChildDescriptors.add(createChildParameter(Literals.ANNOTATION__CONTENTS, BuildshipImportFactory.eINSTANCE.createBuildshipImportTask()));
+         public Object caseAnnotation(Annotation object)
+         {
+            this.newChildDescriptors.add(createChildParameter(Literals.ANNOTATION__CONTENTS,
+                  BuildshipImportFactory.eINSTANCE.createBuildshipImportTask()));
 
             return null;
          }
 
-         protected CommandParameter createChildParameter(Object feature, Object child) {
+         protected CommandParameter createChildParameter(Object feature, Object child)
+         {
             return new CommandParameter(null, feature, child);
          }
       }
 
       @Override
-      public Collection<Object> getNewChildDescriptors(Object object, EditingDomain editingDomain) {
+      public Collection<Object> getNewChildDescriptors(Object object, EditingDomain editingDomain)
+      {
          ArrayList<Object> result = new ArrayList();
          new CreationSwitch(result, editingDomain).doSwitch((EObject) object);
          return result;
       }
 
       @Override
-      public ResourceLocator getResourceLocator() {
+      public ResourceLocator getResourceLocator()
+      {
          return BuildshipImportEditPlugin.INSTANCE;
       }
    }
 
-   public static class SetupChildCreationExtender implements IChildCreationExtender {
+   public static class SetupChildCreationExtender
+      implements IChildCreationExtender
+   {
 
-      protected static class CreationSwitch extends SetupSwitch<Object> {
+      protected static class CreationSwitch
+         extends SetupSwitch<Object>
+      {
 
          protected List<Object> newChildDescriptors;
 
          protected EditingDomain editingDomain;
 
-         CreationSwitch(List<Object> newChildDescriptors, EditingDomain editingDomain) {
+         CreationSwitch(List<Object> newChildDescriptors, EditingDomain editingDomain)
+         {
             this.newChildDescriptors = newChildDescriptors;
             this.editingDomain = editingDomain;
          }
 
          @Override
-         public Object caseSetupTaskContainer(SetupTaskContainer object) {
-            this.newChildDescriptors.add(createChildParameter(SetupPackage.SETUP_TASK_CONTAINER__SETUP_TASKS, BuildshipImportFactory.eINSTANCE.createBuildshipImportTask()));
+         public Object caseSetupTaskContainer(SetupTaskContainer object)
+         {
+            this.newChildDescriptors.add(createChildParameter(SetupPackage.Literals.SETUP_TASK_CONTAINER__SETUP_TASKS,
+                  BuildshipImportFactory.eINSTANCE.createBuildshipImportTask()));
 
             return null;
          }
 
-         protected CommandParameter createChildParameter(Object feature, Object child) {
+         protected CommandParameter createChildParameter(Object feature, Object child)
+         {
             return new CommandParameter(null, feature, child);
          }
       }
 
       @Override
-      public Collection<Object> getNewChildDescriptors(Object object, EditingDomain editingDomain) {
+      public Collection<Object> getNewChildDescriptors(Object object, EditingDomain editingDomain)
+      {
          ArrayList<Object> result = new ArrayList();
          new CreationSwitch(result, editingDomain).doSwitch((EObject) object);
          return result;
       }
 
       @Override
-      public ResourceLocator getResourceLocator() {
+      public ResourceLocator getResourceLocator()
+      {
          return BuildshipImportEditPlugin.INSTANCE;
       }
    }

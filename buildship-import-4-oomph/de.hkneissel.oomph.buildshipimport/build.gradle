@@ -13,7 +13,7 @@ dependencies {
 
 
 eclipse {
-  
+
    project {
 
       natures = ['org.eclipse.pde.PluginNature']
@@ -22,8 +22,10 @@ eclipse {
       buildCommand 'org.eclipse.pde.SchemaBuilder'
    }
 
-   classpath {
+    classpath {
 
-      // containers 'org.eclipse.pde.core.requiredPlugins'
-   }
+       downloadJavadoc = true
+       downloadSources = true
+        // containers 'org.eclipse.pde.core.requiredPlugins'
+    }
 }

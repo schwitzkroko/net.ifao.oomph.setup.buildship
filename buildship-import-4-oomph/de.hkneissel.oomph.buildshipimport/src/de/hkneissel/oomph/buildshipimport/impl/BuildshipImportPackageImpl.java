@@ -3,11 +3,13 @@
 package de.hkneissel.oomph.buildshipimport.impl;
 
 
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 import org.eclipse.oomph.base.BasePackage;
+import org.eclipse.oomph.predicates.PredicatesPackage;
+import org.eclipse.oomph.resources.ResourcesPackage;
 import org.eclipse.oomph.setup.SetupPackage;
 
 import de.hkneissel.oomph.buildshipimport.BuildshipImportFactory;
@@ -87,6 +89,8 @@ public class BuildshipImportPackageImpl
 
       // Initialize simple dependencies
       BasePackage.eINSTANCE.eClass();
+      PredicatesPackage.eINSTANCE.eClass();
+      ResourcesPackage.eINSTANCE.eClass();
       SetupPackage.eINSTANCE.eClass();
 
       // Create package meta-data objects
@@ -120,86 +124,9 @@ public class BuildshipImportPackageImpl
     * @generated
     */
    @Override
-   public EAttribute getBuildshipImportTask_ProjectRootDirectory()
+   public EReference getBuildshipImportTask_SourceLocators()
    {
-      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(0);
-   }
-
-   /**
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    */
-   @Override
-   public EAttribute getBuildshipImportTask_JavaHome()
-   {
-      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(1);
-   }
-
-   /**
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    */
-   @Override
-   public EAttribute getBuildshipImportTask_GradleUserHome()
-   {
-      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(2);
-   }
-
-   /**
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    */
-   @Override
-   public EAttribute getBuildshipImportTask_JvmArguments()
-   {
-      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(3);
-   }
-
-   /**
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    */
-   @Override
-   public EAttribute getBuildshipImportTask_Arguments()
-   {
-      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(4);
-   }
-
-   /**
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    */
-   @Override
-   public EAttribute getBuildshipImportTask_ImportWaitTime()
-   {
-      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(5);
-   }
-
-   /**
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    */
-   @Override
-   public EAttribute getBuildshipImportTask_GradleTask()
-   {
-      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(6);
-   }
-
-   /**
-    * <!-- begin-user-doc -->
-    * <!-- end-user-doc -->
-    * @generated
-    */
-   @Override
-   public EAttribute getBuildshipImportTask_GradleBuildDirectory()
-   {
-      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(7);
+      return (EReference) buildshipImportTaskEClass.getEStructuralFeatures().get(0);
    }
 
    /**
@@ -236,14 +163,7 @@ public class BuildshipImportPackageImpl
 
       // Create classes and their features
       buildshipImportTaskEClass = createEClass(BUILDSHIP_IMPORT_TASK);
-      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__PROJECT_ROOT_DIRECTORY);
-      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__JAVA_HOME);
-      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__GRADLE_USER_HOME);
-      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__JVM_ARGUMENTS);
-      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__ARGUMENTS);
-      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__IMPORT_WAIT_TIME);
-      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__GRADLE_TASK);
-      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__GRADLE_BUILD_DIRECTORY);
+      createEReference(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS);
    }
 
    /**
@@ -274,7 +194,7 @@ public class BuildshipImportPackageImpl
 
       // Obtain other dependent packages
       SetupPackage theSetupPackage = (SetupPackage) EPackage.Registry.INSTANCE.getEPackage(SetupPackage.eNS_URI);
-      BasePackage theBasePackage = (BasePackage) EPackage.Registry.INSTANCE.getEPackage(BasePackage.eNS_URI);
+      ResourcesPackage theResourcesPackage = (ResourcesPackage) EPackage.Registry.INSTANCE.getEPackage(ResourcesPackage.eNS_URI);
 
       // Create type parameters
 
@@ -286,30 +206,9 @@ public class BuildshipImportPackageImpl
       // Initialize classes and features; add operations and parameters
       initEClass(buildshipImportTaskEClass, BuildshipImportTask.class, "BuildshipImportTask", !IS_ABSTRACT, !IS_INTERFACE,
             IS_GENERATED_INSTANCE_CLASS);
-      initEAttribute(getBuildshipImportTask_ProjectRootDirectory(), theBasePackage.getURI(), "ProjectRootDirectory", null, 1, 1,
-            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
-            IS_ORDERED);
-      initEAttribute(getBuildshipImportTask_JavaHome(), theBasePackage.getURI(), "JavaHome", null, 0, 1,
-            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
-            IS_ORDERED);
-      initEAttribute(getBuildshipImportTask_GradleUserHome(), theBasePackage.getURI(), "GradleUserHome", null, 0, 1,
-            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
-            IS_ORDERED);
-      initEAttribute(getBuildshipImportTask_JvmArguments(), ecorePackage.getEString(), "JvmArguments", null, 0, 1,
-            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
-            IS_ORDERED);
-      initEAttribute(getBuildshipImportTask_Arguments(), ecorePackage.getEString(), "Arguments", null, 0, 1,
-            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
-            IS_ORDERED);
-      initEAttribute(getBuildshipImportTask_ImportWaitTime(), ecorePackage.getEInt(), "ImportWaitTime", "30", 0, 1,
-            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
-            IS_ORDERED);
-      initEAttribute(getBuildshipImportTask_GradleTask(), ecorePackage.getEString(), "GradleTask", "eclipse", 0, 1,
-            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
-            IS_ORDERED);
-      initEAttribute(getBuildshipImportTask_GradleBuildDirectory(), theBasePackage.getURI(), "GradleBuildDirectory", null, 0, 1,
-            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
-            IS_ORDERED);
+      initEReference(getBuildshipImportTask_SourceLocators(), theResourcesPackage.getSourceLocator(), null, "sourceLocators",
+            null, 1, -1, BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES,
+            !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
       // Create resource
       createResource("http://www.hkneissel.de/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore");
@@ -319,8 +218,12 @@ public class BuildshipImportPackageImpl
       createEcoreAnnotations();
       // http://www.eclipse.org/oomph/setup/Enablement
       createEnablementAnnotations();
+      // http://www.eclipse.org/oomph/base/LabelProvider
+      createLabelProviderAnnotations();
       // http://www.eclipse.org/oomph/setup/ValidTriggers
       createValidTriggersAnnotations();
+      // http:///org/eclipse/emf/ecore/util/ExtendedMetaData
+      createExtendedMetaDataAnnotations();
    }
 
    /**
@@ -345,10 +248,21 @@ public class BuildshipImportPackageImpl
    protected void createEnablementAnnotations()
    {
       String source = "http://www.eclipse.org/oomph/setup/Enablement";
-      addAnnotation(buildshipImportTaskEClass, source,
-            new String[]{ "variableName", "p2.buildship.import", "repository",
-                  "http://p2.kneissel.mail-und-web.de/update/buildshipimport", "installableUnits",
-                  "de.hkneissel.oomph.buildshipimport.feature.group" });
+      addAnnotation(this, source, new String[]{ "variableName", "setup.projects.p2", "repository", "${oomph.update.url}",
+            "installableUnits", "de.hkneissel.oomph.buildshipimport.feature.group" });
+   }
+
+   /**
+    * Initializes the annotations for <b>http://www.eclipse.org/oomph/base/LabelProvider</b>.
+    * <!-- begin-user-doc -->
+    * <!-- end-user-doc -->
+    * @generated
+    */
+   protected void createLabelProviderAnnotations()
+   {
+      String source = "http://www.eclipse.org/oomph/base/LabelProvider";
+      addAnnotation(this, source, new String[]{ "imageBaseURI",
+            "http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/de.hkneissel.oomph.buildshipimport.edit/icons/full/obj16" });
    }
 
    /**
@@ -361,6 +275,18 @@ public class BuildshipImportPackageImpl
    {
       String source = "http://www.eclipse.org/oomph/setup/ValidTriggers";
       addAnnotation(buildshipImportTaskEClass, source, new String[]{ "triggers", "STARTUP MANUAL" });
+   }
+
+   /**
+    * Initializes the annotations for <b>http:///org/eclipse/emf/ecore/util/ExtendedMetaData</b>.
+    * <!-- begin-user-doc -->
+    * <!-- end-user-doc -->
+    * @generated
+    */
+   protected void createExtendedMetaDataAnnotations()
+   {
+      String source = "http:///org/eclipse/emf/ecore/util/ExtendedMetaData";
+      addAnnotation(getBuildshipImportTask_SourceLocators(), source, new String[]{ "name", "sourceLocator" });
    }
 
 } //BuildshipImportPackageImpl

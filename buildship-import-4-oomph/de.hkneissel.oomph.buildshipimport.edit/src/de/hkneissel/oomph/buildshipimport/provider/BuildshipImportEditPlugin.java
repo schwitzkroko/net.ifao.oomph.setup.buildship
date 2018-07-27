@@ -4,6 +4,8 @@ package de.hkneissel.oomph.buildshipimport.provider;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.ResourceLocator;
 import org.eclipse.oomph.base.provider.BaseEditPlugin;
+import org.eclipse.oomph.predicates.provider.PredicatesEditPlugin;
+import org.eclipse.oomph.resources.provider.ResourcesEditPlugin;
 import org.eclipse.oomph.setup.provider.SetupEditPlugin;
 
 
@@ -17,7 +19,8 @@ public final class BuildshipImportEditPlugin
 
    public BuildshipImportEditPlugin()
    {
-      super(new ResourceLocator[]{ BaseEditPlugin.INSTANCE, SetupEditPlugin.INSTANCE });
+      super(new ResourceLocator[]{ BaseEditPlugin.INSTANCE, PredicatesEditPlugin.INSTANCE, ResourcesEditPlugin.INSTANCE,
+            SetupEditPlugin.INSTANCE, });
    }
 
    @Override

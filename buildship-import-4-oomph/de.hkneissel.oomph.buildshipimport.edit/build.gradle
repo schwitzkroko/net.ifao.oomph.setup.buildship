@@ -7,17 +7,19 @@ sourceSets {
 }
 
 eclipse {
-  
+
     project {
 
         natures = ['org.eclipse.pde.PluginNature']
 
         buildCommand 'org.eclipse.pde.ManifestBuilder'
         buildCommand 'org.eclipse.pde.SchemaBuilder'
-    }  
+    }
 
- classpath {
-     
-     // containers 'org.eclipse.pde.core.requiredPlugins'
-}
+    classpath {
+
+       downloadJavadoc = true
+       downloadSources = true
+        // containers 'org.eclipse.pde.core.requiredPlugins'
+    }
 }
