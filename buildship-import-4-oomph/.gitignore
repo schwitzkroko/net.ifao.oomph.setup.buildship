@@ -25,3 +25,4 @@ ui/
 *EditPlugin.java
 
 .project
+/dev.log

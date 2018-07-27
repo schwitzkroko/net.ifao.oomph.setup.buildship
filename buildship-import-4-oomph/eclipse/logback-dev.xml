@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 seconds" debug="true">
+
+   <property name="pattern" value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} #%M - %msg%n" />
+   <property name="logFolder" value="${logback-dev.folder}" />
+
+   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <layout class="ch.qos.logback.classic.PatternLayout">
+         <Pattern>${pattern}</Pattern>
+      </layout>
+   </appender>
+
+   <appender name="FILE_DEV" class="ch.qos.logback.core.FileAppender">
+      <file>${logFolder}/dev.log</file>
+      <encoder>
+        <Pattern>${pattern}</Pattern>
+      </encoder>
+   </appender>
+
+   <root level="DEBUG">
+      <appender-ref ref="STDOUT" />
+      <appender-ref ref="FILE_DEV" />
+   </root>
+
+</configuration>

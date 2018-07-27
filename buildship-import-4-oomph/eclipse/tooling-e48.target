@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Buildship Eclipse Photon Target Platform" sequenceNumber="4">
+<?pde version="3.8"?><target name="buildshipimport Eclipse Photon Target Platform" sequenceNumber="7">
 <locations>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="com.google.guava" version="15.0.0.v201403281430"/>
-<unit id="org.junit" version="4.12.0.v201504281640"/>
-<unit id="org.slf4j.api" version="1.7.2.v20121108-1250"/>
-<repository location="http://builds.gradle.org:8000/eclipse/update-site/mirror/orbit-photon-m7/"/>
-</location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.2.1.201402241301"/>
 <unit id="org.eclipse.swtbot.ide.feature.group" version="2.2.1.201402241301"/>
@@ -31,6 +25,14 @@
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.buildship.feature.group" version="2.2.1.v20180125-1441"/>
 <repository location="http://download.eclipse.org/buildship/updates/e47/releases/2.x"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="ch.qos.logback.classic" version="1.1.2.v20171220-1825"/>
+<unit id="ch.qos.logback.core" version="1.1.2.v20160208-0839"/>
+<unit id="ch.qos.logback.slf4j" version="1.1.2.v20160301-0943"/>
+<unit id="com.google.guava" version="21.0.0.v20170206-1425"/>
+<unit id="org.junit" version="4.12.0.v201504281640"/>
+<repository location="http://builds.gradle.org:8000/eclipse/update-site/mirror/orbit-photon-m7/"/>
 </location>
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
