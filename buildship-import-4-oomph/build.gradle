@@ -48,7 +48,8 @@ def oomphEditDependencies = [
 ]
 
 def buildshipDependencies = [
-   'org.eclipse.buildship.core'                : buildshipVersion
+   'org.eclipse.buildship.core'                : buildshipVersion,
+   'org.eclipse.buildship.ui'                  : buildshipVersion
 ]
 
 // define version mapping for the 3rd-party dependencies that are not specific to a particular Eclipse version
@@ -103,6 +104,7 @@ eclipseBuild {
       'org.eclipse.ui.ide'                    : '3.13.1',
       'org.eclipse.ui.navigator'              : '3.7.0',
       'org.eclipse.ui.views'                  : '3.9.0',
+      // 'org.eclipse.ui.workbench               : '3.10.100',
       'org.eclipse.ui.workbench.texteditor'   : '3.10.100',
       'org.junit'                             : '4.12.0'
     ] + eclipseVersionAgnosticDependencies

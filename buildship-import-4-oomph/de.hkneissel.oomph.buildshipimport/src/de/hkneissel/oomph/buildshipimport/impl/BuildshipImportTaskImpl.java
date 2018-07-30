@@ -2,6 +2,7 @@
  */
 package de.hkneissel.oomph.buildshipimport.impl;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.buildship.core.configuration.BuildConfiguration;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -36,6 +38,7 @@ import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 import org.eclipse.emf.ecore.xml.type.XMLTypeFactory;
 import org.eclipse.oomph.resources.EclipseProjectFactory;
+import org.eclipse.oomph.resources.ProjectFactory;
 import org.eclipse.oomph.resources.ProjectHandler;
 import org.eclipse.oomph.resources.ResourcesUtil.ImportResult;
 import org.eclipse.oomph.resources.SourceLocator;
@@ -51,9 +54,13 @@ import org.eclipse.oomph.util.SubMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gradleware.tooling.toolingclient.GradleDistribution;
+
 import de.hkneissel.oomph.buildshipimport.BuildshipImportPackage;
 import de.hkneissel.oomph.buildshipimport.BuildshipImportPlugin;
 import de.hkneissel.oomph.buildshipimport.BuildshipImportTask;
+import de.hkneissel.oomph.buildshipimport.impl.bship.BuildUtil;
+
 
 /**
 * <!-- begin-user-doc -->
@@ -68,397 +75,451 @@ import de.hkneissel.oomph.buildshipimport.BuildshipImportTask;
 *
 * @generated
 */
-public class BuildshipImportTaskImpl extends SetupTaskImpl implements BuildshipImportTask {
-	private static final PropertyFile HISTORY = new PropertyFile(
-			BuildshipImportPlugin.INSTANCE.getStateLocation().append("import-history.properties").toFile());
+public class BuildshipImportTaskImpl
+   extends SetupTaskImpl
+   implements BuildshipImportTask
+{
+   private static final PropertyFile HISTORY =
+      new PropertyFile(BuildshipImportPlugin.INSTANCE.getStateLocation().append("import-history.properties").toFile());
 
-	private static final IWorkspaceRoot ROOT = EcorePlugin.getWorkspaceRoot();
+   private static final IWorkspaceRoot ROOT = EcorePlugin.getWorkspaceRoot();
 
-	/**
-	* The cached value of the '{@link #getSourceLocators() <em>Source Locators</em>}' containment reference list.
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* @see #getSourceLocators()
-	* @generated
-	* @ordered
-	*/
-	protected EList<SourceLocator> sourceLocators;
+   /**
+   * The cached value of the '{@link #getSourceLocators() <em>Source Locators</em>}' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getSourceLocators()
+   * @generated
+   * @ordered
+   */
+   protected EList<SourceLocator> sourceLocators;
 
-	private static final Logger log = LoggerFactory.getLogger(BuildshipImportTaskImpl.class);
+   private static final Logger log = LoggerFactory.getLogger(BuildshipImportTaskImpl.class);
 
-	/**
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* @generated
-	*/
-	protected BuildshipImportTaskImpl() {
-		super();
-	}
+   /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+   protected BuildshipImportTaskImpl()
+   {
+      super();
+   }
 
-	/**
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* @return TODO (Fliedner) add text for returnValue
-	*
-	* @generated
-	*/
-	@Override
-	protected EClass eStaticClass() {
-		return BuildshipImportPackage.Literals.BUILDSHIP_IMPORT_TASK;
-	}
+   /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return TODO (Fliedner) add text for returnValue
+   *
+   * @generated
+   */
+   @Override
+   protected EClass eStaticClass()
+   {
+      return BuildshipImportPackage.Literals.BUILDSHIP_IMPORT_TASK;
+   }
 
-	/**
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* @return TODO (Fliedner) add text for returnValue
-	*
-	* @generated
-	*/
-	@Override
-	public EList<SourceLocator> getSourceLocators() {
-		if (this.sourceLocators == null) {
-			this.sourceLocators = new EObjectContainmentEList<>(SourceLocator.class, this,
-					BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS);
-		}
-		return this.sourceLocators;
-	}
+   /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return TODO (Fliedner) add text for returnValue
+   *
+   * @generated
+   */
+   @Override
+   public EList<SourceLocator> getSourceLocators()
+   {
+      if (this.sourceLocators == null) {
+         this.sourceLocators = new EObjectContainmentEList<>(SourceLocator.class, this,
+               BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS);
+      }
+      return this.sourceLocators;
+   }
 
-	/**
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* <p> TODO rename otherEnd to pEnd, featureID to piID, msgs to pMsgs
-	* @param otherEnd TODO (Fliedner) add text for param otherEnd
-	* @param featureID TODO (Fliedner) add text for param featureID
-	* @param msgs TODO (Fliedner) add text for param msgs
-	* @return TODO (Fliedner) add text for returnValue
-	*
-	* @generated
-	*/
-	@Override
-	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
-		switch (featureID) {
-		case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
-			return ((InternalEList<?>) getSourceLocators()).basicRemove(otherEnd, msgs);
-		}
-		return super.eInverseRemove(otherEnd, featureID, msgs);
-	}
+   /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * <p> TODO rename otherEnd to pEnd, featureID to piID, msgs to pMsgs
+   * @param otherEnd TODO (Fliedner) add text for param otherEnd
+   * @param featureID TODO (Fliedner) add text for param featureID
+   * @param msgs TODO (Fliedner) add text for param msgs
+   * @return TODO (Fliedner) add text for returnValue
+   *
+   * @generated
+   */
+   @Override
+   public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs)
+   {
+      switch (featureID) {
+         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
+            return ((InternalEList<?>) getSourceLocators()).basicRemove(otherEnd, msgs);
+      }
+      return super.eInverseRemove(otherEnd, featureID, msgs);
+   }
 
-	/**
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* <p> TODO rename featureID to piID, resolve to pbResolve, coreType to pbType
-	* @param featureID TODO (Fliedner) add text for param featureID
-	* @param resolve TODO (Fliedner) add text for param resolve
-	* @param coreType TODO (Fliedner) add text for param coreType
-	* @return TODO (Fliedner) add text for returnValue
-	*
-	* @generated
-	*/
-	@Override
-	public Object eGet(int featureID, boolean resolve, boolean coreType) {
-		switch (featureID) {
-		case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
-			return getSourceLocators();
-		}
-		return super.eGet(featureID, resolve, coreType);
-	}
+   /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * <p> TODO rename featureID to piID, resolve to pbResolve, coreType to pbType
+   * @param featureID TODO (Fliedner) add text for param featureID
+   * @param resolve TODO (Fliedner) add text for param resolve
+   * @param coreType TODO (Fliedner) add text for param coreType
+   * @return TODO (Fliedner) add text for returnValue
+   *
+   * @generated
+   */
+   @Override
+   public Object eGet(int featureID, boolean resolve, boolean coreType)
+   {
+      switch (featureID) {
+         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
+            return getSourceLocators();
+      }
+      return super.eGet(featureID, resolve, coreType);
+   }
 
-	/**
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* <p> TODO rename featureID to piID, newValue to pValue
-	* @param featureID TODO (Fliedner) add text for param featureID
-	* @param newValue TODO (Fliedner) add text for param newValue
-	*
-	* @generated
-	*/
-	@SuppressWarnings("unchecked")
-	@Override
-	public void eSet(int featureID, Object newValue) {
-		switch (featureID) {
-		case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
-			getSourceLocators().clear();
-			getSourceLocators().addAll((Collection<? extends SourceLocator>) newValue);
-			return;
-		}
-		super.eSet(featureID, newValue);
-	}
+   /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * <p> TODO rename featureID to piID, newValue to pValue
+   * @param featureID TODO (Fliedner) add text for param featureID
+   * @param newValue TODO (Fliedner) add text for param newValue
+   *
+   * @generated
+   */
+   @SuppressWarnings("unchecked")
+   @Override
+   public void eSet(int featureID, Object newValue)
+   {
+      switch (featureID) {
+         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
+            getSourceLocators().clear();
+            getSourceLocators().addAll((Collection<? extends SourceLocator>) newValue);
+            return;
+      }
+      super.eSet(featureID, newValue);
+   }
 
-	/**
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* <p> TODO rename featureID to piID
-	* @param featureID TODO (Fliedner) add text for param featureID
-	*
-	* @generated
-	*/
-	@Override
-	public void eUnset(int featureID) {
-		switch (featureID) {
-		case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
-			getSourceLocators().clear();
-			return;
-		}
-		super.eUnset(featureID);
-	}
+   /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * <p> TODO rename featureID to piID
+   * @param featureID TODO (Fliedner) add text for param featureID
+   *
+   * @generated
+   */
+   @Override
+   public void eUnset(int featureID)
+   {
+      switch (featureID) {
+         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
+            getSourceLocators().clear();
+            return;
+      }
+      super.eUnset(featureID);
+   }
 
-	/**
-	* <!-- begin-user-doc -->
-	* <!-- end-user-doc -->
-	* <p> TODO rename featureID to piID
-	* @param featureID TODO (Fliedner) add text for param featureID
-	* @return TODO (Fliedner) add text for returnValue
-	*
-	* @generated
-	*/
-	@Override
-	public boolean eIsSet(int featureID) {
-		switch (featureID) {
-		case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
-			return this.sourceLocators != null && !this.sourceLocators.isEmpty();
-		}
-		return super.eIsSet(featureID);
-	}
+   /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * <p> TODO rename featureID to piID
+   * @param featureID TODO (Fliedner) add text for param featureID
+   * @return TODO (Fliedner) add text for returnValue
+   *
+   * @generated
+   */
+   @Override
+   public boolean eIsSet(int featureID)
+   {
+      switch (featureID) {
+         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
+            return this.sourceLocators != null && !this.sourceLocators.isEmpty();
+      }
+      return super.eIsSet(featureID);
+   }
 
-	/**
-	* TODO (Fliedner) add comment for method getProgressMonitorWork
-	*
-	* @return TODO (Fliedner) add text for returnValue
-	*
-	* @author Fliedner
-	*/
-	@Override
-	public int getProgressMonitorWork() {
-		return 50;
-	}
+   /**
+   * TODO (Fliedner) add comment for method getProgressMonitorWork
+   *
+   * @return TODO (Fliedner) add text for returnValue
+   *
+   * @author Fliedner
+   */
+   @Override
+   public int getProgressMonitorWork()
+   {
+      return 50;
+   }
 
-	/**
-	* TODO (Fliedner) add comment for method setProjects
-	*
-	* <p> TODO rename sourceLocator to pLocator
-	* @param sourceLocator TODO (Fliedner) add text for param sourceLocator
-	* @param projects TODO (Fliedner) add text for param projects
-	*
-	* @author Fliedner
-	*/
-	private void setProjects(SourceLocator sourceLocator, IProject[] projects) {
-		String key = getDigest(sourceLocator);
-		StringBuilder value = new StringBuilder();
-		for (IProject project : projects) {
-			if (value.length() != 0) {
-				value.append(' ');
-			}
+   /**
+   * TODO (Fliedner) add comment for method setProjects
+   *
+   * <p> TODO rename sourceLocator to pLocator
+   * @param sourceLocator TODO (Fliedner) add text for param sourceLocator
+   * @param projects TODO (Fliedner) add text for param projects
+   *
+   * @author Fliedner
+   */
+   private void setProjects(SourceLocator sourceLocator, IProject[] projects)
+   {
+      String key = getDigest(sourceLocator);
+      StringBuilder value = new StringBuilder();
+      for (IProject project : projects) {
+         if (value.length() != 0) {
+            value.append(' ');
+         }
 
-			value.append(URI.encodeSegment(project.getName(), false));
-		}
+         value.append(URI.encodeSegment(project.getName(), false));
+      }
 
-		HISTORY.setProperty(key, value.toString());
-	}
+      HISTORY.setProperty(key, value.toString());
+   }
 
-	/**
-	* overrides @see org.eclipse.oomph.setup.SetupTask#isNeeded(org.eclipse.oomph.setup.SetupTaskContext)
-	* <p> TODO rename context to pContext
-	* @param context TODO (Fliedner) add text for param context
-	* @return TODO (Fliedner) add text for returnValue
-	* @throws Exception
-	*
-	*/
-	@Override
-	public boolean isNeeded(SetupTaskContext context) throws Exception {
-		if (context.getTrigger() == Trigger.MANUAL) {
-			return true;
-		}
+   /**
+   * overrides @see org.eclipse.oomph.setup.SetupTask#isNeeded(org.eclipse.oomph.setup.SetupTaskContext)
+   * <p> TODO rename context to pContext
+   * @param context TODO (Fliedner) add text for param context
+   * @return TODO (Fliedner) add text for returnValue
+   * @throws Exception
+   *
+   */
+   @Override
+   public boolean isNeeded(SetupTaskContext context)
+      throws Exception
+   {
+      if (context.getTrigger() == Trigger.MANUAL) {
+         return true;
+      }
 
-		final EList<SourceLocator> sourceLocators = getSourceLocators();
-		log.debug("checking sourceLocators: {}", sourceLocators);
+      final EList<SourceLocator> sourceLocators = getSourceLocators();
+      log.debug("checking sourceLocators: {}", sourceLocators);
 
-		for (SourceLocator sourceLocator : sourceLocators) {
-			IProject[] projects = getProjects(sourceLocator);
-			if (projects == null) {
-				return true;
-			}
+      for (SourceLocator sourceLocator : sourceLocators) {
+         IProject[] projects = getProjects(sourceLocator);
+         if (projects == null) {
+            return true;
+         }
 
-			for (IProject project : projects) {
-				if (!project.exists()) {
-					return true;
-				}
-			}
-		}
+         for (IProject project : projects) {
+            if (!project.exists()) {
+               return true;
+            }
+         }
+      }
 
-		return false;
-	}
+      return false;
+   }
 
-	/**
-	* TODO (Fliedner) add comment for method perform
-	*
-	* <p> TODO rename context to pfContext
-	* @param context TODO (Fliedner) add text for param context
-	* @throws Exception
-	*
-	* @author Fliedner
-	*/
-	@Override
-	public void perform(final SetupTaskContext context) throws Exception {
-		final EList<SourceLocator> locs = getSourceLocators();
-		final int size = this.sourceLocators.size();
+   /**
+   * TODO (Fliedner) add comment for method perform
+   *
+   * <p> TODO rename context to pfContext
+   * @param context TODO (Fliedner) add text for param context
+   * @throws Exception
+   *
+   * @author Fliedner
+   */
+   @Override
+   public void perform(final SetupTaskContext context)
+      throws Exception
+   {
+      final GradleDistribution gradleDistribution = GradleDistribution.fromBuild();
 
-		final MultiStatus performStatus = new MultiStatus(BuildshipImportPlugin.INSTANCE.getSymbolicName(), 0,
-				"Buildship import Analysis", null);
+      final EList<SourceLocator> locs = getSourceLocators();
+      final int size = this.sourceLocators.size();
 
-		final IProgressMonitor monitor = context.getProgressMonitor(true);
-		monitor.beginTask("", 2 * size);
+      final MultiStatus status =
+         new MultiStatus(BuildshipImportPlugin.INSTANCE.getSymbolicName(), 0, "Buildship import Analysis", null);
 
-		try {
-			Map<BackendContainer, IProject> backendContainers = locs.stream().flatMap((loc) -> {
+      final IProgressMonitor monitor = context.getProgressMonitor(true);
+      monitor.beginTask("", 2 * size);
 
-				final String folder = loc.getRootFolder();
-				context.log("Buildship import from " + folder);
 
-				final MultiStatus childStatus = new MultiStatus(BuildshipImportPlugin.INSTANCE.getSymbolicName(), 0,
-						"Buildship import Analysis of '" + folder + "'", null);
+      List<BuildConfiguration> collect = locs.stream().map(loc -> {
+         String rootFolder = loc.getRootFolder();
 
-				final ProjectHandler.Collector collector = new ProjectHandler.Collector();
-				try {
-					loc.handleProjects(EclipseProjectFactory.LIST, collector, childStatus,
-							MonitorUtil.create(monitor, 1));
-				} catch (Exception ex) {
+         return BuildUtil.createBuildConfiguration(rootFolder, gradleDistribution);
+      }).collect(Collectors.toList());
 
-					SourceLocatorImpl.addStatus(performStatus, BuildshipImportPlugin.INSTANCE, folder, ex);
-				}
 
-				if (childStatus.getSeverity() >= IStatus.ERROR) {
+   }
 
-					performStatus.add(childStatus);
-					return Stream.empty();
-				} else {
 
-					final Map<IProject, BackendContainer> projectMap = collector.getProjectMap();
+   public void perform_(final SetupTaskContext context)
+      throws Exception
+   {
+      final GradleDistribution gradleDistribution = GradleDistribution.fromBuild();
 
-					Set<IProject> projects = projectMap.keySet();
-					if (projects.isEmpty()) {
+      final EList<SourceLocator> locs = getSourceLocators();
+      final int size = this.sourceLocators.size();
 
-						log.debug("no projects at loc '{}'.", folder);
+      final MultiStatus performStatus =
+         new MultiStatus(BuildshipImportPlugin.INSTANCE.getSymbolicName(), 0, "Buildship import Analysis", null);
 
-						context.log("No projects were found");
-					}
+      final IProgressMonitor monitor = context.getProgressMonitor(true);
+      monitor.beginTask("", 2 * size);
 
-					// SIDE EFFECT - FIXME: refactor
-					setProjects(loc, projects.toArray(new IProject[projectMap.size()]));
+      try {
+         Map<BackendContainer, IProject> backendContainers = locs.stream().flatMap((loc) -> {
 
-					return projectMap.entrySet().stream();
-				}
-			})
-					// key value switcheroo
-					.collect(Collectors.toMap(Entry::getValue, Entry::getKey));
+            final String folder = loc.getRootFolder();
 
-			importProjects(backendContainers, MonitorUtil.create(monitor, size));
+            context.log("Buildship import from " + folder);
 
-		} finally {
+            final MultiStatus childStatus = new MultiStatus(BuildshipImportPlugin.INSTANCE.getSymbolicName(), 0,
+                  "Buildship import Analysis of '" + folder + "'", null);
 
-			monitor.done();
-		}
+            final ProjectHandler.Collector collector = new ProjectHandler.Collector();
+            try {
+               EList<ProjectFactory> list = EclipseProjectFactory.LIST;
+               loc.handleProjects(list, collector, childStatus, MonitorUtil.create(monitor, 1));
+            }
+            catch (Exception ex) {
 
-		BuildshipImportPlugin.INSTANCE.coreException(performStatus);
-	}
+               SourceLocatorImpl.addStatus(performStatus, BuildshipImportPlugin.INSTANCE, folder, ex);
+            }
 
-	/**
-	* TODO (Fliedner) add comment for method importProjects
-	*
-	* <p> TODO rename Map<BackendContainer to pfMap<BackendContainer, backendContainers to pContainers, monitor to pMonitor
-	* @param Map<BackendContainer TODO (Fliedner) add text for param Map<BackendContainer
-	* @param backendContainers TODO (Fliedner) add text for param backendContainers
-	* @param monitor TODO (Fliedner) add text for param monitor
-	* @return TODO (Fliedner) add text for returnValue
-	* @throws CoreException
-	*
-	* @author Fliedner
-	*/
-	private static int importProjects(final Map<BackendContainer, IProject> backendContainers, IProgressMonitor monitor)
-			throws CoreException {
-		if (backendContainers.isEmpty()) {
-			log.warn("no backendContainers");
-			return 0;
-		}
+            if (childStatus.getSeverity() >= IStatus.ERROR) {
 
-		log.debug("backendContainers - size {} - {}", backendContainers.size(), backendContainers);
+               performStatus.add(childStatus);
+               return Stream.empty();
+            } else {
 
-		final AtomicInteger count = new AtomicInteger();
+               final Map<IProject, BackendContainer> projectMap = collector.getProjectMap();
 
-		final IWorkspace workspace = org.eclipse.core.resources.ResourcesPlugin.getWorkspace();
-		workspace.run(new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				SubMonitor progress = SubMonitor.convert(monitor, backendContainers.size()).detectCancelation();
+               Set<IProject> projects = projectMap.keySet();
+               if (projects.isEmpty()) {
 
-				try {
-					for (Map.Entry<BackendContainer, IProject> entry : backendContainers.entrySet()) {
-						BackendContainer backendContainer = entry.getKey();
-						IProject project = entry.getValue();
-						if (backendContainer.importIntoWorkspace(project,
-								progress.newChild()) == ImportResult.IMPORTED) {
-							count.incrementAndGet();
-						}
-					}
-				} catch (Exception ex) {
-					BuildshipImportPlugin.INSTANCE.coreException(ex);
-				} finally {
-					progress.done();
-				}
-			}
-		}, monitor);
+                  log.debug("no projects at loc '{}'.", folder);
 
-		return count.get();
-	}
+                  context.log("No projects were found");
+               }
 
-	/**
-	* TODO (Fliedner) add comment for method getProjects
-	*
-	* <p> TODO rename sourceLocator to pLocator
-	* @param sourceLocator TODO (Fliedner) add text for param sourceLocator
-	* @return TODO (Fliedner) add text for returnValue
-	*
-	* @author Fliedner
-	*/
-	private static IProject[] getProjects(SourceLocator sourceLocator) {
-		String key = getDigest(sourceLocator);
-		String value = HISTORY.getProperty(key, null);
-		if (value != null) {
-			List<IProject> projects = new ArrayList<>();
-			for (String element : XMLTypeFactory.eINSTANCE.createNMTOKENS(value)) {
-				projects.add(ROOT.getProject(URI.decode(element)));
-			}
+               // SIDE EFFECT - FIXME: refactor
+               setProjects(loc, projects.toArray(new IProject[projectMap.size()]));
 
-			return projects.toArray(new IProject[projects.size()]);
-		}
+               return projectMap.entrySet().stream();
+            }
+         })
+               // key value switcheroo
+               .collect(Collectors.toMap(Entry::getValue, Entry::getKey));
 
-		return null;
-	}
+         importProjects(backendContainers, MonitorUtil.create(monitor, size));
 
-	/**
-	* TODO (Fliedner) add comment for method getDigest
-	*
-	* <p> TODO rename sourceLocator to pLocator
-	* @param sourceLocator TODO (Fliedner) add text for param sourceLocator
-	* @return TODO (Fliedner) add text for returnValue
-	*
-	* @author Fliedner
-	*/
-	private static String getDigest(SourceLocator sourceLocator) {
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		try {
-			EObjectOutputStream eObjectOutputStream = new BinaryResourceImpl.EObjectOutputStream(bytes, null);
-			eObjectOutputStream.saveEObject((InternalEObject) sourceLocator,
-					BinaryResourceImpl.EObjectOutputStream.Check.NOTHING);
-			bytes.toByteArray();
-			return XMLTypeFactory.eINSTANCE
-					.convertBase64Binary(IOUtil.getSHA1(new ByteArrayInputStream(bytes.toByteArray())));
-		} catch (IOException ex) {
-			BuildshipImportPlugin.INSTANCE.log(ex);
-		} catch (NoSuchAlgorithmException ex) {
-			BuildshipImportPlugin.INSTANCE.log(ex);
-		}
+      }
+      finally {
 
-		return null;
-	}
+         monitor.done();
+      }
+
+      BuildshipImportPlugin.INSTANCE.coreException(performStatus);
+   }
+
+   /**
+   * TODO (Fliedner) add comment for method importProjects
+   *
+   * <p> TODO rename Map<BackendContainer to pfMap<BackendContainer, backendContainers to pContainers, monitor to pMonitor
+   * @param Map<BackendContainer TODO (Fliedner) add text for param Map<BackendContainer
+   * @param backendContainers TODO (Fliedner) add text for param backendContainers
+   * @param monitor TODO (Fliedner) add text for param monitor
+   * @return TODO (Fliedner) add text for returnValue
+   * @throws CoreException
+   *
+   * @author Fliedner
+   */
+   private static int importProjects(final Map<BackendContainer, IProject> backendContainers, IProgressMonitor monitor)
+      throws CoreException
+   {
+      if (backendContainers.isEmpty()) {
+         log.warn("no backendContainers");
+         return 0;
+      }
+
+      log.debug("backendContainers - size {} - {}", backendContainers.size(), backendContainers);
+
+      final AtomicInteger count = new AtomicInteger();
+
+      final IWorkspace workspace = org.eclipse.core.resources.ResourcesPlugin.getWorkspace();
+      workspace.run(new IWorkspaceRunnable()
+      {
+         @Override
+         public void run(IProgressMonitor monitor)
+            throws CoreException
+         {
+            SubMonitor progress = SubMonitor.convert(monitor, backendContainers.size()).detectCancelation();
+
+            try {
+               for (Map.Entry<BackendContainer, IProject> entry : backendContainers.entrySet()) {
+                  BackendContainer backendContainer = entry.getKey();
+                  IProject project = entry.getValue();
+                  if (backendContainer.importIntoWorkspace(project, progress.newChild()) == ImportResult.IMPORTED) {
+                     count.incrementAndGet();
+                  }
+               }
+            }
+            catch (Exception ex) {
+               BuildshipImportPlugin.INSTANCE.coreException(ex);
+            }
+            finally {
+               progress.done();
+            }
+         }
+      }, monitor);
+
+      return count.get();
+   }
+
+   /**
+   * TODO (Fliedner) add comment for method getProjects
+   *
+   * <p> TODO rename sourceLocator to pLocator
+   * @param sourceLocator TODO (Fliedner) add text for param sourceLocator
+   * @return TODO (Fliedner) add text for returnValue
+   *
+   * @author Fliedner
+   */
+   private static IProject[] getProjects(SourceLocator sourceLocator)
+   {
+      String key = getDigest(sourceLocator);
+      String value = HISTORY.getProperty(key, null);
+      if (value != null) {
+         List<IProject> projects = new ArrayList<>();
+         for (String element : XMLTypeFactory.eINSTANCE.createNMTOKENS(value)) {
+            projects.add(ROOT.getProject(URI.decode(element)));
+         }
+
+         return projects.toArray(new IProject[projects.size()]);
+      }
+
+      return null;
+   }
+
+   /**
+   * TODO (Fliedner) add comment for method getDigest
+   *
+   * <p> TODO rename sourceLocator to pLocator
+   * @param sourceLocator TODO (Fliedner) add text for param sourceLocator
+   * @return TODO (Fliedner) add text for returnValue
+   *
+   * @author Fliedner
+   */
+   private static String getDigest(SourceLocator sourceLocator)
+   {
+      ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+      try {
+         EObjectOutputStream eObjectOutputStream = new BinaryResourceImpl.EObjectOutputStream(bytes, null);
+         eObjectOutputStream.saveEObject((InternalEObject) sourceLocator, BinaryResourceImpl.EObjectOutputStream.Check.NOTHING);
+         bytes.toByteArray();
+         return XMLTypeFactory.eINSTANCE.convertBase64Binary(IOUtil.getSHA1(new ByteArrayInputStream(bytes.toByteArray())));
+      }
+      catch (IOException ex) {
+         BuildshipImportPlugin.INSTANCE.log(ex);
+      }
+      catch (NoSuchAlgorithmException ex) {
+         BuildshipImportPlugin.INSTANCE.log(ex);
+      }
+
+      return null;
+   }
 
 }
