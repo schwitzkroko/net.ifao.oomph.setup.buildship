@@ -1,5 +1,3 @@
-/**
- */
 package de.hkneissel.oomph.buildshipimport.impl;
 
 
@@ -10,21 +8,17 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import org.eclipse.buildship.core.CorePlugin;
 import org.eclipse.buildship.core.configuration.BuildConfiguration;
+import org.eclipse.buildship.core.util.progress.AsyncHandler;
+import org.eclipse.buildship.core.workspace.GradleBuild;
+import org.eclipse.buildship.core.workspace.NewProjectHandler;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.emf.common.notify.NotificationChain;
 import org.eclipse.emf.common.util.EList;
@@ -37,20 +31,12 @@ import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl.EObjectOutputStrea
 import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 import org.eclipse.emf.ecore.xml.type.XMLTypeFactory;
-import org.eclipse.oomph.resources.EclipseProjectFactory;
-import org.eclipse.oomph.resources.ProjectFactory;
-import org.eclipse.oomph.resources.ProjectHandler;
-import org.eclipse.oomph.resources.ResourcesUtil.ImportResult;
 import org.eclipse.oomph.resources.SourceLocator;
-import org.eclipse.oomph.resources.backend.BackendContainer;
-import org.eclipse.oomph.resources.impl.SourceLocatorImpl;
 import org.eclipse.oomph.setup.SetupTaskContext;
 import org.eclipse.oomph.setup.Trigger;
 import org.eclipse.oomph.setup.impl.SetupTaskImpl;
 import org.eclipse.oomph.util.IOUtil;
-import org.eclipse.oomph.util.MonitorUtil;
 import org.eclipse.oomph.util.PropertyFile;
-import org.eclipse.oomph.util.SubMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +45,8 @@ import com.gradleware.tooling.toolingclient.GradleDistribution;
 import de.hkneissel.oomph.buildshipimport.BuildshipImportPackage;
 import de.hkneissel.oomph.buildshipimport.BuildshipImportPlugin;
 import de.hkneissel.oomph.buildshipimport.BuildshipImportTask;
-import de.hkneissel.oomph.buildshipimport.impl.bship.BuildUtil;
+import de.hkneissel.oomph.buildshipimport.impl.buildship.BuildsUtil;
+import de.hkneissel.oomph.buildshipimport.impl.buildship.WorkingSetsAddingProjectHandler;
 
 
 /**
@@ -79,8 +66,10 @@ public class BuildshipImportTaskImpl
    extends SetupTaskImpl
    implements BuildshipImportTask
 {
+
    private static final PropertyFile HISTORY =
       new PropertyFile(BuildshipImportPlugin.INSTANCE.getStateLocation().append("import-history.properties").toFile());
+
 
    private static final IWorkspaceRoot ROOT = EcorePlugin.getWorkspaceRoot();
 
@@ -93,6 +82,7 @@ public class BuildshipImportTaskImpl
    * @ordered
    */
    protected EList<SourceLocator> sourceLocators;
+
 
    private static final Logger log = LoggerFactory.getLogger(BuildshipImportTaskImpl.class);
 
@@ -182,8 +172,8 @@ public class BuildshipImportTaskImpl
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * <p> TODO rename featureID to piID, newValue to pValue
-   * @param featureID TODO (Fliedner) add text for param featureID
-   * @param newValue TODO (Fliedner) add text for param newValue
+   * @param featureID
+   * @param newValue
    *
    * @generated
    */
@@ -204,7 +194,7 @@ public class BuildshipImportTaskImpl
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * <p> TODO rename featureID to piID
-   * @param featureID TODO (Fliedner) add text for param featureID
+   * @param featureID
    *
    * @generated
    */
@@ -223,8 +213,8 @@ public class BuildshipImportTaskImpl
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * <p> TODO rename featureID to piID
-   * @param featureID TODO (Fliedner) add text for param featureID
-   * @return TODO (Fliedner) add text for returnValue
+   * @param featureID
+   * @return returnValue
    *
    * @generated
    */
@@ -234,6 +224,9 @@ public class BuildshipImportTaskImpl
       switch (featureID) {
          case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
             return this.sourceLocators != null && !this.sourceLocators.isEmpty();
+
+         default:
+            // do nothing
       }
       return super.eIsSet(featureID);
    }
@@ -241,9 +234,7 @@ public class BuildshipImportTaskImpl
    /**
    * TODO (Fliedner) add comment for method getProgressMonitorWork
    *
-   * @return TODO (Fliedner) add text for returnValue
-   *
-   * @author Fliedner
+   * @return returnValue
    */
    @Override
    public int getProgressMonitorWork()
@@ -254,11 +245,8 @@ public class BuildshipImportTaskImpl
    /**
    * TODO (Fliedner) add comment for method setProjects
    *
-   * <p> TODO rename sourceLocator to pLocator
-   * @param sourceLocator TODO (Fliedner) add text for param sourceLocator
-   * @param projects TODO (Fliedner) add text for param projects
-   *
-   * @author Fliedner
+   * @param sourceLocator
+   * @param projects
    */
    private void setProjects(SourceLocator sourceLocator, IProject[] projects)
    {
@@ -276,49 +264,46 @@ public class BuildshipImportTaskImpl
    }
 
    /**
-   * overrides @see org.eclipse.oomph.setup.SetupTask#isNeeded(org.eclipse.oomph.setup.SetupTaskContext)
-   * <p> TODO rename context to pContext
-   * @param context TODO (Fliedner) add text for param context
-   * @return TODO (Fliedner) add text for returnValue
-   * @throws Exception
-   *
-   */
+    * TODO: correct implementation (this one
+    *
+    * overrides @see org.eclipse.oomph.setup.SetupTask#isNeeded(org.eclipse.oomph.setup.SetupTaskContext)
+    */
    @Override
    public boolean isNeeded(SetupTaskContext context)
       throws Exception
    {
+      boolean needed = false;
+
       if (context.getTrigger() == Trigger.MANUAL) {
-         return true;
+         needed = true;
       }
 
       final EList<SourceLocator> sourceLocators = getSourceLocators();
       log.debug("checking sourceLocators: {}", sourceLocators);
 
-      for (SourceLocator sourceLocator : sourceLocators) {
+      outer: for (SourceLocator sourceLocator : sourceLocators) {
          IProject[] projects = getProjects(sourceLocator);
          if (projects == null) {
-            return true;
+            needed = true;
+            break;
          }
 
          for (IProject project : projects) {
             if (!project.exists()) {
-               return true;
+               needed = true;
+               break outer;
             }
          }
       }
 
-      return false;
+      log.debug("import needed? {}", needed);
+      return needed;
    }
 
    /**
-   * TODO (Fliedner) add comment for method perform
-   *
-   * <p> TODO rename context to pfContext
-   * @param context TODO (Fliedner) add text for param context
-   * @throws Exception
-   *
-   * @author Fliedner
-   */
+    *
+    * overrides @see org.eclipse.oomph.setup.SetupTask#perform(org.eclipse.oomph.setup.SetupTaskContext)
+    */
    @Override
    public void perform(final SetupTaskContext context)
       throws Exception
@@ -334,150 +319,40 @@ public class BuildshipImportTaskImpl
       final IProgressMonitor monitor = context.getProgressMonitor(true);
       monitor.beginTask("", 2 * size);
 
-
-      List<BuildConfiguration> collect = locs.stream().map(loc -> {
-         String rootFolder = loc.getRootFolder();
-
-         return BuildUtil.createBuildConfiguration(rootFolder, gradleDistribution);
-      }).collect(Collectors.toList());
-
-
-   }
-
-
-   public void perform_(final SetupTaskContext context)
-      throws Exception
-   {
-      final GradleDistribution gradleDistribution = GradleDistribution.fromBuild();
-
-      final EList<SourceLocator> locs = getSourceLocators();
-      final int size = this.sourceLocators.size();
-
-      final MultiStatus performStatus =
-         new MultiStatus(BuildshipImportPlugin.INSTANCE.getSymbolicName(), 0, "Buildship import Analysis", null);
-
-      final IProgressMonitor monitor = context.getProgressMonitor(true);
-      monitor.beginTask("", 2 * size);
-
       try {
-         Map<BackendContainer, IProject> backendContainers = locs.stream().flatMap((loc) -> {
+         List<BuildConfiguration> buildConfigurations = locs.stream().map(loc -> {
+            String rootFolder = loc.getRootFolder();
 
-            final String folder = loc.getRootFolder();
+            return BuildsUtil.createBuildConfiguration(rootFolder, gradleDistribution);
+         }).collect(Collectors.toList());
 
-            context.log("Buildship import from " + folder);
-
-            final MultiStatus childStatus = new MultiStatus(BuildshipImportPlugin.INSTANCE.getSymbolicName(), 0,
-                  "Buildship import Analysis of '" + folder + "'", null);
-
-            final ProjectHandler.Collector collector = new ProjectHandler.Collector();
-            try {
-               EList<ProjectFactory> list = EclipseProjectFactory.LIST;
-               loc.handleProjects(list, collector, childStatus, MonitorUtil.create(monitor, 1));
-            }
-            catch (Exception ex) {
-
-               SourceLocatorImpl.addStatus(performStatus, BuildshipImportPlugin.INSTANCE, folder, ex);
-            }
-
-            if (childStatus.getSeverity() >= IStatus.ERROR) {
-
-               performStatus.add(childStatus);
-               return Stream.empty();
-            } else {
-
-               final Map<IProject, BackendContainer> projectMap = collector.getProjectMap();
-
-               Set<IProject> projects = projectMap.keySet();
-               if (projects.isEmpty()) {
-
-                  log.debug("no projects at loc '{}'.", folder);
-
-                  context.log("No projects were found");
-               }
-
-               // SIDE EFFECT - FIXME: refactor
-               setProjects(loc, projects.toArray(new IProject[projectMap.size()]));
-
-               return projectMap.entrySet().stream();
-            }
-         })
-               // key value switcheroo
-               .collect(Collectors.toMap(Entry::getValue, Entry::getKey));
-
-         importProjects(backendContainers, MonitorUtil.create(monitor, size));
-
+         buildConfigurations.forEach(bconf -> {
+            performImportProject(bconf, AsyncHandler.NO_OP, NewProjectHandler.IMPORT_AND_MERGE);
+         });
       }
       finally {
 
          monitor.done();
       }
 
-      BuildshipImportPlugin.INSTANCE.coreException(performStatus);
+      BuildshipImportPlugin.INSTANCE.coreException(status);
    }
 
-   /**
-   * TODO (Fliedner) add comment for method importProjects
-   *
-   * <p> TODO rename Map<BackendContainer to pfMap<BackendContainer, backendContainers to pContainers, monitor to pMonitor
-   * @param Map<BackendContainer TODO (Fliedner) add text for param Map<BackendContainer
-   * @param backendContainers TODO (Fliedner) add text for param backendContainers
-   * @param monitor TODO (Fliedner) add text for param monitor
-   * @return TODO (Fliedner) add text for returnValue
-   * @throws CoreException
-   *
-   * @author Fliedner
-   */
-   private static int importProjects(final Map<BackendContainer, IProject> backendContainers, IProgressMonitor monitor)
-      throws CoreException
+
+   public boolean performImportProject(final BuildConfiguration buildConfig, final AsyncHandler initializer,
+                                       final NewProjectHandler newProjectHandler)
    {
-      if (backendContainers.isEmpty()) {
-         log.warn("no backendContainers");
-         return 0;
-      }
+      // TODO: we could populate this by "Buildship import" param (not by sourceLocator)
+      Optional<List<String>> workingSetNames = Optional.empty();
 
-      log.debug("backendContainers - size {} - {}", backendContainers.size(), backendContainers);
-
-      final AtomicInteger count = new AtomicInteger();
-
-      final IWorkspace workspace = org.eclipse.core.resources.ResourcesPlugin.getWorkspace();
-      workspace.run(new IWorkspaceRunnable()
-      {
-         @Override
-         public void run(IProgressMonitor monitor)
-            throws CoreException
-         {
-            SubMonitor progress = SubMonitor.convert(monitor, backendContainers.size()).detectCancelation();
-
-            try {
-               for (Map.Entry<BackendContainer, IProject> entry : backendContainers.entrySet()) {
-                  BackendContainer backendContainer = entry.getKey();
-                  IProject project = entry.getValue();
-                  if (backendContainer.importIntoWorkspace(project, progress.newChild()) == ImportResult.IMPORTED) {
-                     count.incrementAndGet();
-                  }
-               }
-            }
-            catch (Exception ex) {
-               BuildshipImportPlugin.INSTANCE.coreException(ex);
-            }
-            finally {
-               progress.done();
-            }
-         }
-      }, monitor);
-
-      return count.get();
+      WorkingSetsAddingProjectHandler workingSetsAddingNewProjectHandler =
+         new WorkingSetsAddingProjectHandler(newProjectHandler, workingSetNames);
+      GradleBuild build = CorePlugin.gradleWorkspaceManager().getGradleBuild(buildConfig);
+      build.synchronize(workingSetsAddingNewProjectHandler, initializer);
+      return true;
    }
 
-   /**
-   * TODO (Fliedner) add comment for method getProjects
-   *
-   * <p> TODO rename sourceLocator to pLocator
-   * @param sourceLocator TODO (Fliedner) add text for param sourceLocator
-   * @return TODO (Fliedner) add text for returnValue
-   *
-   * @author Fliedner
-   */
+
    private static IProject[] getProjects(SourceLocator sourceLocator)
    {
       String key = getDigest(sourceLocator);
@@ -494,15 +369,7 @@ public class BuildshipImportTaskImpl
       return null;
    }
 
-   /**
-   * TODO (Fliedner) add comment for method getDigest
-   *
-   * <p> TODO rename sourceLocator to pLocator
-   * @param sourceLocator TODO (Fliedner) add text for param sourceLocator
-   * @return TODO (Fliedner) add text for returnValue
-   *
-   * @author Fliedner
-   */
+
    private static String getDigest(SourceLocator sourceLocator)
    {
       ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -512,10 +379,7 @@ public class BuildshipImportTaskImpl
          bytes.toByteArray();
          return XMLTypeFactory.eINSTANCE.convertBase64Binary(IOUtil.getSHA1(new ByteArrayInputStream(bytes.toByteArray())));
       }
-      catch (IOException ex) {
-         BuildshipImportPlugin.INSTANCE.log(ex);
-      }
-      catch (NoSuchAlgorithmException ex) {
+      catch (IOException | NoSuchAlgorithmException ex) {
          BuildshipImportPlugin.INSTANCE.log(ex);
       }
 

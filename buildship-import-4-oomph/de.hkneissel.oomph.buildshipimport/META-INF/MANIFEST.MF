@@ -7,19 +7,17 @@ Bundle-Version: 1.0.0.snapshot
 Bundle-ClassPath: .
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.5.0,4.0.0)",
- org.eclipse.emf.ecore;bundle-version="[2.10.0,3.0.0)";visibility:=reexport,
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui,
+ org.eclipse.debug.ui,
+ org.eclipse.emf.ecore,
  org.eclipse.oomph.base;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.resources;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.setup;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.setup.core;bundle-version="[1.9.0,2.0.0)",
  org.eclipse.buildship.core;bundle-version="[2.2.1,2.3.0)",
- org.eclipse.buildship.ui;bundle-version="[2.2.1,2.3.0)",
  com.gradleware.tooling.model;bundle-version="[0.19.3,0.20.0)",
  com.gradleware.tooling.client;bundle-version="[0.19.3,0.20.0)",
- org.eclipse.ui.workbench;bundle-version="3.111.0",
- org.eclipse.debug.ui;bundle-version="3.13.0",
- org.eclipse.swt;bundle-version="3.107.0",
  com.google.guava;bundle-version="[21.0.0,22.0.0)",
  org.slf4j.api;bundle-version="[1.7.0,1.8.0)"
 Bundle-ActivationPolicy: lazy

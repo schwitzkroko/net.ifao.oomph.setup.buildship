@@ -59,14 +59,9 @@ def miscDependencies = [
     'com.gradleware.tooling.model'          : toolingCommonsBundleVersion,
     'org.gradle.toolingapi'                 : toolingApiBundleVersion,
     'org.slf4j.api'                         : '1.7.2',
-    'org.slf4j.simple'                      : '1.7.2',
     'com.google.guava'                      : '21.0.0',
-    'com.google.gson'                       : '2.7.0',
-    'org.apache.log4j'                      : '1.2.15',
     'org.eclipse.swtbot.eclipse.finder'     : '2.2.1',
-    'org.eclipse.swtbot.junit4_x'           : '2.2.1',
-    'org.jetbrains.kotlin.bundled-compiler' : '0.8.2',
-    'org.jetbrains.kotlin.core'             : '0.8.2'
+    'org.eclipse.swtbot.junit4_x'           : '2.2.1'
 ]
 
 def eclipseVersionAgnosticDependencies = oomphDependencies + oomphEditDependencies + buildshipDependencies + miscDependencies
@@ -82,6 +77,9 @@ eclipseBuild {
     targetDefinition = file('eclipse/tooling-e47.target')
     versionMapping = [
       "$swtPluginId"                          : '3.106.1',
+      'org.eclipse.swt'                       : '3.106.1',
+      'org.eclipse.emf.ecore'                 : '2.14.0', // UNTESTED
+      'org.eclipse.emf.edit'                  : '2.13.0', // UNTESTED
       'com.ibm.icu'                           : '58.2.0',
       'org.eclipse.core.expressions'          : '3.6.0',
       'org.eclipse.core.filesystem'           : '1.7.0',
@@ -104,7 +102,7 @@ eclipseBuild {
       'org.eclipse.ui.ide'                    : '3.13.1',
       'org.eclipse.ui.navigator'              : '3.7.0',
       'org.eclipse.ui.views'                  : '3.9.0',
-      // 'org.eclipse.ui.workbench               : '3.10.100',
+      'org.eclipse.ui.workbench'              : '3.10.100', // UNTESTED
       'org.eclipse.ui.workbench.texteditor'   : '3.10.100',
       'org.junit'                             : '4.12.0'
     ] + eclipseVersionAgnosticDependencies
