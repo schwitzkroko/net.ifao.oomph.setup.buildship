@@ -74,7 +74,7 @@ eclipseBuild {
 
   targetPlatform {
     eclipseVersion = '47'
-    targetDefinition = file('eclipse/tooling-e47.target')
+    targetDefinition = file('tooling-e47.target')
     versionMapping = [
       "$swtPluginId"                          : '3.106.1',
       'org.eclipse.swt'                       : '3.106.1',
@@ -110,7 +110,7 @@ eclipseBuild {
 
   targetPlatform {
     eclipseVersion = '48'
-    targetDefinition = file('eclipse/tooling-e48.target')
+    targetDefinition = file('tooling-e48.target')
     versionMapping = [
       "$swtPluginId"                          : '3.107.0',
       'org.eclipse.swt'                       : '3.107.0',
@@ -181,6 +181,20 @@ subprojects {
       //     url gradleRemoteRepositoryUrl
       // }
     }
+}
+
+def siteBuildDir = "${project(':de.hkneissel.oomph.buildshipimport.site').buildDir}/repository"
+def siteDirOnH = "file:/h:/cytric_development/new-arctic/dev_env/de.hkneissel.oomph.buildshipimport.site/${project.version}"
+
+task siteCopyToH(dependsOn: ':de.hkneissel.oomph.buildshipimport.site:build', type: Copy) {
+
+   group = "buildshipimport.site"
+   description = "copy created update site to 'h:' rollout folder"
+
+   println "writing ${siteDirOnH}"
+
+   from "${siteBuildDir}"
+   into "${siteDirOnH}"
 }
 
 

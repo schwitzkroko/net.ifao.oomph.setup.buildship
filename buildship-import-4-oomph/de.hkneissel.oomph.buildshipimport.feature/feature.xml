@@ -28,7 +28,7 @@
    </license>
 
    <url>
-      <update label="buildshipimport udates" url="http://p2.kneissel.mail-und-web.de/update/buildshipimport"/>
+      <update label="buildshipimport i:FAO updates" url="file:/h:/cytric_development/new-arctic/dev_env/de.hkneissel.oomph.buildshipimport.site/1.0.0.snapshot"/>
    </url>
 
    <plugin
