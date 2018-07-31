@@ -17,12 +17,12 @@ ui/
 *.class
 
 # Ignore generated classes
-*Factory.java
-*FactoryImpl.java
-*Package.java
-*PackageImpl.java
-*Task.java
-*EditPlugin.java
+# *Factory.java
+# *FactoryImpl.java
+# *Package.java
+# *PackageImpl.java
+# *Task.java
+# *EditPlugin.java
 
 .project
 /dev.log
