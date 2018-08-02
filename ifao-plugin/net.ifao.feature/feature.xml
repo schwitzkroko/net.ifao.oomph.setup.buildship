@@ -2,7 +2,7 @@
 <feature
       id="net.ifao.feature"
       label="%featureName"
-      version="2.2.0.snapshot"
+      version="2.1.20"
       provider-name="%providerName"
       plugin="net.ifao.plugin">
 

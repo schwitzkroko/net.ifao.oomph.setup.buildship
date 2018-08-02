@@ -1,42 +1,57 @@
 package dtdinfo;
 
 
-import ifaoplugin.Util;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.StringReader;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
+import dtdinfo.gui.DtdFrame;
+import dtdinfo.gui.DtdSchemaChanged;
+import ifaoplugin.Util;
 import net.ifao.xml.XmlObject;
-import dtdinfo.gui.*;
 
 
-/** 
- * Class DtdGenerator 
- * 
- * <p> 
- * Copyright &copy; 2002, i:FAO, AG. 
- * @author Andreas Brod 
+/**
+ * Class DtdGenerator
+ *
+ * <p>
+ * Copyright &copy; 2002, i:FAO, AG.
+ * @author Andreas Brod
  */
 public class DtdGenerator
 {
 
    static String DONOTEDITTHISMETHOD = "// DO NOT EDIT THIS METHOD, BECAUSE IT WILL BE OVERWRITTEN";
 
-   /** 
-    * Constructor DtdGenerator 
+   /**
+    * Constructor DtdGenerator
     */
    public DtdGenerator()
    {}
 
-   /** 
-    * Method main 
-    * 
-    * @param psArgs 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method main
+    *
+    * @param psArgs
+    *
+    * @author Andreas Brod
     */
    public static void main(String[] psArgs)
    {
@@ -55,39 +70,37 @@ public class DtdGenerator
       System.exit(0);
    }
 
-   /** 
-    * Method exec 
-    * 
-    * @param psText 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method exec
+    *
+    * @param psText
+    *
+    * @author Andreas Brod
     */
    private static void exec(String psText)
    {
       Util.exec(psText, false);
    }
 
-   /** 
-    * Method validateXml 
-    * @param pFrame 
-    * @param psbLog 
-    * @param psBaseDir 
-    * @param psPackage 
-    * @param pArcticPnrElementInfos 
-    * @param psProvider 
-    * @param psUser 
-    * @param psAgent 
-    * @param phtElements 
-    * @return 
-    * 
-    * @author Andreas Brod 
-    * @param phsFiles 
+   /**
+    * Method validateXml
+    * @param pFrame
+    * @param psbLog
+    * @param psBaseDir
+    * @param psPackage
+    * @param pArcticPnrElementInfos
+    * @param psProvider
+    * @param psUser
+    * @param psAgent
+    * @param phtElements
+    * @return
+    *
+    * @author Andreas Brod
+    * @param phsFiles
     */
-   private static boolean validateXml(JFrame pFrame, StringBuffer psbLog, String psBaseDir,
-                                      String psPackage, XmlObject pArcticPnrElementInfos,
-                                      String psProvider, String psUser, String psAgent,
-                                      Hashtable<String, List<String>> phtElements,
-                                      Set<File> phsFiles)
+   private static boolean validateXml(JFrame pFrame, StringBuffer psbLog, String psBaseDir, String psPackage,
+                                      XmlObject pArcticPnrElementInfos, String psProvider, String psUser, String psAgent,
+                                      Hashtable<String, List<String>> phtElements, Set<File> phsFiles)
    {
       System.out.println("---- validateXml ----");
 
@@ -100,8 +113,7 @@ public class DtdGenerator
       psbLog.append("-------------------------------------\n");
 
       XmlObject xmlProvider =
-         pArcticPnrElementInfos.createObject("Arctic").createObject("PnrElementInfos", "provider",
-               psProvider, true);
+         pArcticPnrElementInfos.createObject("Arctic").createObject("PnrElementInfos", "provider", psProvider, true);
 
       // validate if all classnames are set.
 
@@ -109,8 +121,7 @@ public class DtdGenerator
          XmlObject xmlElement = xmlProvider.createObject("PnrElementInfo", "type", sKey, false);
 
          if (xmlElement != null) {
-            String sNewName =
-               psPackage + ".framework.elements.Element" + getUnFormatedProvider(sKey);
+            String sNewName = psPackage + ".framework.elements.Element" + getUnFormatedProvider(sKey);
             String sOldName = xmlElement.getAttribute("className");
             if (!sOldName.equalsIgnoreCase(sNewName)) {
                xmlElement.setAttribute("className", sNewName);
@@ -121,10 +132,8 @@ public class DtdGenerator
       boolean bXsdChanged = false;
       boolean bXmlChanged = false;
 
-      String sArcticPnrElementInfosXml =
-         Util.getConfFile(psBaseDir, "ArcticPnrElementInfos.xml").getAbsolutePath();
-      String sArcticPnrElementInfosXsd =
-         Util.getConfFile(psBaseDir, "ArcticPnrElementInfos.xsd").getAbsolutePath();
+      String sArcticPnrElementInfosXml = Util.getConfFile(psBaseDir, "ArcticPnrElementInfos.xml").getAbsolutePath();
+      String sArcticPnrElementInfosXsd = Util.getConfFile(psBaseDir, "ArcticPnrElementInfos.xsd").getAbsolutePath();
 
       String sGeneratorInfos = "Generator\\ArcticPnrElementInfos.";
       Util.writeToFile(sGeneratorInfos + "xml", Util.loadFromFile(sArcticPnrElementInfosXml));
@@ -143,16 +152,14 @@ public class DtdGenerator
          String sArcticPnrElementInfos = Util.loadFromFile(sArcticPnrElementInfosXml);
 
          try {
-            int iProviderStartPos =
-               sArcticPnrElementInfos.indexOf("<PnrElementInfos provider=\"" + psProvider + "\"");
+            int iProviderStartPos = sArcticPnrElementInfos.indexOf("<PnrElementInfos provider=\"" + psProvider + "\"");
 
             if (iProviderStartPos >= 0) {
                String sOrig = sArcticPnrElementInfos.substring(iProviderStartPos);
 
                sOrig = sOrig.substring(0, sOrig.indexOf("</PnrElementInfos>") + 18);
 
-               sArcticPnrElementInfos =
-                  Util.replaceString(sArcticPnrElementInfos, sOrig, sNewProvider);
+               sArcticPnrElementInfos = Util.replaceString(sArcticPnrElementInfos, sOrig, sNewProvider);
             } else {
                StringBuffer sbHelper = new StringBuffer(sArcticPnrElementInfos);
                int iInsertPos = sbHelper.lastIndexOf("</PnrElementInfos>") + 18;
@@ -172,12 +179,9 @@ public class DtdGenerator
             psbLog.append("Validate ArcticPnrElementInfos.xsd for invalid/new entries\n");
 
             // get the Elements
-            String sPnrEnumPnrElementType =
-               sXsd.substring(sXsd.indexOf("xs:simpleType name=\"PnrEnumPnrElementType\""));
+            String sPnrEnumPnrElementType = sXsd.substring(sXsd.indexOf("xs:simpleType name=\"PnrEnumPnrElementType\""));
 
-            sPnrEnumPnrElementType =
-               sPnrEnumPnrElementType.substring(0,
-                     sPnrEnumPnrElementType.indexOf("</xs:simpleType>"));
+            sPnrEnumPnrElementType = sPnrEnumPnrElementType.substring(0, sPnrEnumPnrElementType.indexOf("</xs:simpleType>"));
 
             List<String> lstElement = getTags(sPnrEnumPnrElementType, "xs:enumeration", "value");
 
@@ -186,17 +190,14 @@ public class DtdGenerator
                sXsd.substring(sXsd.indexOf("xs:simpleType name=\"PnrEnumPnrElementParameterId\""));
 
             sPnrEnumPnrElementParameterId =
-               sPnrEnumPnrElementParameterId.substring(0,
-                     sPnrEnumPnrElementParameterId.indexOf("</xs:simpleType>"));
+               sPnrEnumPnrElementParameterId.substring(0, sPnrEnumPnrElementParameterId.indexOf("</xs:simpleType>"));
 
-            List<String> lstParams =
-               getTags(sPnrEnumPnrElementParameterId, "xs:enumeration", "value");
+            List<String> lstParams = getTags(sPnrEnumPnrElementParameterId, "xs:enumeration", "value");
 
             // get all known elements from xml
             List<String> lstElementXml = getTags(sArcticPnrElementInfos, "PnrElementInfo", "type");
 
-            List<String> lstParamsXml =
-               getTags(sArcticPnrElementInfos, "PnrElementParamInfo", "id");
+            List<String> lstParamsXml = getTags(sArcticPnrElementInfos, "PnrElementParamInfo", "id");
 
             boolean bChanged = false;
 
@@ -212,15 +213,11 @@ public class DtdGenerator
 
             // if changed modify xsd
             if (bChanged) {
+               sXsd = Util.replaceString(sXsd, sPnrEnumPnrElementType, getEnumList("PnrEnumPnrElementType", lstElement));
                sXsd =
-                  Util.replaceString(sXsd, sPnrEnumPnrElementType,
-                        getEnumList("PnrEnumPnrElementType", lstElement));
-               sXsd =
-                  Util.replaceString(sXsd, sPnrEnumPnrElementParameterId,
-                        getEnumList("PnrEnumPnrElementParameterId", lstParams));
+                  Util.replaceString(sXsd, sPnrEnumPnrElementParameterId, getEnumList("PnrEnumPnrElementParameterId", lstParams));
 
-               sXsd =
-                  addComment(sXsd, psUser + " GeneratorChanges for " + psProvider + "." + psAgent);
+               sXsd = addComment(sXsd, psUser + " GeneratorChanges for " + psProvider + "." + psAgent);
 
                Util.writeToFile(sGeneratorInfos + "xsd", sXsd);
 
@@ -249,17 +246,13 @@ public class DtdGenerator
          String sUpperAgent = getCamelCaseName(psAgent);
 
          if (sBlock.indexOf("\"" + sUpperAgent + "\"") < 0) {
-            psbLog.append("\nAdded EnumTransformActionType." + sUpperAgent
-                  + " in ArcticPnrElementInfos.xsd\n");
+            psbLog.append("\nAdded EnumTransformActionType." + sUpperAgent + " in ArcticPnrElementInfos.xsd\n");
 
             // Agent
-            sXsd =
-               addComment(sXsd, psUser + " GeneratorChanges Added EnumTransformActionType."
-                     + sUpperAgent);
+            sXsd = addComment(sXsd, psUser + " GeneratorChanges Added EnumTransformActionType." + sUpperAgent);
 
-            String sBlock2 =
-               sBlock.substring(0, sBlock.indexOf("<xs:enum")) + "<xs:enumeration value=\""
-                     + sUpperAgent + "\"/>\n   " + sBlock.substring(sBlock.indexOf("<xs:enum"));
+            String sBlock2 = sBlock.substring(0, sBlock.indexOf("<xs:enum")) + "<xs:enumeration value=\"" + sUpperAgent
+                  + "\"/>\n   " + sBlock.substring(sBlock.indexOf("<xs:enum"));
 
             sXsd = Util.replaceString(sXsd, sBlock, sBlock2);
 
@@ -271,22 +264,15 @@ public class DtdGenerator
 
       if (bXmlChanged || bXsdChanged) {
          DtdSchemaChanged dialog =
-            new DtdSchemaChanged(pFrame, "Validate xml", sArcticPnrElementInfosXml,
-                  sArcticPnrElementInfosXsd, sGeneratorInfos);
+            new DtdSchemaChanged(pFrame, "Validate xml", sArcticPnrElementInfosXml, sArcticPnrElementInfosXsd, sGeneratorInfos);
 
          dialog.show(bXmlChanged, bXsdChanged);
 
          if (dialog.hasContinue()) {
             phsFiles.add(Util.writeToFile("Generator\\ArcticPnrElementInfos.info", sNewProvider));
-            phsFiles.add(Util.writeToFile(sArcticPnrElementInfosXml,
-                  Util.loadFromFile(sGeneratorInfos + "xml")));
-            phsFiles.add(Util.writeToFile(sArcticPnrElementInfosXsd,
-                  Util.loadFromFile(sGeneratorInfos + "xsd")));
+            phsFiles.add(Util.writeToFile(sArcticPnrElementInfosXml, Util.loadFromFile(sGeneratorInfos + "xml")));
+            phsFiles.add(Util.writeToFile(sArcticPnrElementInfosXsd, Util.loadFromFile(sGeneratorInfos + "xsd")));
 
-            if (bXsdChanged) {
-               psbLog.append("\nCall Batch : Generator\\" + "UpdateArcticPnrElementInfos.bat\n");
-               updateArcticPnrElementInfos(psBaseDir);
-            }
          } else {
 
             return false;
@@ -296,15 +282,15 @@ public class DtdGenerator
       return true;
    }
 
-   /** 
-    * Method addComment 
-    * 
-    * 
-    * @param psXsd 
-    * @param psComment 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method addComment
+    *
+    *
+    * @param psXsd
+    * @param psComment
+    * @return
+    *
+    * @author Andreas Brod
     */
    private static String addComment(String psXsd, String psComment)
    {
@@ -312,38 +298,32 @@ public class DtdGenerator
       // find the current version
       int iVersion = psXsd.indexOf("<xs:attribute name=\"version\"");
       String sVersion = psXsd.substring(iVersion, psXsd.indexOf(">", iVersion) + 1);
-      String sVerDefault =
-         sVersion.substring(sVersion.indexOf(" default=\"") + 10, sVersion.lastIndexOf("\""));
+      String sVerDefault = sVersion.substring(sVersion.indexOf(" default=\"") + 10, sVersion.lastIndexOf("\""));
       String sNextVersion = getNextNumber(sVerDefault);
 
-      psXsd =
-         Util.replaceString(
-               psXsd,
-               sVersion,
-               Util.replaceString(sVersion, " default=\"" + sVerDefault + "\"", " default=\""
-                     + sNextVersion + "\""));
+      psXsd = Util.replaceString(psXsd, sVersion,
+            Util.replaceString(sVersion, " default=\"" + sVerDefault + "\"", " default=\"" + sNextVersion + "\""));
 
       iVersion = psXsd.indexOf("<xs:documentation>", iVersion);
 
       int iStart = psXsd.lastIndexOf("\n", iVersion) + 1;
       SimpleDateFormat sd = new SimpleDateFormat("MMMM dd, yyyy", Locale.ENGLISH);
-      String sDoc =
-         psXsd.substring(iStart, iVersion + 18) + sNextVersion + " " + sd.format(new Date()) + " "
-               + psComment + "</xs:documentation>\n";
+      String sDoc = psXsd.substring(iStart, iVersion + 18) + sNextVersion + " " + sd.format(new Date()) + " " + psComment
+            + "</xs:documentation>\n";
 
       psXsd = psXsd.substring(0, iStart) + sDoc + psXsd.substring(iStart);
 
       return psXsd;
    }
 
-   /** 
-    * Method getNextNumber 
-    * 
-    * 
-    * @param psNumber 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getNextNumber
+    *
+    *
+    * @param psNumber
+    * @return
+    *
+    * @author Andreas Brod
     */
    private static String getNextNumber(String psNumber)
    {
@@ -359,15 +339,15 @@ public class DtdGenerator
       return sNum;
    }
 
-   /** 
-    * Method getEnumList 
-    * 
-    * 
-    * @param psName 
-    * @param plstValues 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getEnumList
+    *
+    *
+    * @param psName
+    * @param plstValues
+    * @return
+    *
+    * @author Andreas Brod
     */
    private static String getEnumList(String psName, List<String> plstValues)
    {
@@ -384,20 +364,19 @@ public class DtdGenerator
       return sRet;
    }
 
-   /** 
-    * Method correct 
-    * 
-    * 
-    * @param psbLog 
-    * @param psType 
-    * @param plstOrg 
-    * @param plstNew 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method correct
+    *
+    *
+    * @param psbLog
+    * @param psType
+    * @param plstOrg
+    * @param plstNew
+    * @return
+    *
+    * @author Andreas Brod
     */
-   private static boolean correct(StringBuffer psbLog, String psType, List<String> plstOrg,
-                                  List<String> plstNew)
+   private static boolean correct(StringBuffer psbLog, String psType, List<String> plstOrg, List<String> plstNew)
    {
       boolean bChanged = false;
 
@@ -452,16 +431,16 @@ public class DtdGenerator
       return bChanged;
    }
 
-   /** 
-    * Method getTags 
-    * 
-    * 
-    * @param psList 
-    * @param psTag 
-    * @param psAttr 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getTags
+    *
+    *
+    * @param psList
+    * @param psTag
+    * @param psAttr
+    * @return
+    *
+    * @author Andreas Brod
     */
    private static List<String> getTags(String psList, String psTag, String psAttr)
    {
@@ -469,7 +448,7 @@ public class DtdGenerator
 
       psAttr = " " + psAttr + "=\"";
 
-      Vector<String> hs = new Vector<String>();
+      Vector<String> hs = new Vector<>();
 
       while (iPos > 0) {
          int iEnd = psList.indexOf(">", iPos);
@@ -491,39 +470,14 @@ public class DtdGenerator
       return hs;
    }
 
-   /** 
-    * Method replaceArcticPnrElementInfos 
-    * @param psArcticDir 
-    * 
-    * @author Andreas Brod 
-    */
-   public static void updateArcticPnrElementInfos(String psArcticDir)
-   {
-
-      // start the update
-      String sText = "@echo off\n";
-
-      sText += psArcticDir.charAt(0) + ":\n";
-      sText += "cd \"" + psArcticDir + "\\conf\\build\"\n";
-      sText += "call BuildSchemaFiles.bat ArcticPnrElementInfos\n";
-      sText += "exit\n";
-
-      Util.writeToFile("Generator\\UpdateArcticPnrElementInfos.bat", sText);
-
-      File f = new File("Generator\\UpdateArcticPnrElementInfos.bat");
-
-      exec("start \"UpdateArcticPnrElementInfos\" call \"" + f.getAbsolutePath() + "\"");
-
-   }
-
-   /** 
-    * Method analyse 
-    * 
-    * @param psBaseDirectory 
-    * 
-    * @author Andreas Brod 
-    * @param pOut 
-    * @param phsFiles 
+   /**
+    * Method analyse
+    *
+    * @param psBaseDirectory
+    *
+    * @author Andreas Brod
+    * @param pOut
+    * @param phsFiles
     */
    public static void analyse(String psBaseDirectory, PrintStream pOut, Set<File> phsFiles)
    {
@@ -531,26 +485,25 @@ public class DtdGenerator
       DtdData dtdData = new DtdData(null, false);
 
       dtdData.setPath(psBaseDirectory);
-      Hashtable<String, String> pSourceCodes = new Hashtable<String, String>();
+      Hashtable<String, String> pSourceCodes = new Hashtable<>();
       analyse(dtdData, psBaseDirectory, sAgents, DtdData.SRCPATH, pSourceCodes, pOut, phsFiles);
    }
 
-   /** 
-    * Method analyse 
-    * 
-    * @param pDtdData 
-    * @param psBaseDirectory 
-    * @param psAgents 
-    * @param psPath 
-    * 
-    * @author Andreas Brod 
-    * @param pSourceCodes 
-    * @param pOut 
-    * @param phsFiles 
+   /**
+    * Method analyse
+    *
+    * @param pDtdData
+    * @param psBaseDirectory
+    * @param psAgents
+    * @param psPath
+    *
+    * @author Andreas Brod
+    * @param pSourceCodes
+    * @param pOut
+    * @param phsFiles
     */
-   public static void analyse(DtdData pDtdData, String psBaseDirectory, String psAgents,
-                              String psPath, Hashtable<String, String> pSourceCodes,
-                              PrintStream pOut, Set<File> phsFiles)
+   public static void analyse(DtdData pDtdData, String psBaseDirectory, String psAgents, String psPath,
+                              Hashtable<String, String> pSourceCodes, PrintStream pOut, Set<File> phsFiles)
    {
       File f = new File(psBaseDirectory + psPath);
 
@@ -560,8 +513,7 @@ public class DtdGenerator
             File[] files = f.listFiles();
 
             for (File file : files) {
-               analyse(pDtdData, psBaseDirectory, psAgents, psPath + "\\" + file.getName(),
-                     pSourceCodes, pOut, phsFiles);
+               analyse(pDtdData, psBaseDirectory, psAgents, psPath + "\\" + file.getName(), pSourceCodes, pOut, phsFiles);
             }
          }
       }
@@ -569,9 +521,7 @@ public class DtdGenerator
       if (f.getName().startsWith("TransformerHandler") && f.getName().endsWith(".java")) {
          String sName = f.getName().substring("TransformerHandler".length());
 
-         File fBase =
-            new File(f.getParentFile().getParentFile().getParentFile().toString() + File.separator
-                  + sName);
+         File fBase = new File(f.getParentFile().getParentFile().getParentFile().toString() + File.separator + sName);
 
          if (!fBase.exists()) {
             System.out.println("Ignore: " + fBase.getAbsolutePath());
@@ -595,10 +545,8 @@ public class DtdGenerator
             }
 
             if (psProvider.length() > 0) {
-               String psSourceList =
-                  DtdFrame.getSourceList(pDtdData, psBaseDirectory,
-                        Util.replaceString(psPath, ".", "\\") + "\\" + psMethod, false,
-                        new StringBuffer(), null, phsFiles);
+               String psSourceList = DtdFrame.getSourceList(pDtdData, psBaseDirectory,
+                     Util.replaceString(psPath, ".", "\\") + "\\" + psMethod, false, new StringBuffer(), null, phsFiles);
 
                /*
                 * if (psBaseDirectory.indexOf("\\src")<0){
@@ -612,11 +560,9 @@ public class DtdGenerator
                   // sPath = sPath.substring(sPath.indexOf("agents") + 7);
                }
 
-               analyse(psBaseDirectory, sPath, psMethod, psSourceList, psProvider, pSourceCodes,
-                     pOut, phsFiles);
+               analyse(psBaseDirectory, sPath, psMethod, psSourceList, psProvider, pSourceCodes, pOut, phsFiles);
             } else {
-               pOut.println("No Provider in Agents.xml for: " + psPath + "-" + psMethod + "-"
-                     + fBase.getAbsolutePath());
+               pOut.println("No Provider in Agents.xml for: " + psPath + "-" + psMethod + "-" + fBase.getAbsolutePath());
 
             }
 
@@ -625,15 +571,15 @@ public class DtdGenerator
 
    }
 
-   /** 
-    * Method getProvider 
-    * 
-    * @param psAgents 
-    * @param psPath 
-    * @param psClass 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getProvider
+    *
+    * @param psAgents
+    * @param psPath
+    * @param psClass
+    * @return
+    *
+    * @author Andreas Brod
     */
    private static String getProvider(String psAgents, String psPath, String psClass)
    {
@@ -653,8 +599,7 @@ public class DtdGenerator
 
       if (iPos > 0) {
          try {
-            String sLine =
-               psAgents.substring(psAgents.lastIndexOf("<", iPos), psAgents.indexOf("/>", iPos));
+            String sLine = psAgents.substring(psAgents.lastIndexOf("<", iPos), psAgents.indexOf("/>", iPos));
             Hashtable<String, StringBuffer> tags = getTags(sLine);
             StringBuffer sProviderType = tags.get("providerType");
             if ((sProviderType != null) && (sProviderType.length() > 0)) {
@@ -678,24 +623,22 @@ public class DtdGenerator
 
    }
 
-   /** 
-    * Method analyse 
-    * 
-    * @param psBaseDirectory 
-    * @param psPath 
-    * @param psMethod 
-    * @param psSourceList 
-    * @param psProvider 
-    * 
-    * @author Andreas Brod 
-    * @param pSourceCodes 
-    * @param pOut 
-    * @param phsFiles 
+   /**
+    * Method analyse
+    *
+    * @param psBaseDirectory
+    * @param psPath
+    * @param psMethod
+    * @param psSourceList
+    * @param psProvider
+    *
+    * @author Andreas Brod
+    * @param pSourceCodes
+    * @param pOut
+    * @param phsFiles
     */
-   private static void analyse(String psBaseDirectory, String psPath, String psMethod,
-                               String psSourceList, String psProvider,
-                               Hashtable<String, String> pSourceCodes, PrintStream pOut,
-                               Set<File> phsFiles)
+   private static void analyse(String psBaseDirectory, String psPath, String psMethod, String psSourceList, String psProvider,
+                               Hashtable<String, String> pSourceCodes, PrintStream pOut, Set<File> phsFiles)
    {
       StringBuffer sbReturn = new StringBuffer();
 
@@ -720,42 +663,35 @@ public class DtdGenerator
       // getBase Package
       String sPackage = Util.replaceString(psPath, "\\", ".");
 
-      pOut.println("analyse " + psBaseDirectory + "..." + psProvider + "." + psMethod + "("
-            + sPackage + ")");
+      pOut.println("analyse " + psBaseDirectory + "..." + psProvider + "." + psMethod + "(" + sPackage + ")");
 
-      writeFile(
-            sbReturn,
-            psBaseDirectory,
-            loadDefaultClass(sbReturn, "TransformerHandler", sPackage, psProvider, psMethod, "",
-                  psSourceList, psBaseDirectory, pSourceCodes, phsFiles), phsFiles);
+      writeFile(sbReturn, psBaseDirectory, loadDefaultClass(sbReturn, "TransformerHandler", sPackage, psProvider, psMethod, "",
+            psSourceList, psBaseDirectory, pSourceCodes, phsFiles), phsFiles);
 
    }
 
-   /** 
-    * Method generate 
-    * 
-    * 
-    * @param pFrame 
-    * @param psBaseDirectory 
-    * @param psPath 
-    * @param psProvider 
-    * @param psMethod 
-    * @param phtElements 
-    * @param pArcticPnrElementInfos 
-    * @param psUser 
-    * @param pbGenerateJavaFiles 
-    * @return 
-    * 
-    * @author Andreas Brod 
-    * @param pSourceCodes 
-    * @param phsFiles 
+   /**
+    * Method generate
+    *
+    *
+    * @param pFrame
+    * @param psBaseDirectory
+    * @param psPath
+    * @param psProvider
+    * @param psMethod
+    * @param phtElements
+    * @param pArcticPnrElementInfos
+    * @param psUser
+    * @param pbGenerateJavaFiles
+    * @return
+    *
+    * @author Andreas Brod
+    * @param pSourceCodes
+    * @param phsFiles
     */
-   public static String generate(DtdFrame pFrame, String psBaseDirectory, String psPath,
-                                 String psProvider, String psMethod,
-                                 Hashtable<String, List<String>> phtElements,
-                                 XmlObject pArcticPnrElementInfos, String psUser,
-                                 boolean pbGenerateJavaFiles,
-                                 Hashtable<String, String> pSourceCodes, Set<File> phsFiles)
+   public static String generate(DtdFrame pFrame, String psBaseDirectory, String psPath, String psProvider, String psMethod,
+                                 Hashtable<String, List<String>> phtElements, XmlObject pArcticPnrElementInfos, String psUser,
+                                 boolean pbGenerateJavaFiles, Hashtable<String, String> pSourceCodes, Set<File> phsFiles)
    {
 
       StringBuffer sbValidate = new StringBuffer();
@@ -787,8 +723,8 @@ public class DtdGenerator
       String sPackage = new String(cPackage);
 
       if (sPackage.startsWith("net.ifao.arctic.agents.")) {
-         if (validateXml(pFrame, sbValidate, psBaseDirectory, sPackage, pArcticPnrElementInfos,
-               psProvider, psUser, psMethod, phtElements, phsFiles)) {
+         if (validateXml(pFrame, sbValidate, psBaseDirectory, sPackage, pArcticPnrElementInfos, psProvider, psUser, psMethod,
+               phtElements, phsFiles)) {
             StringBuffer sb = new StringBuffer();
             String psSourceList = pFrame.save(true, sb, pFrame.getProviderElementInfo(), phsFiles);
             sbReturn.append(sb.toString() + "\n");
@@ -803,23 +739,19 @@ public class DtdGenerator
                sPackage = sPackage.substring(23);
 
                // TransformerHandler has to be created first
-               String[] list =
-                  { "Communication", "AgentFramework", "BusinessRulesController", "Factory",
-                        "GdsAdapter", "GdsRulesController", "ResponseReader", "BaseElement",
-                        "ErrorChecker", "Exception", "ErrorMapper", "GdsRulesControllerTest",
-                        "AllTestsCommunication", "AllTests", "AllTestsRoot", "TransformerHandler" };
+               String[] list = { "Communication", "AgentFramework", "BusinessRulesController", "Factory", "GdsAdapter",
+                     "GdsRulesController", "ResponseReader", "BaseElement", "ErrorChecker", "Exception", "ErrorMapper",
+                     "GdsRulesControllerTest", "AllTestsCommunication", "AllTests", "AllTestsRoot", "TransformerHandler" };
 
                for (String element : list) {
                   String sDirectory = psBaseDirectory;
 
                   if (element.endsWith("Test") || element.startsWith("AllTests")) {
-                     sDirectory =
-                        sDirectory.substring(0, sDirectory.lastIndexOf("\\src") + 1) + "jUnitTest";
+                     sDirectory = sDirectory.substring(0, sDirectory.lastIndexOf("\\src") + 1) + "jUnitTest";
                   }
 
-                  String sFile =
-                     loadDefaultClass(sbReturn, element, sPackage, psProvider, psMethod, "",
-                           psSourceList, sDirectory, pSourceCodes, phsFiles);
+                  String sFile = loadDefaultClass(sbReturn, element, sPackage, psProvider, psMethod, "", psSourceList, sDirectory,
+                        pSourceCodes, phsFiles);
 
                   writeFile(sbReturn, sDirectory, sFile, phsFiles);
 
@@ -830,11 +762,8 @@ public class DtdGenerator
                // _Provider_
 
                for (String sKey : phtElements.keySet()) {
-                  writeFile(
-                        sbReturn,
-                        psBaseDirectory,
-                        loadDefaultClass(sbReturn, "Element", sPackage, psProvider, psMethod, sKey,
-                              "", psBaseDirectory, pSourceCodes, phsFiles), phsFiles);
+                  writeFile(sbReturn, psBaseDirectory, loadDefaultClass(sbReturn, "Element", sPackage, psProvider, psMethod, sKey,
+                        "", psBaseDirectory, pSourceCodes, phsFiles), phsFiles);
                }
 
                // validate if all classes are generated
@@ -852,9 +781,8 @@ public class DtdGenerator
                      sKey = getCamelCaseName(sKey.substring(7));
 
                      // remove the toDos for the default Classes.
-                     String sNewFile =
-                        removeToDos(loadDefaultClass(sbReturn, "Element", sPackage, psProvider, "",
-                              sKey, "", psBaseDirectory, pSourceCodes, phsFiles));
+                     String sNewFile = removeToDos(loadDefaultClass(sbReturn, "Element", sPackage, psProvider, "", sKey, "",
+                           psBaseDirectory, pSourceCodes, phsFiles));
 
                      // get the Parameters
                      iEnd = sInfo.indexOf("</PnrElementInfo>", iStart);
@@ -886,19 +814,18 @@ public class DtdGenerator
       return sbReturn.toString() + sbValidate.toString();
    }
 
-   /** 
-    * method validateGetSetMethods 
-    * 
-    * @param psNewFile 
-    * @param psPnrElementInfo 
-    * @return 
-    * 
-    * @author brod 
+   /**
+    * method validateGetSetMethods
+    *
+    * @param psNewFile
+    * @param psPnrElementInfo
+    * @return
+    *
+    * @author brod
     */
    private static String validateGetSetMethods(String psNewFile, String psPnrElementInfo)
    {
-      StringBuffer baseType =
-         getTags(psPnrElementInfo.substring(0, psPnrElementInfo.indexOf(">"))).get("type");
+      StringBuffer baseType = getTags(psPnrElementInfo.substring(0, psPnrElementInfo.indexOf(">"))).get("type");
       if (baseType == null) {
          baseType = new StringBuffer("___");
       } else {
@@ -907,12 +834,10 @@ public class DtdGenerator
       psNewFile = removeAutomaticallyGeneratedMethods(psNewFile);
       int iStart = psPnrElementInfo.indexOf("<PnrElementParamInfo ");
       while (iStart > 0) {
-         String sPnrElementParamInfo =
-            psPnrElementInfo.substring(iStart + 1, psPnrElementInfo.indexOf(">", iStart) + 1);
+         String sPnrElementParamInfo = psPnrElementInfo.substring(iStart + 1, psPnrElementInfo.indexOf(">", iStart) + 1);
          if (!sPnrElementParamInfo.endsWith("/>")) {
             sPnrElementParamInfo =
-               psPnrElementInfo.substring(iStart + 1,
-                     psPnrElementInfo.indexOf("</PnrElementParamInfo>", iStart));
+               psPnrElementInfo.substring(iStart + 1, psPnrElementInfo.indexOf("</PnrElementParamInfo>", iStart));
          }
          Hashtable<String, StringBuffer> ht = getTags(sPnrElementParamInfo);
          String id = ht.get("id").toString();
@@ -965,10 +890,8 @@ public class DtdGenerator
          if (iPnrElementParamEnum > 0) {
             sParams += "    * Possible Enumerations are:<ul>\n";
             while (iPnrElementParamEnum > 0) {
-               Hashtable<String, StringBuffer> htEnum =
-                  getTags(sPnrElementParamInfo.substring(iPnrElementParamEnum));
-               iPnrElementParamEnum =
-                  sPnrElementParamInfo.indexOf("<PnrElementParamEnum", iPnrElementParamEnum + 1);
+               Hashtable<String, StringBuffer> htEnum = getTags(sPnrElementParamInfo.substring(iPnrElementParamEnum));
+               iPnrElementParamEnum = sPnrElementParamInfo.indexOf("<PnrElementParamEnum", iPnrElementParamEnum + 1);
                StringBuffer sName = htEnum.get("name");
                StringBuffer sValue = htEnum.get("value");
                if (sValue == null) {
@@ -985,14 +908,12 @@ public class DtdGenerator
          Enumeration<String> keys = ht.keys();
          while (keys.hasMoreElements()) {
             String sKey = keys.nextElement();
-            sParams +=
-               "    * <li> <b>" + getUnFormatedProvider(sKey) + "</b> = " + ht.get(sKey).toString()
-                     + "\n";
+            sParams += "    * <li> <b>" + getUnFormatedProvider(sKey) + "</b> = " + ht.get(sKey).toString() + "\n";
          }
          sParams += "    * </ul>\n";
          sParams += "    * <p>\n";
 
-         // try to find get method 
+         // try to find get method
          // add get method to the end
          String s = "";
          s += "   /**\n";
@@ -1043,29 +964,23 @@ public class DtdGenerator
          s += "      " + DONOTEDITTHISMETHOD + "\n";
          if (type_low2.startsWith("Enum")) {
             if (sDefault.length() > 0) {
-               s +=
-                  "      String sEnumValue = getParamValue(PnrEnumPnrElementParameterId." + id
-                        + ");\n";
+               s += "      String sEnumValue = getParamValue(PnrEnumPnrElementParameterId." + id + ");\n";
                s += "      if (sEnumValue == null || sEnumValue.length() == 0) {\n";
                s += "          sEnumValue = \"" + sDefault + "\";\n";
                s += "      }\n";
                s += "      return " + type_low + ".parse(sEnumValue);\n";
             } else {
-               s +=
-                  "      return " + type_low + ".parse(getParamValue(PnrEnumPnrElementParameterId."
-                        + id + "));\n";
+               s += "      return " + type_low + ".parse(getParamValue(PnrEnumPnrElementParameterId." + id + "));\n";
 
             }
          } else {
-            s +=
-               "      return getParamValue" + type_low2 + "(PnrEnumPnrElementParameterId." + id
-                     + ");\n";
+            s += "      return getParamValue" + type_low2 + "(PnrEnumPnrElementParameterId." + id + ");\n";
          }
          s += "   } // Generated Method get" + id_low + "()\n";
          s += "\n";
          psNewFile = addOrReplace(psNewFile, s, "get" + id_low + "", true);
 
-         // add Has Method         
+         // add Has Method
          if (sHas.length() > 0) {
             s = "";
             s += "   /**\n";
@@ -1078,9 +993,7 @@ public class DtdGenerator
             s += "   {\n";
             s += "      " + DONOTEDITTHISMETHOD + "\n";
             s += "      try {\n";
-            s +=
-               "          String s" + id + " = getParamValue(PnrEnumPnrElementParameterId." + id
-                     + ");\n";
+            s += "          String s" + id + " = getParamValue(PnrEnumPnrElementParameterId." + id + ");\n";
             s += "          if (s" + id + " == null || s" + id + ".length() == 0) {\n";
             s += "            return false;\n";
             s += "          }\n";
@@ -1100,17 +1013,17 @@ public class DtdGenerator
       return psNewFile;
    }
 
-   /** 
-    * method getTags 
-    * 
-    * @param psText 
-    * @return The Tags within the text 
-    * 
-    * @author brod 
+   /**
+    * method getTags
+    *
+    * @param psText
+    * @return The Tags within the text
+    *
+    * @author brod
     */
    private static Hashtable<String, StringBuffer> getTags(String psText)
    {
-      Hashtable<String, StringBuffer> ht = new Hashtable<String, StringBuffer>();
+      Hashtable<String, StringBuffer> ht = new Hashtable<>();
       boolean bText = false;
       StringBuffer sb = new StringBuffer();
       char[] cElement = psText.toCharArray();
@@ -1143,13 +1056,13 @@ public class DtdGenerator
       return ht;
    }
 
-   /** 
-    * Method removeAutomaticallyGeneratedMethods 
-    * 
-    * @param psNewFile 
-    * @return File without automatically GeneratedMethods 
-    * 
-    * @author brod 
+   /**
+    * Method removeAutomaticallyGeneratedMethods
+    *
+    * @param psNewFile
+    * @return File without automatically GeneratedMethods
+    *
+    * @author brod
     */
    private static String removeAutomaticallyGeneratedMethods(String psNewFile)
    {
@@ -1165,19 +1078,18 @@ public class DtdGenerator
       return psNewFile;
    }
 
-   /** 
-    * Method addOrReplace adds/replaces a specific method 
-    * 
-    * @param psJavaFile The JavaFile 
-    * @param psMethodValue The value of the method 
-    * @param psMethodName The name of the method 
-    * @param pbElement 
-    * @return New new text 
-    * 
-    * @author brod 
+   /**
+    * Method addOrReplace adds/replaces a specific method
+    *
+    * @param psJavaFile The JavaFile
+    * @param psMethodValue The value of the method
+    * @param psMethodName The name of the method
+    * @param pbElement
+    * @return New new text
+    *
+    * @author brod
     */
-   private static String addOrReplace(String psJavaFile, String psMethodValue, String psMethodName,
-                                      boolean pbElement)
+   private static String addOrReplace(String psJavaFile, String psMethodValue, String psMethodName, boolean pbElement)
    {
       if (psMethodName.indexOf("(") > 0) {
          psMethodName = psMethodName.substring(0, psMethodName.indexOf("("));
@@ -1204,14 +1116,14 @@ public class DtdGenerator
       return psJavaFile.substring(0, iStart) + psMethodValue + "\n" + psJavaFile.substring(iEnd);
    }
 
-   /** 
-    * Method removeToDos 
-    * 
-    * 
-    * @param psText 
-    * @return 
-    * 
-    * @author $author$ 
+   /**
+    * Method removeToDos
+    *
+    *
+    * @param psText
+    * @return
+    *
+    * @author $author$
     */
    private static String removeToDos(String psText)
    {
@@ -1225,14 +1137,14 @@ public class DtdGenerator
       return psText;
    }
 
-   /** 
-    * Method validateRuleMap 
-    * 
-    * @param psbLog 
-    * @param psProvider 
-    * @param psBaseDir 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method validateRuleMap
+    *
+    * @param psbLog
+    * @param psProvider
+    * @param psBaseDir
+    *
+    * @author Andreas Brod
     */
    private static void validateRuleMap(StringBuffer psbLog, String psProvider, String psBaseDir)
    {
@@ -1248,16 +1160,12 @@ public class DtdGenerator
 
          sText += "   <Provider type=\"" + psProvider + "\">\n";
          sText += "      <Event name=\"onBeforeProcess\">\n";
-         sText +=
-            "         <Rule class=\"net.ifao.arctic.agents.common.pnr.business.DisableEmptyElementsRule\"/>\n";
-         sText +=
-            "         <Rule class=\"net.ifao.arctic.agents.common.pnr.business.SplitParameterRule\"/>\n";
-         sText +=
-            "         <Rule class=\"net.ifao.arctic.agents.common.pnr.business.PlausiCheckRule\"/>\n";
+         sText += "         <Rule class=\"net.ifao.arctic.agents.common.pnr.business.DisableEmptyElementsRule\"/>\n";
+         sText += "         <Rule class=\"net.ifao.arctic.agents.common.pnr.business.SplitParameterRule\"/>\n";
+         sText += "         <Rule class=\"net.ifao.arctic.agents.common.pnr.business.PlausiCheckRule\"/>\n";
          sText += "      </Event>\n";
          sText += "      <Event name=\"onAfterProcess\">\n";
-         sText +=
-            "         <Rule class=\"net.ifao.arctic.agents.common.pnr.business.PostReservationConsistencyRule\"/>\n";
+         sText += "         <Rule class=\"net.ifao.arctic.agents.common.pnr.business.PostReservationConsistencyRule\"/>\n";
          sText += "      </Event>\n";
          sText += "   ";
          sRuleMap = sRuleMap.substring(0, lastIdx) + sText + sRuleMap.substring(lastIdx);
@@ -1268,28 +1176,27 @@ public class DtdGenerator
 
    }
 
-   /** 
-    * Method loadDefaultClass 
-    * 
-    * 
-    * 
-    * @param psbLog 
-    * @param psFileName 
-    * @param psPackage 
-    * @param psProvider 
-    * @param psMethod 
-    * @param psElement 
-    * @param psSourceList 
-    * @param psArcticBase 
-    * @return 
-    * 
-    * @author Andreas Brod 
-    * @param pSourceCodes 
-    * @param phsFiles 
+   /**
+    * Method loadDefaultClass
+    *
+    *
+    *
+    * @param psbLog
+    * @param psFileName
+    * @param psPackage
+    * @param psProvider
+    * @param psMethod
+    * @param psElement
+    * @param psSourceList
+    * @param psArcticBase
+    * @return
+    *
+    * @author Andreas Brod
+    * @param pSourceCodes
+    * @param phsFiles
     */
-   private static String loadDefaultClass(StringBuffer psbLog, String psFileName, String psPackage,
-                                          String psProvider, String psMethod, String psElement,
-                                          String psSourceList, String psArcticBase,
+   private static String loadDefaultClass(StringBuffer psbLog, String psFileName, String psPackage, String psProvider,
+                                          String psMethod, String psElement, String psSourceList, String psArcticBase,
                                           Hashtable<String, String> pSourceCodes, Set<File> phsFiles)
    {
 
@@ -1300,9 +1207,7 @@ public class DtdGenerator
 
       String sPackageRoot = psPackage + ".";
 
-      sFile =
-         Util.replaceString(sFile, "_PACKAGEROOT_",
-               sPackageRoot.substring(0, sPackageRoot.indexOf(".")));
+      sFile = Util.replaceString(sFile, "_PACKAGEROOT_", sPackageRoot.substring(0, sPackageRoot.indexOf(".")));
       sFile = Util.replaceString(sFile, "_Provider_", getUnFormatedProvider(psProvider));
       sFile = Util.replaceString(sFile, "_METHOD_", getCamelCaseName(psMethod));
       sFile = Util.replaceString(sFile, "_Method_", psMethod);
@@ -1325,8 +1230,7 @@ public class DtdGenerator
          // DtdTransformerHandler handler = new DtdTransformerHandler(psProvider, psSourceList,
          //               psArcticBase);
          DtdTransformerHandler handler =
-            new DtdTransformerHandler(psProvider, psSourceList, psArcticBase, pSourceCodes,
-                  sPackageRoot);
+            new DtdTransformerHandler(psProvider, psSourceList, psArcticBase, pSourceCodes, sPackageRoot);
 
          String sSource = handler.scrOfTransformer();
 
@@ -1337,12 +1241,10 @@ public class DtdGenerator
 
             // ... define the class as abstract
             sSource =
-               "\n    // Class is defined as abstract because DtdInfo contains"
-                     + "\n    // User defined entires\n\n" + sSource;
+               "\n    // Class is defined as abstract because DtdInfo contains" + "\n    // User defined entires\n\n" + sSource;
 
-            String sCustomized =
-               loadDefaultClass(psbLog, "CustomizedTransformer", psPackage, psProvider, psMethod,
-                     psElement, psSourceList, psArcticBase, pSourceCodes, phsFiles);
+            String sCustomized = loadDefaultClass(psbLog, "CustomizedTransformer", psPackage, psProvider, psMethod, psElement,
+                  psSourceList, psArcticBase, pSourceCodes, phsFiles);
 
             sCustomized = sCustomized.substring(0, sCustomized.lastIndexOf("}"));
 
@@ -1364,13 +1266,13 @@ public class DtdGenerator
       return sFile;
    }
 
-   /** 
-    * Method withoutVersionInfo 
-    * 
-    * @param psText 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method withoutVersionInfo
+    *
+    * @param psText
+    * @return
+    *
+    * @author Andreas Brod
     */
    private static String withoutVersionInfo(String psText)
    {
@@ -1383,29 +1285,28 @@ public class DtdGenerator
       return psText;
    }
 
-   /** 
-    * Method replace 
-    * 
-    * 
-    * @param psBaseDir 
-    * @param psbLog 
-    * @param psFileName 
-    * @param psShortName 
-    * @param psNewFile 
-    * @param psOldFile 
-    * @return 
-    * 
-    * @author Andreas Brod 
-    * @param phsFiles 
+   /**
+    * Method replace
+    *
+    *
+    * @param psBaseDir
+    * @param psbLog
+    * @param psFileName
+    * @param psShortName
+    * @param psNewFile
+    * @param psOldFile
+    * @return
+    *
+    * @author Andreas Brod
+    * @param phsFiles
     */
-   private static String updateFile(String psBaseDir, StringBuffer psbLog, String psFileName,
-                                    String psShortName, String psNewFile, String psOldFile,
-                                    Set<File> phsFiles)
+   private static String updateFile(String psBaseDir, StringBuffer psbLog, String psFileName, String psShortName,
+                                    String psNewFile, String psOldFile, Set<File> phsFiles)
    {
 
       // replace all 'old' generated by
       // get 'old' authors
-      Hashtable<String, String> htGeneratedBy = new Hashtable<String, String>();
+      Hashtable<String, String> htGeneratedBy = new Hashtable<>();
       int iGeneratedBy = psOldFile.indexOf("@author generated by");
       try {
          while (iGeneratedBy > 0) {
@@ -1417,8 +1318,8 @@ public class DtdGenerator
                i1++;
             }
             int i2 = psOldFile.indexOf(")", i1);
-            htGeneratedBy.put(psOldFile.substring(i1, i2).replaceAll(" ", "").replaceAll("\n", "")
-                  .replaceAll("\r", ""), psOldFile.substring(iGeneratedBy, i0));
+            htGeneratedBy.put(psOldFile.substring(i1, i2).replaceAll(" ", "").replaceAll("\n", "").replaceAll("\r", ""),
+                  psOldFile.substring(iGeneratedBy, i0));
             iGeneratedBy = psOldFile.indexOf("@author generated by", iGeneratedBy + 1);
          }
       }
@@ -1439,12 +1340,10 @@ public class DtdGenerator
             }
             int i2 = psNewFile.indexOf(")", i1);
             String sOldAuthor =
-               htGeneratedBy.get(psNewFile.substring(i1, i2).replaceAll(" ", "")
-                     .replaceAll("\n", "").replaceAll("\r", ""));
+               htGeneratedBy.get(psNewFile.substring(i1, i2).replaceAll(" ", "").replaceAll("\n", "").replaceAll("\r", ""));
             if ((sOldAuthor != null) && (sOldAuthor.length() > 0)) {
                // replace the text
-               psNewFile =
-                  psNewFile.substring(0, iGeneratedBy) + sOldAuthor + psNewFile.substring(i0);
+               psNewFile = psNewFile.substring(0, iGeneratedBy) + sOldAuthor + psNewFile.substring(i0);
             }
             iGeneratedBy = psNewFile.indexOf("@author generated by", iGeneratedBy + 1);
          }
@@ -1459,29 +1358,21 @@ public class DtdGenerator
       if (psNewFile.indexOf("THE FOLLOWING LINES WILL BE AUTOMATICALLY GENERATED !!!") > 0) {
          // psNewFile = getJIndent(psBaseDir, psNewFile);
 
-         String sGenOld =
-            psOldFile.substring(psOldFile
-                  .indexOf("THE FOLLOWING LINES WILL BE AUTOMATICALLY GENERATED !!!"));
-         String sGenNew =
-            psNewFile.substring(psNewFile
-                  .indexOf("THE FOLLOWING LINES WILL BE AUTOMATICALLY GENERATED !!!"));
+         String sGenOld = psOldFile.substring(psOldFile.indexOf("THE FOLLOWING LINES WILL BE AUTOMATICALLY GENERATED !!!"));
+         String sGenNew = psNewFile.substring(psNewFile.indexOf("THE FOLLOWING LINES WILL BE AUTOMATICALLY GENERATED !!!"));
 
          // correct the abstract entry
-         if ((sGenNew.indexOf("protected abstract ") > 0)
-               && (psOldFile.indexOf("public abstract class") < 0)) {
+         if ((sGenNew.indexOf("protected abstract ") > 0) && (psOldFile.indexOf("public abstract class") < 0)) {
             psOldFile = Util.replaceString(psOldFile, "public class ", "public abstract class ");
             sGenOld = "- changed in each case -";
-         } else if ((sGenNew.indexOf("protected abstract ") < 0)
-               && (psOldFile.indexOf("public abstract class") > 0)) {
+         } else if ((sGenNew.indexOf("protected abstract ") < 0) && (psOldFile.indexOf("public abstract class") > 0)) {
             psOldFile = Util.replaceString(psOldFile, "public abstract class ", "public class ");
             sGenOld = "- changed in each case -";
          }
 
          if (!withoutVersionInfo(sGenOld).equals(withoutVersionInfo(sGenNew))) {
             psOldFile =
-               psOldFile.substring(0,
-                     psOldFile.indexOf("THE FOLLOWING LINES WILL BE AUTOMATICALLY GENERATED !!!"))
-                     + sGenNew;
+               psOldFile.substring(0, psOldFile.indexOf("THE FOLLOWING LINES WILL BE AUTOMATICALLY GENERATED !!!")) + sGenNew;
             psOldFile = copyImports(psNewFile, psOldFile);
             phsFiles.add(Util.writeToFile(psFileName, psOldFile));
             psbLog.append("UPDATED - " + psShortName + "\n");
@@ -1551,15 +1442,14 @@ public class DtdGenerator
                   }
 
                   sEnumClasses += "   /**\n";
-                  sEnumClasses +=
-                     "    * This Enumerator is used for " + sClassName + " business elements.\n";
+                  sEnumClasses += "    * This Enumerator is used for " + sClassName + " business elements.\n";
                   sEnumClasses += "    * <p>\n";
                   sEnumClasses += "    * DO NOT EDIT THIS CLASS, BECAUSE IT WILL BE REGENERATED\n";
                   sEnumClasses += "    * @author Generator\n";
                   sEnumClasses += "    */\n";
                   sEnumClasses += "   public static class " + sClassName + "\n";
                   sEnumClasses += "   {\n";
-                  HashSet<String> enumItems = new HashSet<String>();
+                  HashSet<String> enumItems = new HashSet<>();
                   // get the EnumTypes
                   iStart = sNewCode.indexOf("Possible Enumerations are:");
                   int iEnd = sNewCode.indexOf("</ul>");
@@ -1575,10 +1465,8 @@ public class DtdGenerator
                               sEnumClasses += "      /**\n";
                               sEnumClasses += "       * Enumeration: " + sLi + "\n";
                               sEnumClasses += "       */\n";
-                              sEnumClasses +=
-                                 "      public static final " + sClassName + " "
-                                       + getMemberName(sLi2) + " = new " + sClassName + "(\""
-                                       + sLi2 + "\");\n";
+                              sEnumClasses += "      public static final " + sClassName + " " + getMemberName(sLi2) + " = new "
+                                    + sClassName + "(\"" + sLi2 + "\");\n";
                               sEnumClasses += "\n";
                            }
                         }
@@ -1600,24 +1488,18 @@ public class DtdGenerator
                   sEnumClasses += "\n";
                   sEnumClasses += "      /**\n";
                   sEnumClasses += "       * @param ps" + sClassName + " The type to parse.\n";
-                  sEnumClasses +=
-                     "       * @return The related " + sClassName + "-object. If the\n";
-                  sEnumClasses +=
-                     "       * " + sClassName + " is not found the returnValue is null\n";
+                  sEnumClasses += "       * @return The related " + sClassName + "-object. If the\n";
+                  sEnumClasses += "       * " + sClassName + " is not found the returnValue is null\n";
                   sEnumClasses += "       */\n";
-                  sEnumClasses +=
-                     "      public static " + sClassName + " parse(String ps" + sClassName + ")\n";
+                  sEnumClasses += "      public static " + sClassName + " parse(String ps" + sClassName + ")\n";
                   sEnumClasses += "      {\n";
                   sEnumClasses += "         if(ps" + sClassName + " == null) {\n";
                   sEnumClasses += "            return null;\n";
                   sEnumClasses += "         }\n";
                   Object[] array = enumItems.toArray();
                   for (Object element : array) {
-                     sEnumClasses +=
-                        "         if (ps" + sClassName + ".equalsIgnoreCase(\"" + element
-                              + "\")) {\n";
-                     sEnumClasses +=
-                        "            return " + getMemberName((String) element) + ";\n";
+                     sEnumClasses += "         if (ps" + sClassName + ".equalsIgnoreCase(\"" + element + "\")) {\n";
+                     sEnumClasses += "            return " + getMemberName((String) element) + ";\n";
                      sEnumClasses += "         }\n";
                   }
                   sEnumClasses += "         return null;\n";
@@ -1636,10 +1518,8 @@ public class DtdGenerator
                   sEnumClasses += "      }\n";
                   sEnumClasses += "\n";
                   sEnumClasses += "      /**\n";
-                  sEnumClasses +=
-                     "       * @param pOtherObject The object, which has to be compared\n";
-                  sEnumClasses +=
-                     "       * @return true, if the ElementConfirmation equals the other object\n";
+                  sEnumClasses += "       * @param pOtherObject The object, which has to be compared\n";
+                  sEnumClasses += "       * @return true, if the ElementConfirmation equals the other object\n";
                   sEnumClasses += "       */\n";
                   sEnumClasses += "      @Override\n";
                   sEnumClasses += "      public boolean equals(Object pOtherObject)\n";
@@ -1647,8 +1527,7 @@ public class DtdGenerator
                   sEnumClasses += "         if (pOtherObject == null) {\n";
                   sEnumClasses += "             return false;\n";
                   sEnumClasses += "         }\n";
-                  sEnumClasses +=
-                     "         return _s" + sClassName + ".equals(pOtherObject.toString());\n";
+                  sEnumClasses += "         return _s" + sClassName + ".equals(pOtherObject.toString());\n";
                   sEnumClasses += "      }\n";
                   sEnumClasses += "\n";
                   sEnumClasses += "      /**\n";
@@ -1698,14 +1577,12 @@ public class DtdGenerator
          try {
             boolean ok = true;
 
-            String sGenOld =
-               getStartEnd(psOldFile.substring(psOldFile.indexOf("## GENERATOR.BEGIN ##"),
-                     psOldFile.indexOf("## GENERATOR.END ##")));
+            String sGenOld = getStartEnd(
+                  psOldFile.substring(psOldFile.indexOf("## GENERATOR.BEGIN ##"), psOldFile.indexOf("## GENERATOR.END ##")));
 
             Hashtable<String, String> elementsOld = getElements(sGenOld);
-            Hashtable<String, String> elementsNew =
-               getElements(psNewFile.substring(psNewFile.indexOf("## GENERATOR.BEGIN ##"),
-                     psNewFile.indexOf("## GENERATOR.END ##")));
+            Hashtable<String, String> elementsNew = getElements(
+                  psNewFile.substring(psNewFile.indexOf("## GENERATOR.BEGIN ##"), psNewFile.indexOf("## GENERATOR.END ##")));
 
             // validate if all new element exist correctly
             for (String sKey : elementsNew.keySet()) {
@@ -1718,12 +1595,8 @@ public class DtdGenerator
 
                   // get package
                   int iPack = psOldFile.indexOf(".framework.transform.");
-                  String sPack =
-                     psBaseDir
-                           + "\\"
-                           + Util.replaceString(psOldFile.substring(
-                                 psOldFile.lastIndexOf(" ", iPack) + 1,
-                                 psOldFile.indexOf(".*", iPack)), ".", "\\");
+                  String sPack = psBaseDir + "\\" + Util.replaceString(
+                        psOldFile.substring(psOldFile.lastIndexOf(" ", iPack) + 1, psOldFile.indexOf(".*", iPack)), ".", "\\");
                   String sTH = Util.loadFromFile(sPack + "\\" + sTransHandler + ".java");
 
                   if (sTH.indexOf(" abstract class ") > 0) {
@@ -1757,9 +1630,7 @@ public class DtdGenerator
 
                int iStart = psOldFile.indexOf(sGenOld);
 
-               psOldFile =
-                  psOldFile.substring(0, iStart) + sGenNew
-                        + psOldFile.substring(iStart + sGenOld.length());
+               psOldFile = psOldFile.substring(0, iStart) + sGenNew + psOldFile.substring(iStart + sGenOld.length());
 
                // do not JIndent file !
                // psOldFile = getJIndent(psBaseDir, psOldFile);
@@ -1773,12 +1644,9 @@ public class DtdGenerator
          catch (Exception ex1) {}
       } else if (psNewFile.indexOf("//$JUnit-BEGIN$") > 0) {
          boolean bNew = false;
-         String sGenNew =
-            psOldFile.substring(psOldFile.indexOf("//$JUnit-BEGIN$"),
-                  psOldFile.indexOf("//$JUnit-END$"));
-         StringTokenizer tokenizer =
-            new StringTokenizer(psNewFile.substring(psNewFile.indexOf("//$JUnit-BEGIN$"),
-                  psNewFile.indexOf("//$JUnit-END$")), "\n");
+         String sGenNew = psOldFile.substring(psOldFile.indexOf("//$JUnit-BEGIN$"), psOldFile.indexOf("//$JUnit-END$"));
+         StringTokenizer tokenizer = new StringTokenizer(
+               psNewFile.substring(psNewFile.indexOf("//$JUnit-BEGIN$"), psNewFile.indexOf("//$JUnit-END$")), "\n");
 
          while (tokenizer.hasMoreTokens()) {
             String element = tokenizer.nextToken().trim();
@@ -1801,17 +1669,15 @@ public class DtdGenerator
 
                if (element.startsWith("import ")) {
                   if (psOldFile.indexOf(element) < 0) {
-                     psOldFile =
-                        psOldFile.substring(0, psOldFile.indexOf("import ")) + element + "\n"
-                              + psOldFile.substring(psOldFile.indexOf("import "));
+                     psOldFile = psOldFile.substring(0, psOldFile.indexOf("import ")) + element + "\n"
+                           + psOldFile.substring(psOldFile.indexOf("import "));
 
                   }
                }
             }
 
-            psOldFile =
-               psOldFile.substring(0, psOldFile.indexOf("//$JUnit-BEGIN$")) + sGenNew
-                     + psOldFile.substring(psOldFile.indexOf("//$JUnit-END$"));
+            psOldFile = psOldFile.substring(0, psOldFile.indexOf("//$JUnit-BEGIN$")) + sGenNew
+                  + psOldFile.substring(psOldFile.indexOf("//$JUnit-END$"));
             psOldFile = copyImports(psNewFile, psOldFile);
             phsFiles.add(Util.writeToFile(psFileName, psOldFile));
             psbLog.append("UPDATED - " + psShortName + "\n");
@@ -1823,14 +1689,14 @@ public class DtdGenerator
       return sToDoFile;
    }
 
-   /** 
-    * The method copyImports copies the imports from one file to another 
-    * 
-    * @param psNewFile The text of the new File 
-    * @param psOldFile The Text of the old File 
-    * @return The oldFile with the (new) Imports from the psNewFile 
-    * 
-    * @author brod 
+   /**
+    * The method copyImports copies the imports from one file to another
+    *
+    * @param psNewFile The text of the new File
+    * @param psOldFile The Text of the old File
+    * @return The oldFile with the (new) Imports from the psNewFile
+    *
+    * @author brod
     */
    private static String copyImports(String psNewFile, String psOldFile)
    {
@@ -1840,23 +1706,21 @@ public class DtdGenerator
          String sImport = importsNew.get(j);
          if (!importsOld.contains(sImport)) {
             int iImport = psOldFile.indexOf("import ");
-            psOldFile =
-               psOldFile.substring(0, iImport) + "import " + sImport + ";\n"
-                     + psOldFile.substring(iImport);
+            psOldFile = psOldFile.substring(0, iImport) + "import " + sImport + ";\n" + psOldFile.substring(iImport);
          }
       }
       return psOldFile;
    }
 
-   /** 
-    * The method methodMatch returns true if two methods match. The 
-    * whiteSpaces are eliminated. 
-    * 
-    * @param psText1 The first text 
-    * @param psText2 The second text 
-    * @return true if two methods match 
-    * 
-    * @author brod 
+   /**
+    * The method methodMatch returns true if two methods match. The
+    * whiteSpaces are eliminated.
+    *
+    * @param psText1 The first text
+    * @param psText2 The second text
+    * @return true if two methods match
+    *
+    * @author brod
     */
    private static boolean methodMatch(String psText1, String psText2)
    {
@@ -1865,13 +1729,13 @@ public class DtdGenerator
       return psText1.equals(psText2);
    }
 
-   /** 
-    * The method withoutBlank returns the String without any blank characters 
-    * 
-    * @param psText The text 
-    * @return The text (only with characters within the range ]32,127[ 
-    * 
-    * @author brod 
+   /**
+    * The method withoutBlank returns the String without any blank characters
+    *
+    * @param psText The text
+    * @return The text (only with characters within the range ]32,127[
+    *
+    * @author brod
     */
    private static String withoutBlank(String psText)
    {
@@ -1888,17 +1752,17 @@ public class DtdGenerator
       return sb.toString();
    }
 
-   /** 
-    * The method getImports return the import of a Text 
-    * 
-    * @param psText The text 
-    * @return The list of Imports. 
-    * 
-    * @author brod 
+   /**
+    * The method getImports return the import of a Text
+    *
+    * @param psText The text
+    * @return The list of Imports.
+    *
+    * @author brod
     */
    private static List<String> getImports(String psText)
    {
-      List<String> ret = new ArrayList<String>();
+      List<String> ret = new ArrayList<>();
       psText = psText.substring(0, psText.indexOf("{") + 1);
       StringTokenizer st = new StringTokenizer(psText, ";");
       while (st.hasMoreTokens()) {
@@ -1910,13 +1774,13 @@ public class DtdGenerator
       return ret;
    }
 
-   /** 
-    * method getMemberName 
-    * 
-    * @param psClassName The name of the class 
-    * @return The clas with valid chars. 
-    * 
-    * @author brod 
+   /**
+    * method getMemberName
+    *
+    * @param psClassName The name of the class
+    * @return The clas with valid chars.
+    *
+    * @author brod
     */
    private static String getMemberName(String psClassName)
    {
@@ -1935,26 +1799,24 @@ public class DtdGenerator
       return new String(charArray);
    }
 
-   /** 
-    * method getGeneratedMethods 
-    * 
-    * @param psFile the file 
-    * @return The list of GeneratedMethods 
-    * 
-    * @author brod 
+   /**
+    * method getGeneratedMethods
+    *
+    * @param psFile the file
+    * @return The list of GeneratedMethods
+    *
+    * @author brod
     */
    private static Hashtable<String, String> getGeneratedMethods(String psFile)
    {
-      Hashtable<String, String> ht = new Hashtable<String, String>();
+      Hashtable<String, String> ht = new Hashtable<>();
       int iStart = psFile.indexOf("// Generated Method ");
 
       while (iStart > 0) {
          iStart += 19;
 
          String sGenMethod =
-            psFile.substring(iStart,
-                  Math.max(psFile.indexOf("(", iStart + 1) + 1, psFile.indexOf(" ", iStart + 1)))
-                  .trim();
+            psFile.substring(iStart, Math.max(psFile.indexOf("(", iStart + 1) + 1, psFile.indexOf(" ", iStart + 1))).trim();
          if (sGenMethod.indexOf(")") > 0) {
             sGenMethod = sGenMethod.substring(0, sGenMethod.indexOf(")"));
          }
@@ -2005,19 +1867,18 @@ public class DtdGenerator
       return s1.equals(s2);
    }
 
-   /** 
-    * Method writeFile 
-    * 
-    * 
-    * @param psbLog 
-    * @param psBaseDir 
-    * @param psFile 
-    * 
-    * @author Andreas Brod 
-    * @param phsFiles 
+   /**
+    * Method writeFile
+    *
+    *
+    * @param psbLog
+    * @param psBaseDir
+    * @param psFile
+    *
+    * @author Andreas Brod
+    * @param phsFiles
     */
-   public static void writeFile(StringBuffer psbLog, String psBaseDir, String psFile,
-                                Set<File> phsFiles)
+   public static void writeFile(StringBuffer psbLog, String psBaseDir, String psFile, Set<File> phsFiles)
    {
       String sPackage = "";
 
@@ -2027,9 +1888,7 @@ public class DtdGenerator
          sPackage = sPackage.substring(0, sPackage.indexOf(";"));
       }
 
-      psFile =
-         Util.replaceString(psFile, "_GENERATOR_",
-               "generated by " + System.getProperty("user.name"));
+      psFile = Util.replaceString(psFile, "_GENERATOR_", "generated by " + System.getProperty("user.name"));
 
       String sFileName = "";
 
@@ -2048,9 +1907,7 @@ public class DtdGenerator
          sFileName = sFileName.substring(sFileName.lastIndexOf(" ") + 1);
 
          if (sPackage.length() > 0) {
-            sFileName =
-               psBaseDir + "\\" + Util.replaceString(sPackage, ".", "\\") + "\\" + sFileName
-                     + ".java";
+            sFileName = psBaseDir + "\\" + Util.replaceString(sPackage, ".", "\\") + "\\" + sFileName + ".java";
          } else {
             sFileName = psBaseDir + "\\" + sFileName + ".java";
 
@@ -2072,11 +1929,9 @@ public class DtdGenerator
             psbLog.append("CREATED - " + sShortName + "\n");
             phsFiles.add(Util.writeToFile(sFileName, psFile));
 
-            sToDoFile =
-               updateFile(psBaseDir, psbLog, sFileName, sShortName, psFile, psFile, phsFiles);
+            sToDoFile = updateFile(psBaseDir, psbLog, sFileName, sShortName, psFile, psFile, phsFiles);
          } else {
-            sToDoFile =
-               updateFile(psBaseDir, psbLog, sFileName, sShortName, psFile, sOldFile, phsFiles);
+            sToDoFile = updateFile(psBaseDir, psbLog, sFileName, sShortName, psFile, sOldFile, phsFiles);
          }
 
          // analyse the toDo's
@@ -2089,14 +1944,14 @@ public class DtdGenerator
 
    //   public static byte btCounter = 1;
    //
-   //   /** 
-   //    * Method getJIndent 
-   //    * 
-   //    * @param psBaseDir 
-   //    * @param psText 
-   //    * @return 
-   //    * 
-   //    * @author Andreas Brod 
+   //   /**
+   //    * Method getJIndent
+   //    *
+   //    * @param psBaseDir
+   //    * @param psText
+   //    * @return
+   //    *
+   //    * @author Andreas Brod
    //    */
    //   public static synchronized String getJIndent(String psBaseDir, String psText)
    //   {
@@ -2155,14 +2010,14 @@ public class DtdGenerator
    //   }
    //
 
-   /** 
-    * Method getToDoInfo 
-    * 
-    * 
-    * @param psText 
-    * @return 
-    * 
-    * @author $author$ 
+   /**
+    * Method getToDoInfo
+    *
+    *
+    * @param psText
+    * @return
+    *
+    * @author $author$
     */
    public static String getToDoInfo(String psText)
    {
@@ -2174,9 +2029,7 @@ public class DtdGenerator
          int iEnd = psText.indexOf("*/", iStart);
 
          try {
-            String sToDo =
-               Util.replaceString(psText.substring(psText.lastIndexOf("\n", iStart) + 1, iEnd),
-                     "\r", "");
+            String sToDo = Util.replaceString(psText.substring(psText.lastIndexOf("\n", iStart) + 1, iEnd), "\r", "");
 
             sb.append(sToDo + "\n");
          }
@@ -2188,13 +2041,13 @@ public class DtdGenerator
       return sb.toString();
    }
 
-   /** 
-    * Method getUnFormatedProvider 
-    * 
-    * @param psProvider 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getUnFormatedProvider
+    *
+    * @param psProvider
+    * @return
+    *
+    * @author Andreas Brod
     */
    public static String getUnFormatedProvider(String psProvider)
    {
@@ -2213,9 +2066,7 @@ public class DtdGenerator
          if (psProvider.charAt(i) == '_') {
             bUpper = true;
          } else {
-            sAgent +=
-               bUpper ? psProvider.substring(i, i + 1).toUpperCase() : psProvider.substring(i,
-                     i + 1).toLowerCase();
+            sAgent += bUpper ? psProvider.substring(i, i + 1).toUpperCase() : psProvider.substring(i, i + 1).toLowerCase();
             bUpper = false;
          }
       }
@@ -2224,14 +2075,14 @@ public class DtdGenerator
 
    }
 
-   /** 
-    * Method getCamelCaseName 
-    * 
-    * 
-    * @param psName 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getCamelCaseName
+    *
+    *
+    * @param psName
+    * @return
+    *
+    * @author Andreas Brod
     */
    public static String getCamelCaseName(String psName)
    {
@@ -2259,25 +2110,24 @@ public class DtdGenerator
 
       if (sCamelCaseName.toUpperCase().endsWith("_TYPE")) {
          sCamelCaseName =
-            sCamelCaseName.substring(0, sCamelCaseName.length() - 5)
-                  + sCamelCaseName.substring(sCamelCaseName.length() - 4);
+            sCamelCaseName.substring(0, sCamelCaseName.length() - 5) + sCamelCaseName.substring(sCamelCaseName.length() - 4);
       }
 
       return sCamelCaseName;
    }
 
-   /** 
-    * Method getElements 
-    * 
-    * 
-    * @param psText 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getElements
+    *
+    *
+    * @param psText
+    * @return
+    *
+    * @author Andreas Brod
     */
    private static Hashtable<String, String> getElements(String psText)
    {
-      Hashtable<String, String> ht = new Hashtable<String, String>();
+      Hashtable<String, String> ht = new Hashtable<>();
       BufferedReader reader = new BufferedReader(new StringReader(psText));
       String sLine = "";
       String sKey = "";
@@ -2307,14 +2157,14 @@ public class DtdGenerator
       return ht;
    }
 
-   /** 
-    * Method getStartEnd 
-    * 
-    * 
-    * @param psText 
-    * @return 
-    * 
-    * @author Andreas Brod 
+   /**
+    * Method getStartEnd
+    *
+    *
+    * @param psText
+    * @return
+    *
+    * @author Andreas Brod
     */
    private static String getStartEnd(String psText)
    {
@@ -2325,8 +2175,7 @@ public class DtdGenerator
       try {
          int iStart = psText.indexOf("//");
 
-         while ((iStart > 0) && (psText.charAt(iStart + 2) >= ' ')
-               && (psText.charAt(iStart + 3) >= ' ')) {
+         while ((iStart > 0) && (psText.charAt(iStart + 2) >= ' ') && (psText.charAt(iStart + 3) >= ' ')) {
             iStart = psText.indexOf("//", iStart + 2);
          }
 

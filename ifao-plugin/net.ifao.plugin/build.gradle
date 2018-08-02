@@ -22,7 +22,6 @@ eclipse {
    }
 
    classpath {
-
-      // containers 'org.eclipse.pde.core.requiredPlugins'
+      containers 'org.eclipse.pde.core.requiredPlugins'
    }
 }

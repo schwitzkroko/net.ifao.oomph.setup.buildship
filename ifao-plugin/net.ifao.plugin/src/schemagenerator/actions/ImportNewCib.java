@@ -23,8 +23,7 @@ public class ImportNewCib
    {
       _sWsdlFile = psWsdlFile;
       _sBaseArctic = sBaseArctic;
-      _ffDirectory =
-         new File(ifaoplugin.Util.getProviderDataRootDirectory(sBaseArctic, "net/ifao/newcib"));
+      _ffDirectory = new File(ifaoplugin.Util.getProviderDataRootDirectory(sBaseArctic, "net/ifao/newcib"));
    }
 
    public String start(OutputStream swtConsoleStream)
@@ -37,8 +36,7 @@ public class ImportNewCib
          ImportWsdl importWsdl = new ImportWsdl(pOut);
 
          try {
-            importWsdl.importWsdl(_sWsdlFile, _ffDirectory.getAbsolutePath(),
-                  "net.ifao.newcib.soap", true);
+            importWsdl.importWsdl(_sWsdlFile, _ffDirectory.getAbsolutePath(), "net.ifao.newcib.soap", true);
 
             // validate the possible enumerations
             validateArcticResponseDtd(pOut);
@@ -58,9 +56,7 @@ public class ImportNewCib
       throws IOException
    {
       // get the xml object
-      XmlObject dataXsd =
-         new XmlObject(new File(_ffDirectory, "net/ifao/newcib/soap/type/data.xsd"))
-               .getFirstObject();
+      XmlObject dataXsd = new XmlObject(new File(_ffDirectory, "net/ifao/newcib/soap/type/data.xsd")).getFirstObject();
 
       StringBuilder sbCode = getEnumAncillaryCodeType(dataXsd);
       if (sbCode != null) {
@@ -70,12 +66,11 @@ public class ImportNewCib
          StringBuilder sbMeasure = getEnumAncillaryMeasure(dataXsd);
 
          File createMapper = createMapper(sbMapper.toString());
-         pOut.println("\n------------------------------------------" + "\nATTENTION: "
-               + createMapper.getName() + " was changed "
+         pOut.println("\n------------------------------------------" + "\nATTENTION: " + createMapper.getName() + " was changed "
                + "\n-----------------------------------------");
 
          // read the ArcticResponse.dtd
-         File arcticResponseDtd = new File(_sBaseArctic, "conf/definitions/ArcticResponse.dtd");
+         File arcticResponseDtd = ifaoplugin.Util.getConfFile(_sBaseArctic, "ArcticResponse.dtd");
 
          ArrayList<String> readFile = Util.readFile(arcticResponseDtd.getAbsolutePath());
          boolean bChanged = false;
@@ -106,8 +101,7 @@ public class ImportNewCib
          }
          if (bChanged) {
             Util.writeFile(readFile, arcticResponseDtd.getAbsolutePath(), false);
-            pOut.println("\n------------------------------------------"
-                  + "\nATTENTION: ArcticResponse.dtd was changed "
+            pOut.println("\n------------------------------------------" + "\nATTENTION: ArcticResponse.dtd was changed "
                   + "\n-----------------------------------------");
          }
       }
@@ -140,8 +134,7 @@ public class ImportNewCib
       int iStartLen = sbDep.length();
       // add the generics
       XmlObject[] subObject =
-         dataXsd.createObject("simpleType", "name", "DependencyType", true)
-               .createObject("restriction").getObjects("enumeration");
+         dataXsd.createObject("simpleType", "name", "DependencyType", true).createObject("restriction").getObjects("enumeration");
       for (XmlObject dependencyType : subObject) {
          if (sbDep.length() > iStartLen) {
             sbDep.append(" | ");
@@ -175,101 +168,87 @@ public class ImportNewCib
             }
             String name = element.getAttribute("name");
             name = name.substring(0, 1).toUpperCase() + name.substring(1);
-            String sName =
-               upperCase(name).toLowerCase().replaceAll("except_", "exception_").toUpperCase();
+            String sName = upperCase(name).toLowerCase().replaceAll("except_", "exception_").toUpperCase();
             if (sType.contains("ArrayOfString")) {
                sbDep.append(sName);
                sb.append("      if (pCibDependencies.get" + name + "() != null) {\n");
-               sb.append("         for (String s" + name + " : pCibDependencies.get" + name
-                     + "().getItem()) {\n");
+               sb.append("         for (String s" + name + " : pCibDependencies.get" + name + "().getItem()) {\n");
                sb.append("            if (s" + name + ".length() > 0) {\n");
-               sb.append("               addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + ", s" + name + ");\n");
+               sb.append("               addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + ", s" + name
+                     + ");\n");
                sb.append("            }\n");
                sb.append("         }\n");
                sb.append("      }\n");
             } else if (sType.contains("ArrayOfCibCode")) {
                sbDep.append(sName);
                sb.append("      if (pCibDependencies.get" + name + "() != null) {\n");
-               sb.append("         for (CibCode cc" + name + " : pCibDependencies.get" + name
-                     + "().getItem()) {\n");
+               sb.append("         for (CibCode cc" + name + " : pCibDependencies.get" + name + "().getItem()) {\n");
                sb.append("            if (cc" + name + " != null) {\n");
-               sb.append("               addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + ", cc" + name + ".getCode());\n");
+               sb.append("               addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + ", cc" + name
+                     + ".getCode());\n");
                sb.append("            }\n");
                sb.append("         }\n");
                sb.append("      }\n");
             } else if (sType.contains("string")) {
                sbDep.append(sName);
-               sb.append("      if ((pCibDependencies.get" + name
-                     + "() != null) && (pCibDependencies.get" + name + "().length() > 0)) {\n");
-               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + ",\n");
+               sb.append("      if ((pCibDependencies.get" + name + "() != null) && (pCibDependencies.get" + name
+                     + "().length() > 0)) {\n");
+               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + ",\n");
                sb.append("               pCibDependencies.get" + name + "());\n");
                sb.append("      }\n");
             } else if (sType.contains("DependencyDateRangeAttribute")) {
                sbDep.append(sName + "_FROM | " + sName + "_TO");
                sb.append("      if (pCibDependencies.get" + name + "() != null) {\n");
-               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + "_FROM,\n");
+               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + "_FROM,\n");
                sb.append("               pCibDependencies.get" + name
                      + "().getValueFrom().getValue()).setUnit(getResEnumAncillaryMeasure(\n");
-               sb.append("               pCibDependencies.get" + name
-                     + "().getValueFrom().getUnit().value()));\n");
-               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + "_TO,\n");
+               sb.append("               pCibDependencies.get" + name + "().getValueFrom().getUnit().value()));\n");
+               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + "_TO,\n");
                sb.append("               pCibDependencies.get" + name
                      + "().getValueTo().getValue()).setUnit(getResEnumAncillaryMeasure(\n");
-               sb.append("               pCibDependencies.get" + name
-                     + "().getValueTo().getUnit().value()));\n");
+               sb.append("               pCibDependencies.get" + name + "().getValueTo().getUnit().value()));\n");
                sb.append("      }\n");
             } else if (sType.contains("DependencyDateRange")) {
                sbDep.append(sName + "_FROM | " + sName + "_TO");
                sb.append("      if (pCibDependencies.get" + name + "() != null) {\n");
-               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + "_FROM,\n");
+               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + "_FROM,\n");
                sb.append("               pCibDependencies.get" + name + "().getDateFrom());\n");
-               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + "_TO,\n");
+               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + "_TO,\n");
                sb.append("               pCibDependencies.get" + name + "().getDateTo());\n");
                sb.append("      }\n");
             } else if (sType.contains("DependencySingleAttribute")) {
                sbDep.append(sName);
                sb.append("      if (pCibDependencies.get" + name + "() != null) {\n");
-               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + ",\n");
-               sb.append("               pCibDependencies.get" + name
-                     + "().getValue()).setUnit(getResEnumAncillaryMeasure(\n");
+               sb.append("         addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + ",\n");
+               sb.append("               pCibDependencies.get" + name + "().getValue()).setUnit(getResEnumAncillaryMeasure(\n");
                sb.append("               pCibDependencies.get" + name + "().getUnit().value()));\n");
                sb.append("      }\n");
             } else if (sType.contains("CubeChannel")) {
                sbDep.append(sName);
                sb.append("      if (pCibDependencies.get" + name + "() != null) {\n");
-               sb.append("         for (CubeChannel cc" + name + " : pCibDependencies.get" + name
-                     + "().getItem()) {\n");
+               sb.append("         for (CubeChannel cc" + name + " : pCibDependencies.get" + name + "().getItem()) {\n");
                sb.append("            if (cc" + name + " != null) {\n");
-               sb.append("               addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + ", cc" + name + ".name());\n");
+               sb.append("               addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + ", cc" + name
+                     + ".name());\n");
                sb.append("            }\n");
                sb.append("         }\n");
                sb.append("      }\n");
 
             } else if (sType.contains("boolean")) {
                sbDep.append(sName);
-               //The boolean is actually Boolean and we can check whether it is != null  
+               //The boolean is actually Boolean and we can check whether it is != null
                sb.append("      if ((pCibDependencies.is" + name + "() != null)) {\n");
-               sb.append("     addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName
-                     + ", pCibDependencies.is" + name + "());\n");
+               sb.append("     addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + ", pCibDependencies.is"
+                     + name + "());\n");
                sb.append("      }\n");
-               
+
             } else if (sType.contains("ArrayOfChannelType")) {
                sbDep.append(sName);
                sb.append("      if (pCibDependencies.get" + name + "() != null) {\n");
-               sb.append("         for (ChannelType ct" + name + " : pCibDependencies.get" + name
-                     + "().getItem()) {\n");
+               sb.append("         for (ChannelType ct" + name + " : pCibDependencies.get" + name + "().getItem()) {\n");
                sb.append("            if (ct" + name + " != null) {\n");
-               sb.append("               addDependency(pResAncillaryInfoItem, ResEnumDependencyType."
-                     + sName + ", ct" + name + ".name());\n");
+               sb.append("               addDependency(pResAncillaryInfoItem, ResEnumDependencyType." + sName + ", ct" + name
+                     + ".name());\n");
                sb.append("            }\n");
                sb.append("         }\n");
                sb.append("      }\n");
@@ -439,8 +418,7 @@ public class ImportNewCib
       sb.append("\n");
       sb.append("}\n");
       sb.append("\n");
-      File file =
-         new File(_sBaseArctic, "src/net/ifao/arctic/agents/newcib/wsdl/DependencyTypeMapper.java");
+      File file = new File(_sBaseArctic, "src/net/ifao/arctic/agents/newcib/wsdl/DependencyTypeMapper.java");
       Utils.writeFile(file, sb.toString());
       return file;
    }
