@@ -225,6 +225,6 @@ def getBundleVersion(String version) {
 
 eclipse {
    project {
-      name = 'de.hkneissel.oomph.buildshipimport.ROOT'
+      name = 'net.ifao.oomph.buildshipimport.ROOT'
    }
 }
