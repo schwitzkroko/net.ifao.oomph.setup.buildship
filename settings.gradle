@@ -1,4 +1,4 @@
-include ':net.ifao..oomph.buildshipimport.plugin'
-include ':net.ifao..oomph.buildshipimport.plugin.edit'
-include ':net.ifao..oomph.buildshipimport.feature'
-include ':net.ifao..oomph.buildshipimport.site'
+include ':net.ifao.oomph.buildshipimport.plugin'
+include ':net.ifao.oomph.buildshipimport.plugin.edit'
+include ':net.ifao.oomph.buildshipimport.feature'
+include ':net.ifao.oomph.buildshipimport.site'

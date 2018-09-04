@@ -183,10 +183,10 @@ subprojects {
     }
 }
 
-def siteBuildDir = "${project(':de.hkneissel.oomph.buildshipimport.site').buildDir}/repository"
-def siteDirOnH = "file:/h:/cytric_development/new-arctic/dev_env/de.hkneissel.oomph.buildshipimport.site/${project.version}"
+def siteBuildDir = "${project(':net.ifao.oomph.buildshipimport.site').buildDir}/repository"
+def siteDirOnH = "file:/h:/cytric_development/new-arctic/dev_env/net.ifao.oomph.buildshipimport.site/${project.version}"
 
-task siteCopyToH(dependsOn: ':de.hkneissel.oomph.buildshipimport.site:build', type: Copy) {
+task siteCopyToH(dependsOn: ':net.ifao.oomph.buildshipimport.site:build', type: Copy) {
 
    group = "buildshipimport.site"
    description = "copy created update site to 'h:' rollout folder"
