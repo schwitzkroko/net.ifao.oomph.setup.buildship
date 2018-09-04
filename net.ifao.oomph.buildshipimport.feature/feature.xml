@@ -10,7 +10,7 @@
     Eike Stepper - initial API and implementation
 -->
 <feature
-      id="de.hkneissel.oomph.buildshipimport"
+      id="net.ifao.oomph.buildshipimport"
       label="%featureName"
       version="1.0.0.snapshot"
       provider-name="%providerName">
@@ -28,18 +28,18 @@
    </license>
 
    <url>
-      <update label="buildshipimport i:FAO updates" url="file:/h:/cytric_development/new-arctic/dev_env/de.hkneissel.oomph.buildshipimport.site/1.0.0.snapshot"/>
+      <update label="%updateSiteName" url="%updateSiteUrl"/>
    </url>
 
    <plugin
-         id="de.hkneissel.oomph.buildshipimport"
+         id="net.ifao.oomph.buildshipimport.plugin"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="de.hkneissel.oomph.buildshipimport.edit"
+         id="net.ifao.oomph.buildshipimport.plugin.edit"
          download-size="0"
          install-size="0"
          version="0.0.0"
