@@ -1,6 +1,6 @@
 /**
  */
-package de.hkneissel.oomph.buildshipimport.util;
+package net.ifao.oomph.buildshipimport.util;
 
 
 import org.eclipse.emf.ecore.EObject;
@@ -9,8 +9,8 @@ import org.eclipse.emf.ecore.util.Switch;
 import org.eclipse.oomph.base.ModelElement;
 import org.eclipse.oomph.setup.SetupTask;
 
-import de.hkneissel.oomph.buildshipimport.BuildshipImportPackage;
-import de.hkneissel.oomph.buildshipimport.BuildshipImportTask;
+import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
+import net.ifao.oomph.buildshipimport.BuildshipImportTask;
 
 
 /**
@@ -23,7 +23,7 @@ import de.hkneissel.oomph.buildshipimport.BuildshipImportTask;
  * until a non-null result is returned,
  * which is the result of the switch.
  * <!-- end-user-doc -->
- * @see de.hkneissel.oomph.buildshipimport.BuildshipImportPackage
+ * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage
  * @generated
  */
 public class BuildshipImportSwitch<T>

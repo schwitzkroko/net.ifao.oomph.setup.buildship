@@ -1,6 +1,6 @@
 /**
  */
-package de.hkneissel.oomph.buildshipimport.impl;
+package net.ifao.oomph.buildshipimport.impl;
 
 
 import org.eclipse.emf.ecore.EClass;
@@ -9,9 +9,9 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
 import org.eclipse.emf.ecore.plugin.EcorePlugin;
 
-import de.hkneissel.oomph.buildshipimport.BuildshipImportFactory;
-import de.hkneissel.oomph.buildshipimport.BuildshipImportPackage;
-import de.hkneissel.oomph.buildshipimport.BuildshipImportTask;
+import net.ifao.oomph.buildshipimport.BuildshipImportFactory;
+import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
+import net.ifao.oomph.buildshipimport.BuildshipImportTask;
 
 
 /**

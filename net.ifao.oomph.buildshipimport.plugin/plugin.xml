@@ -10,7 +10,7 @@
       <!-- @generated BuildshipImport -->
       <package
             uri="http://www.hkneissel.de/oomph/buildshipimport/1.0"
-            class="de.hkneissel.oomph.buildshipimport.BuildshipImportPackage"
+            class="net.ifao.oomph.buildshipimport.BuildshipImportPackage"
             genModel="model/BuildshipImport.genmodel"/>
    </extension>
 

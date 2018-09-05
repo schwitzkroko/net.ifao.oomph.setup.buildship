@@ -1,4 +1,4 @@
-package de.hkneissel.oomph.buildshipimport.impl.buildship;
+package net.ifao.oomph.buildshipimport.impl.buildship;
 
 
 import java.io.File;

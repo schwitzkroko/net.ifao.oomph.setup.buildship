@@ -93,7 +93,7 @@ The task ~~provides~~ used to provide the following properties, work-in-progress
 ### Update site
 
 The build supports the copying of the generated ps update site, internal locations is currently here:
-[file:///H:/cytric_development/new-arctic/dev_env/de.hkneissel.oomph.buildshipimport.site/1.0.0.snapshot](file:///H:/cytric_development/new-arctic/dev_env/de.hkneissel.oomph.buildshipimport.site/1.0.0.snapshot)
+[file:///H:/cytric_development/new-arctic/dev_env/net.ifao.oomph.buildshipimport.site/1.0.0.snapshot](file:///H:/cytric_development/new-arctic/dev_env/net.ifao.oomph.buildshipimport.site/1.0.0.snapshot)
 
 There is some code taken from the *buildship* project to update an existing "composite" site - not in use and untested.
 
@@ -110,7 +110,7 @@ RCP IDE eclipse... etc TBC
 - introduce a category in generated update site
 - some automated testing using `eclipsebuild.TestBundlePlugin'
 - configure CI build
-- mandatory release to community ([EPL 1.0](https://opensource.org/licenses/EPL-1.0)) , preferably in a [GitHub corporate group](https://github.com/AmadeusITGroup) 
+- mandatory release to community ([EPL 1.0](https://opensource.org/licenses/EPL-1.0)) , preferably in a [GitHub corporate group](https://github.com/AmadeusITGroup)
 
 
 

@@ -1,6 +1,6 @@
 /**
  */
-package de.hkneissel.oomph.buildshipimport;
+package net.ifao.oomph.buildshipimport;
 
 
 import org.eclipse.emf.common.util.EList;
@@ -17,10 +17,10 @@ import org.eclipse.oomph.setup.SetupTask;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link de.hkneissel.oomph.buildshipimport.BuildshipImportTask#getSourceLocators <em>Source Locators</em>}</li>
+ *   <li>{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getSourceLocators <em>Source Locators</em>}</li>
  * </ul>
  *
- * @see de.hkneissel.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask()
+ * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask()
  * @model annotation="http://www.eclipse.org/oomph/setup/ValidTriggers triggers='STARTUP MANUAL'"
  * @generated
  */
@@ -37,7 +37,7 @@ public interface BuildshipImportTask
     * </p>
     * <!-- end-user-doc -->
     * @return the value of the '<em>Source Locators</em>' containment reference list.
-    * @see de.hkneissel.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask_SourceLocators()
+    * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask_SourceLocators()
     * @model containment="true" required="true"
     *        extendedMetaData="name='sourceLocator'"
     * @generated

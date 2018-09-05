@@ -2,18 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
-Bundle-SymbolicName: de.hkneissel.oomph.buildshipimport.edit;singleton:=true
+Bundle-SymbolicName: net.ifao.oomph.buildshipimport.plugin.edit;singleton:=true
 Bundle-Version: 1.0.0.snapshot
 Bundle-ClassPath: .
-Bundle-Activator: de.hkneissel.oomph.buildshipimport.provider.BuildshipImportEditPlugin$Implementation
+Bundle-Activator: net.ifao.oomph.buildshipimport.provider.BuildshipImportEditPlugin$Implementation
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: de.hkneissel.oomph.buildshipimport,
+Require-Bundle: net.ifao.oomph.buildshipimport.plugin,
  org.eclipse.core.runtime,
  org.eclipse.emf.edit,
  org.eclipse.oomph.base.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.predicates.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.resources.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.setup.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport
-Export-Package: de.hkneissel.oomph.buildshipimport.provider;version="1.0.0"
+Export-Package: net.ifao.oomph.buildshipimport.provider;version="1.0.0"

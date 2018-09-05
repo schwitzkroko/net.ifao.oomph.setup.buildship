@@ -10,7 +10,7 @@
       <!-- @generated BuildshipImport -->
       <factory
             uri="http://www.hkneissel.de/oomph/buildshipimport/1.0"
-            class="de.hkneissel.oomph.buildshipimport.provider.BuildshipImportItemProviderAdapterFactory"
+            class="net.ifao.oomph.buildshipimport.provider.BuildshipImportItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -23,10 +23,10 @@
       <!-- @generated BuildshipImport -->
       <extender
             uri="http://www.eclipse.org/oomph/base/1.0"
-            class="de.hkneissel.oomph.buildshipimport.provider.BuildshipImportItemProviderAdapterFactory$BaseChildCreationExtender"/>
+            class="net.ifao.oomph.buildshipimport.provider.BuildshipImportItemProviderAdapterFactory$BaseChildCreationExtender"/>
       <extender
             uri="http://www.eclipse.org/oomph/setup/1.0"
-            class="de.hkneissel.oomph.buildshipimport.provider.BuildshipImportItemProviderAdapterFactory$SetupChildCreationExtender"/>
+            class="net.ifao.oomph.buildshipimport.provider.BuildshipImportItemProviderAdapterFactory$SetupChildCreationExtender"/>
    </extension>
 
 </plugin>
