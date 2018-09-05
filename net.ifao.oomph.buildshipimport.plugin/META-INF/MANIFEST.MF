@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
-Bundle-SymbolicName: net.ifao.oomph.buildshipimport;singleton:=true
+Bundle-SymbolicName: net.ifao.oomph.buildshipimport.plugin;singleton:=true
 Bundle-Version: 1.0.0.snapshot
 Bundle-ClassPath: .
 Bundle-Localization: plugin
