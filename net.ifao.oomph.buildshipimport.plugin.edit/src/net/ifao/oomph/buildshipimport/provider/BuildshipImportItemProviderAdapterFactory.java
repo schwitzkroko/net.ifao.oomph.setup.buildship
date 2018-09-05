@@ -45,7 +45,7 @@ public class BuildshipImportItemProviderAdapterFactory
    protected IChangeNotifier changeNotifier = new ChangeNotifier();
 
    protected ChildCreationExtenderManager childCreationExtenderManager =
-      new ChildCreationExtenderManager(BuildshipImportEditPlugin.INSTANCE, "http://www.hkneissel.de/oomph/buildshipimport/1.0");
+      new ChildCreationExtenderManager(BuildshipImportEditPlugin.INSTANCE, "http://www.ifao.net/oomph/buildshipimport/1.0");
 
    protected Collection<Object> supportedTypes = new ArrayList();
 

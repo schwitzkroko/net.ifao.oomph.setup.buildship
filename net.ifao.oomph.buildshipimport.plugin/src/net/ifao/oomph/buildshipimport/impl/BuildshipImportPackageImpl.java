@@ -211,7 +211,7 @@ public class BuildshipImportPackageImpl
             !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
       // Create resource
-      createResource("http://www.hkneissel.de/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore");
+      createResource("http://www.ifao.net/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore");
 
       // Create annotations
       // http://www.eclipse.org/emf/2002/Ecore
@@ -236,7 +236,7 @@ public class BuildshipImportPackageImpl
    {
       String source = "http://www.eclipse.org/emf/2002/Ecore";
       addAnnotation(this, source,
-            new String[]{ "schemaLocation", "http://www.hkneissel.de/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore" });
+            new String[]{ "schemaLocation", "http://www.ifao.net/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore" });
    }
 
    /**

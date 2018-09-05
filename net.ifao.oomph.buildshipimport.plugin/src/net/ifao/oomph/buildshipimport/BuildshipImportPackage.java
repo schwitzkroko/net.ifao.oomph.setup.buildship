@@ -22,7 +22,7 @@ import org.eclipse.oomph.setup.SetupPackage;
  * <!-- end-user-doc -->
  * @see net.ifao.oomph.buildshipimport.BuildshipImportFactory
  * @model kind="package"
- *        annotation="http://www.eclipse.org/emf/2002/Ecore schemaLocation='http://www.hkneissel.de/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore'"
+ *        annotation="http://www.eclipse.org/emf/2002/Ecore schemaLocation='http://www.ifao.net/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore'"
  *        annotation="http://www.eclipse.org/oomph/setup/Enablement variableName='setup.projects.p2' repository='${oomph.update.url}' installableUnits='net.ifao.oomph.buildshipimport.feature.group'"
  *        annotation="http://www.eclipse.org/oomph/base/LabelProvider imageBaseURI='http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/net.ifao.oomph.buildshipimport.plugin.edit/icons/full/obj16'"
  * @generated
@@ -44,7 +44,7 @@ public interface BuildshipImportPackage
     * <!-- end-user-doc -->
     * @generated
     */
-   String eNS_URI = "http://www.hkneissel.de/oomph/buildshipimport/1.0";
+   String eNS_URI = "http://www.ifao.net/oomph/buildshipimport/1.0";
 
    /**
     * The package namespace name.

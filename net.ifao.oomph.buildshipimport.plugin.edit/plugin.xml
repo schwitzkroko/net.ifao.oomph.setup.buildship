@@ -9,7 +9,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <!-- @generated BuildshipImport -->
       <factory
-            uri="http://www.hkneissel.de/oomph/buildshipimport/1.0"
+            uri="http://www.ifao.net/oomph/buildshipimport/1.0"
             class="net.ifao.oomph.buildshipimport.provider.BuildshipImportItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
