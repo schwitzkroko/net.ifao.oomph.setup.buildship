@@ -145,7 +145,7 @@ eclipseBuild {
   }
 }
 
-version = '1.0.0.snapshot'
+version = '1.0.0'
 
 subprojects {
     version = rootProject.version
