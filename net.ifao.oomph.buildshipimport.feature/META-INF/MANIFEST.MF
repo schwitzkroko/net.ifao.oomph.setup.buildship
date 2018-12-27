@@ -1,5 +1,1 @@
 Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: buildshipimport-feature
-Bundle-SymbolicName: net.ifao.oomph.buildshipimport.feature
-Bundle-Version: 1.0.0.snapshot

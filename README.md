@@ -92,10 +92,19 @@ The task ~~provides~~ used to provide the following properties, work-in-progress
 
 ### Update site
 
-The build supports the copying of the generated ps update site, internal locations is currently here:
-[file:///H:/cytric_development/new-arctic/dev_env/net.ifao.oomph.buildshipimport.site/1.0.0.snapshot](file:///H:/cytric_development/new-arctic/dev_env/net.ifao.oomph.buildshipimport.site/1.0.0.snapshot)
+The build supports the copying of the generated update sites, internal locations are currently below here:
+[http://polaris.home.ifao.net:8080/eclipse/updates/eclipse_oomph_buildshipimport/](http://polaris.home.ifao.net:8080/eclipse/updates/eclipse_oomph_buildshipimport/)
 
-There is some code taken from the *buildship* project to update an existing "composite" site - not in use and untested.
+
+Create a release version and deploy:
+
+```bash
+{ eclipse_oomph_buildshipimport } master » ./gradlew clean build./gradlew clean build -Prelease.type=release
+{ eclipse_oomph_buildshipimport } master » cd net.ifao.oomph.buildshipimport.site/
+{ net.ifao.oomph.buildshipimport.site } master » ../gradlew uploadUpdateSite -Prelease.type=release
+```
+
+For deploying a snapshot skip the last property "release" on each of the above gradle calls.
 
 
 ## Develop

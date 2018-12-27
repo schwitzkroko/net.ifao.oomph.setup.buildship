@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/net.ifao.oomph.buildshipimport_1.0.0.snapshot.jar" id="net.ifao.oomph.buildshipimport" version="1.0.0.snapshot">
+   <feature url="features/net.ifao.oomph.buildshipimport_0.0.0.jar" id="net.ifao.oomph.buildshipimport" version="0.0.0">
       <category name="eclipse_oomph_buildshipimport"/>
    </feature>
    <category-def name="eclipse_oomph_buildshipimport" label="i:FAO Eclipse Plug-in: Oomph Buildship Import"/>

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: net.ifao.oomph.buildshipimport.plugin;singleton:=true
-Bundle-Version: 1.0.0.snapshot
+Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -22,6 +22,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.slf4j.api;bundle-version="[1.7.0,1.8.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: net.ifao.oomph.buildshipimport.BuildshipImportPlugin$Implementation
-Export-Package: net.ifao.oomph.buildshipimport;version="1.0.0",
- net.ifao.oomph.buildshipimport.impl;version="1.0.0",
- net.ifao.oomph.buildshipimport.util;version="1.0.0"
+Export-Package: net.ifao.oomph.buildshipimport,
+ net.ifao.oomph.buildshipimport.impl,
+ net.ifao.oomph.buildshipimport.util

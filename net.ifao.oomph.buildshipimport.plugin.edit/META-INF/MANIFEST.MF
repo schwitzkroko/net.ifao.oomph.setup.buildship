@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: net.ifao.oomph.buildshipimport.plugin.edit;singleton:=true
-Bundle-Version: 1.0.0.snapshot
+Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: net.ifao.oomph.buildshipimport.provider.BuildshipImportEditPlugin$Implementation
 Bundle-ActivationPolicy: lazy
@@ -16,4 +16,4 @@ Require-Bundle: net.ifao.oomph.buildshipimport.plugin,
  org.eclipse.oomph.predicates.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.resources.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.setup.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport
-Export-Package: net.ifao.oomph.buildshipimport.provider;version="1.0.0"
+Export-Package: net.ifao.oomph.buildshipimport.provider

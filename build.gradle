@@ -145,7 +145,12 @@ eclipseBuild {
   }
 }
 
-version = '1.0.0'
+
+// read the current version from an external file and add a timestamp suffix if requested by the caller
+ext.baseVersion = file('version.txt').text.trim()
+ext.versionQualifier = getVersionQualifier()
+version = baseVersion + '.' + versionQualifier
+
 
 subprojects {
     version = rootProject.version
@@ -183,20 +188,6 @@ subprojects {
     }
 }
 
-def siteBuildDir = "${project(':net.ifao.oomph.buildshipimport.site').buildDir}/repository"
-def siteDirOnH = "file:/h:/cytric_development/new-arctic/dev_env/net.ifao.oomph.buildshipimport.site/${project.version}"
-
-task siteCopyToH(dependsOn: ':net.ifao.oomph.buildshipimport.site:build', type: Copy) {
-
-   group = "buildshipimport.site"
-   description = "copy created update site to 'h:' rollout folder"
-
-   println "writing ${siteDirOnH}"
-
-   from "${siteBuildDir}"
-   into "${siteDirOnH}"
-}
-
 
 tasks.withType(eclipsebuild.DownloadEclipseSdkTask) {
    def os = org.gradle.internal.os.OperatingSystem.current()
@@ -210,6 +201,29 @@ tasks.withType(eclipsebuild.DownloadEclipseSdkTask) {
    }
 }
 
+String getVersionQualifier() {
+    def config = eclipsebuild.BuildshipConfig.on(project)
+
+    // determine suffix for snapshot and milestone builds
+    def suffix
+    if (config.isRelease()) {
+        suffix = ''
+    } else if (config.isMilestone()) {
+        suffix = '-m'
+    } else if (config.isSnapshot()) {
+        suffix = '-s'
+    } else {
+        throw new IllegalStateException("BuildshipConfig must either be a release, milestone, or snapshot.")
+    }
+
+    // use full timestamp on CI vs. date-only for local builds
+    if (project.hasProperty('build.invoker') && project.property('build.invoker') == 'ci') {
+        // note that for Eclipse plugin versions, the '-' and '.' character are invalid in front of the build id
+        'v' + new Date().format('yyyyMMdd-kkmm', TimeZone.getTimeZone('GMT')) + suffix
+    } else {
+        'v' + new Date().format('yyyyMMdd', TimeZone.getTimeZone('GMT')) + suffix
+    }
+}
 
 def getBundleVersion(String version) {
    def matcher = version =~ /(\d+)\.(\d+)(?:-.*|\.(\d+)(?:-.*)?)?/
