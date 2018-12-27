@@ -1,7 +1,7 @@
 buildscript {
 
    repositories {
-      mavenLocal()
+      // mavenLocal()
 
       // for all internal and public gradle plug-ins use a NON-PCI-DSS complaint URL (group)
       maven {
@@ -31,6 +31,12 @@ eclipseBuild {
 
   final def swtPluginId = "org.eclipse.swt.${ECLIPSE_WS}.${ECLIPSE_OS}.${ECLIPSE_ARCH}"
 
+  def versionAgnosticDependencies = [
+     'org.slf4j.api'                         : '1.7.2',
+     'com.google.guava'                      : '21.0.0',
+     'org.eclipse.swtbot.eclipse.finder'     : '2.2.1',
+     'org.eclipse.swtbot.junit4_x'           : '2.2.1'
+  ]
 
   targetPlatform {
     eclipseVersion = '410'
@@ -58,18 +64,7 @@ eclipseBuild {
        'org.eclipse.buildship.ui'                  : buildshipVersion
     ]
 
-    def miscDependencies = [
-      // 'com.gradleware.tooling.utils'          : toolingCommonsBundleVersion,
-      // 'com.gradleware.tooling.client'         : toolingCommonsBundleVersion,
-      // 'com.gradleware.tooling.model'          : toolingCommonsBundleVersion,
-      // 'org.gradle.toolingapi'                 : toolingApiBundleVersion,
-       'org.slf4j.api'                         : '1.7.2',
-       'com.google.guava'                      : '21.0.0',
-       'org.eclipse.swtbot.eclipse.finder'     : '2.2.1',
-       'org.eclipse.swtbot.junit4_x'           : '2.2.1'
-   ]
-
-   def eclipseVersionAgnosticDependencies = oomphDependencies + oomphEditDependencies + buildshipDependencies + miscDependencies
+   def targetAdditionalDependencies = oomphDependencies + oomphEditDependencies + buildshipDependencies + versionAgnosticDependencies
 
 
     versionMapping = [
@@ -102,7 +97,7 @@ eclipseBuild {
       'org.eclipse.ui.workbench'              : '3.112.100',
       'org.eclipse.ui.workbench.texteditor'   : '3.11.200',
       'org.junit'                             : '4.12.0'
-    ] + eclipseVersionAgnosticDependencies
+    ] + targetAdditionalDependencies
   }
 
 
@@ -136,18 +131,14 @@ eclipseBuild {
   ext.toolingCommonsBundleVersion = getBundleVersion(toolingCommonsVersion)
   ext.toolingApiBundleVersion = getBundleVersion(toolingApiVersion)
 
-  def miscDependenciesPreE49 = [
+  def gradleToolingDependencies = [
       'com.gradleware.tooling.utils'          : toolingCommonsBundleVersion,
       'com.gradleware.tooling.client'         : toolingCommonsBundleVersion,
       'com.gradleware.tooling.model'          : toolingCommonsBundleVersion,
       'org.gradle.toolingapi'                 : toolingApiBundleVersion,
-      'org.slf4j.api'                         : '1.7.2',
-      'com.google.guava'                      : '21.0.0',
-      'org.eclipse.swtbot.eclipse.finder'     : '2.2.1',
-      'org.eclipse.swtbot.junit4_x'           : '2.2.1'
   ]
 
-  def eclipseVersionAgnosticDependenciesPreE49 = oomphDependenciesPreE49 + oomphEditDependenciesPreE49 + buildshipDependenciesPreE49 + miscDependenciesPreE49
+  def targetAdditionalDependenciesPreE49 = oomphDependenciesPreE49 + oomphEditDependenciesPreE49 + buildshipDependenciesPreE49 + gradleToolingDependencies + versionAgnosticDependencies
 
   targetPlatform {
     eclipseVersion = '48'
@@ -182,7 +173,7 @@ eclipseBuild {
       'org.eclipse.ui.workbench'              : '3.111.0',
       'org.eclipse.ui.workbench.texteditor'   : '3.11.0',
       'org.junit'                             : '4.12.0'
-    ] + eclipseVersionAgnosticDependenciesPreE49
+    ] + targetAdditionalDependenciesPreE49
   }
 
   targetPlatform {
@@ -218,7 +209,7 @@ eclipseBuild {
       'org.eclipse.ui.workbench'              : '3.10.100', // UNTESTED
       'org.eclipse.ui.workbench.texteditor'   : '3.10.100',
       'org.junit'                             : '4.12.0'
-    ] + eclipseVersionAgnosticDependenciesPreE49
+    ] + targetAdditionalDependenciesPreE49
   }
 }
 
