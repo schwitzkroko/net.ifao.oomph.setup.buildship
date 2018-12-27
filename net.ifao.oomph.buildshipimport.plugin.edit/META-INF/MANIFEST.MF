@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: net.ifao.oomph.buildshipimport.plugin.edit;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: net.ifao.oomph.buildshipimport.provider.BuildshipImportEditPlugin$Implementation
 Bundle-ActivationPolicy: lazy

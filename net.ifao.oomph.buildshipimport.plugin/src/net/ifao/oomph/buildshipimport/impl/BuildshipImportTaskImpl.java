@@ -3,23 +3,24 @@ package net.ifao.oomph.buildshipimport.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.buildship.core.CorePlugin;
-import org.eclipse.buildship.core.configuration.BuildConfiguration;
-import org.eclipse.buildship.core.util.progress.AsyncHandler;
-import org.eclipse.buildship.core.workspace.GradleBuild;
-import org.eclipse.buildship.core.workspace.NewProjectHandler;
+import org.eclipse.buildship.core.BuildConfiguration;
+import org.eclipse.buildship.core.GradleBuild;
+import org.eclipse.buildship.core.GradleCore;
+import org.eclipse.buildship.core.GradleWorkspace;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.notify.NotificationChain;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -40,13 +41,9 @@ import org.eclipse.oomph.util.PropertyFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gradleware.tooling.toolingclient.GradleDistribution;
-
 import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
 import net.ifao.oomph.buildshipimport.BuildshipImportPlugin;
 import net.ifao.oomph.buildshipimport.BuildshipImportTask;
-import net.ifao.oomph.buildshipimport.impl.buildship.BuildsUtil;
-import net.ifao.oomph.buildshipimport.impl.buildship.WorkingSetsAddingProjectHandler;
 
 
 /**
@@ -66,6 +63,8 @@ public class BuildshipImportTaskImpl
    extends SetupTaskImpl
    implements BuildshipImportTask
 {
+
+   private static final String PLUGIN_ID = BuildshipImportPlugin.INSTANCE.getSymbolicName();
 
    private static final PropertyFile HISTORY =
       new PropertyFile(BuildshipImportPlugin.INSTANCE.getStateLocation().append("import-history.properties").toFile());
@@ -308,27 +307,33 @@ public class BuildshipImportTaskImpl
    public void perform(final SetupTaskContext context)
       throws Exception
    {
-      final GradleDistribution gradleDistribution = GradleDistribution.fromBuild();
-
       final EList<SourceLocator> locs = getSourceLocators();
       final int size = this.sourceLocators.size();
 
-      final MultiStatus status =
-         new MultiStatus(BuildshipImportPlugin.INSTANCE.getSymbolicName(), 0, "Buildship import Analysis", null);
+      final MultiStatus status = new MultiStatus(PLUGIN_ID, 0, "Buildship import Analysis", null);
 
       final IProgressMonitor monitor = context.getProgressMonitor(true);
       monitor.beginTask("", 2 * size);
 
-      try {
-         List<BuildConfiguration> buildConfigurations = locs.stream().map(loc -> {
-            String rootFolder = loc.getRootFolder();
 
-            return BuildsUtil.createBuildConfiguration(rootFolder, gradleDistribution);
-         }).collect(Collectors.toList());
+      try {
+         List<BuildConfiguration> buildConfigurations = locs
+               .stream().map(SourceLocator::getRootFolder).map(folder -> BuildConfiguration
+                     .forRootProjectDirectory(new File(folder)).overrideWorkspaceConfiguration(false).build())
+               .collect(Collectors.toList());
 
          buildConfigurations.forEach(bconf -> {
-            performImportProject(bconf, AsyncHandler.NO_OP, NewProjectHandler.IMPORT_AND_MERGE);
+
+            final GradleWorkspace workspace = GradleCore.getWorkspace();
+            final GradleBuild newBuild = workspace.createBuild(bconf);
+            newBuild.synchronize(monitor);
          });
+      }
+      catch (Exception e) {
+
+         final String msg = "error on Buildship import.";
+         log.error(msg, e);
+         status.add(new Status(IStatus.ERROR, PLUGIN_ID, msg, e));
       }
       finally {
 
@@ -336,20 +341,6 @@ public class BuildshipImportTaskImpl
       }
 
       BuildshipImportPlugin.INSTANCE.coreException(status);
-   }
-
-
-   public boolean performImportProject(final BuildConfiguration buildConfig, final AsyncHandler initializer,
-                                       final NewProjectHandler newProjectHandler)
-   {
-      // TODO: we could populate this by "Buildship import" param (not by sourceLocator)
-      Optional<List<String>> workingSetNames = Optional.empty();
-
-      WorkingSetsAddingProjectHandler workingSetsAddingNewProjectHandler =
-         new WorkingSetsAddingProjectHandler(newProjectHandler, workingSetNames);
-      GradleBuild build = CorePlugin.gradleWorkspaceManager().getGradleBuild(buildConfig);
-      build.synchronize(workingSetsAddingNewProjectHandler, initializer);
-      return true;
    }
 
 

@@ -3,10 +3,8 @@ package net.ifao.oomph.buildshipimport.impl.buildship;
 
 import java.io.File;
 
-import org.eclipse.buildship.core.CorePlugin;
-import org.eclipse.buildship.core.configuration.BuildConfiguration;
-
-import com.gradleware.tooling.toolingclient.GradleDistribution;
+import org.eclipse.buildship.core.BuildConfiguration;
+import org.eclipse.buildship.core.GradleDistribution;
 
 
 /**
@@ -17,6 +15,7 @@ import com.gradleware.tooling.toolingclient.GradleDistribution;
  *
  * @author Jochen Fliedner
  */
+@Deprecated
 public class BuildsUtil
 {
 
@@ -63,9 +62,11 @@ public class BuildsUtil
 
       boolean overrideWorkspaceSettings = workspaceOverride != WorkspaceOverride.NONE;
 
-      return CorePlugin.configurationManager().createBuildConfiguration(new File(projectDir), overrideWorkspaceSettings,
-            gradleDistribution, workspaceOverride.getGradleUserHome(), workspaceOverride.isBuildScansEnabled(),
-            workspaceOverride.isOfflineMode(), workspaceOverride.isAutoSync());
+      //      return CorePlugin.configurationManager().createBuildConfiguration(new File(projectDir), overrideWorkspaceSettings,
+      //            gradleDistribution, workspaceOverride.getGradleUserHome(), workspaceOverride.isBuildScansEnabled(),
+      //            workspaceOverride.isOfflineMode(), workspaceOverride.isAutoSync());
+
+      return null;
    }
 
 }

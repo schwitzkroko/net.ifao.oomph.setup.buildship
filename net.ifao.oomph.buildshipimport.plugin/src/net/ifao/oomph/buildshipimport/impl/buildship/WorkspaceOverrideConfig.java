@@ -3,7 +3,9 @@ package net.ifao.oomph.buildshipimport.impl.buildship;
 
 import java.io.File;
 
-import org.eclipse.buildship.core.configuration.WorkspaceConfiguration;
+import org.eclipse.buildship.core.internal.configuration.WorkspaceConfiguration;
+
+// import org.eclipse.buildship.core.configuration.WorkspaceConfiguration;
 
 
 /**
@@ -15,6 +17,7 @@ import org.eclipse.buildship.core.configuration.WorkspaceConfiguration;
  *
  * @author Jochen Fliedner
  */
+@Deprecated
 public interface WorkspaceOverrideConfig
 {
    /**

@@ -1,1 +1,9 @@
+<<<<<<< Upstream, based on branch 'master' of https://fliedner@repository.secure.ifao.net:7443/scm/art/eclipse_oomph_buildshipimport.git
 1.0.0
+=======
+<<<<<<< Upstream, based on branch 'master' of https://fliedner@repository.secure.ifao.net:7443/scm/art/eclipse_oomph_buildshipimport.git
+1.0.0
+=======
+1.1.0
+>>>>>>> 3f51a52 AST-368 e10 / 1.1.0 working snapshot
+>>>>>>> a0e513f AST-368 introduce composite update site, upload and placeholders for version, do e48/1.0.0 release
