@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.buildship.core.BuildConfiguration;
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
 import net.ifao.oomph.buildshipimport.BuildshipImportPlugin;
 import net.ifao.oomph.buildshipimport.BuildshipImportTask;
+import net.ifao.oomph.buildshipimport.impl.buildship.UIUtils;
 
 
 /**
@@ -69,8 +71,10 @@ public class BuildshipImportTaskImpl
    private static final PropertyFile HISTORY =
       new PropertyFile(BuildshipImportPlugin.INSTANCE.getStateLocation().append("import-history.properties").toFile());
 
-
    private static final IWorkspaceRoot ROOT = EcorePlugin.getWorkspaceRoot();
+
+
+   private final AtomicBoolean gradleViewsVisible = new AtomicBoolean(Boolean.FALSE);
 
    /**
    * The cached value of the '{@link #getSourceLocators() <em>Source Locators</em>}' containment reference list.
@@ -327,6 +331,8 @@ public class BuildshipImportTaskImpl
             final GradleWorkspace workspace = GradleCore.getWorkspace();
             final GradleBuild newBuild = workspace.createBuild(bconf);
             newBuild.synchronize(monitor);
+
+            UIUtils.asyncSetGradleViewsAreVisible(this.gradleViewsVisible);
          });
       }
       catch (Exception e) {

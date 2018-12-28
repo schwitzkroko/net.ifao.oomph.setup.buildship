@@ -2,13 +2,17 @@ package net.ifao.oomph.buildshipimport.impl.buildship;
 
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
@@ -37,11 +41,13 @@ public final class UIUtils
    public static final String ID_EXECUTION_VIEW = "org.eclipse.buildship.ui.views.executionview";
 
 
+   private static final Logger log = LoggerFactory.getLogger(UIUtils.class);
+
+
    private UIUtils()
    {
       // utils
    }
-
 
    /**
     * Converts the given working set names to {@link org.eclipse.ui.IWorkingSet} instances. Filters
@@ -82,7 +88,32 @@ public final class UIUtils
          return view;
       }
       catch (PartInitException e) {
+
+         log.error("error on initializing view.", e);
+
          throw new RuntimeException(String.format("Cannot show view with id %s and secondary id %s.", viewId, secondaryId), e);
       }
+   }
+
+   /**
+    * asynchronously set the buildship gradle views visible
+    *
+    * @param onFalse - if the wrapped value still happens to be false
+    */
+   public static void asyncSetGradleViewsAreVisible(final AtomicBoolean onFalse)
+   {
+      log.trace("check for buildship gradle views visible.");
+
+      PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+
+         if (!onFalse.getAndSet(Boolean.TRUE)) {
+
+            log.debug("set buildship gradle views visible.");
+
+            showView(UIUtils.ID_TASK_VIEW, null, IWorkbenchPage.VIEW_ACTIVATE);
+            showView(UIUtils.ID_EXECUTION_VIEW, null, IWorkbenchPage.VIEW_VISIBLE);
+         }
+
+      });
    }
 }
