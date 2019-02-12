@@ -3,6 +3,7 @@
 package net.ifao.oomph.buildshipimport.impl;
 
 
+import net.ifao.oomph.buildshipimport.*;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -32,14 +33,16 @@ public class BuildshipImportFactoryImpl
     */
    public static BuildshipImportFactory init()
    {
-      try {
-         BuildshipImportFactory theBuildshipImportFactory =
-            (BuildshipImportFactory) EPackage.Registry.INSTANCE.getEFactory(BuildshipImportPackage.eNS_URI);
-         if (theBuildshipImportFactory != null) {
+      try
+      {
+         BuildshipImportFactory theBuildshipImportFactory = (BuildshipImportFactory)EPackage.Registry.INSTANCE.getEFactory(BuildshipImportPackage.eNS_URI);
+         if (theBuildshipImportFactory != null)
+         {
             return theBuildshipImportFactory;
          }
       }
-      catch (Exception exception) {
+      catch (Exception exception)
+      {
          EcorePlugin.INSTANCE.log(exception);
       }
       return new BuildshipImportFactoryImpl();
@@ -64,9 +67,9 @@ public class BuildshipImportFactoryImpl
    @Override
    public EObject create(EClass eClass)
    {
-      switch (eClass.getClassifierID()) {
-         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK:
-            return createBuildshipImportTask();
+      switch (eClass.getClassifierID())
+      {
+         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK: return createBuildshipImportTask();
          default:
             throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
       }
@@ -92,7 +95,7 @@ public class BuildshipImportFactoryImpl
    @Override
    public BuildshipImportPackage getBuildshipImportPackage()
    {
-      return (BuildshipImportPackage) getEPackage();
+      return (BuildshipImportPackage)getEPackage();
    }
 
    /**

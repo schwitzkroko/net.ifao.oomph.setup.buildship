@@ -3,6 +3,7 @@
 package net.ifao.oomph.buildshipimport;
 
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -24,7 +25,7 @@ import org.eclipse.oomph.setup.SetupPackage;
  * @model kind="package"
  *        annotation="http://www.eclipse.org/emf/2002/Ecore schemaLocation='http://www.ifao.net/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore'"
  *        annotation="http://www.eclipse.org/oomph/setup/Enablement variableName='setup.projects.p2' repository='${oomph.update.url}' installableUnits='net.ifao.oomph.buildshipimport.feature.group'"
- *        annotation="http://www.eclipse.org/oomph/base/LabelProvider imageBaseURI='http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/net.ifao.oomph.buildshipimport.plugin.edit/icons/full/obj16'"
+ *        annotation="http://www.eclipse.org/oomph/base/LabelProvider imageBaseURI='http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/net.ifao.oomph.buildshipimport.edit/icons/full/obj16'"
  * @generated
  */
 public interface BuildshipImportPackage
@@ -172,13 +173,22 @@ public interface BuildshipImportPackage
    int BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS = SetupPackage.SETUP_TASK_FEATURE_COUNT + 0;
 
    /**
+    * The feature id for the '<em><b>Gradle Task</b></em>' attribute.
+    * <!-- begin-user-doc -->
+    * <!-- end-user-doc -->
+    * @generated
+    * @ordered
+    */
+   int BUILDSHIP_IMPORT_TASK__GRADLE_TASK = SetupPackage.SETUP_TASK_FEATURE_COUNT + 1;
+
+   /**
     * The number of structural features of the '<em>Task</em>' class.
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
     * @generated
     * @ordered
     */
-   int BUILDSHIP_IMPORT_TASK_FEATURE_COUNT = SetupPackage.SETUP_TASK_FEATURE_COUNT + 1;
+   int BUILDSHIP_IMPORT_TASK_FEATURE_COUNT = SetupPackage.SETUP_TASK_FEATURE_COUNT + 2;
 
 
    /**
@@ -201,6 +211,17 @@ public interface BuildshipImportPackage
     * @generated
     */
    EReference getBuildshipImportTask_SourceLocators();
+
+   /**
+    * Returns the meta object for the attribute '{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}'.
+    * <!-- begin-user-doc -->
+    * <!-- end-user-doc -->
+    * @return the meta object for the attribute '<em>Gradle Task</em>'.
+    * @see net.ifao.oomph.buildshipimport.BuildshipImportTask#getGradleTask()
+    * @see #getBuildshipImportTask()
+    * @generated
+    */
+   EAttribute getBuildshipImportTask_GradleTask();
 
    /**
     * Returns the factory that creates the instances of the model.
@@ -242,6 +263,14 @@ public interface BuildshipImportPackage
        * @generated
        */
       EReference BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS = eINSTANCE.getBuildshipImportTask_SourceLocators();
+
+      /**
+       * The meta object literal for the '<em><b>Gradle Task</b></em>' attribute feature.
+       * <!-- begin-user-doc -->
+       * <!-- end-user-doc -->
+       * @generated
+       */
+      EAttribute BUILDSHIP_IMPORT_TASK__GRADLE_TASK = eINSTANCE.getBuildshipImportTask_GradleTask();
 
    }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="buildshipimport" nsURI="http://www.ifao.net/oomph/buildshipimport/1.0"
-    nsPrefix="projects">
+    nsPrefix="buildshipimport">
   <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore">
     <details key="schemaLocation" value="http://www.ifao.net/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore"/>
   </eAnnotations>
@@ -24,5 +24,6 @@
         <details key="name" value="sourceLocator"/>
       </eAnnotations>
     </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="gradleTask" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
 </ecore:EPackage>

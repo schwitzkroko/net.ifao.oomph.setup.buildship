@@ -10,11 +10,8 @@
   <genPackages prefix="BuildshipImport" basePackage="net.ifao.oomph" disposableProviderFactory="true"
       childCreationExtenders="true" ecorePackage="BuildshipImport.ecore#/" publicationLocation="/setups/models/BuildshipImport.ecore">
     <genClasses ecoreClass="BuildshipImport.ecore#//BuildshipImportTask" labelFeature="../../org.eclipse.oomph.setup/model/Setup.genmodel#//setup/SetupTask/description">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference BuildshipImport.ecore#//BuildshipImport/predicates"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute BuildshipImport.ecore#//BuildshipImportTask/onlyNewProjects"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute BuildshipImport.ecore#//BuildshipImportTask/refresh"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute BuildshipImport.ecore#//BuildshipImportTask/clean"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute BuildshipImport.ecore#//BuildshipImportTask/build"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference BuildshipImport.ecore#//BuildshipImportTask/sourceLocators"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute BuildshipImport.ecore#//BuildshipImportTask/gradleTask"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

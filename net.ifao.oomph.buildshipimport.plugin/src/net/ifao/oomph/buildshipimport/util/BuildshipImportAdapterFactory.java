@@ -41,7 +41,8 @@ public class BuildshipImportAdapterFactory
     */
    public BuildshipImportAdapterFactory()
    {
-      if (modelPackage == null) {
+      if (modelPackage == null)
+      {
          modelPackage = BuildshipImportPackage.eINSTANCE;
       }
    }
@@ -57,11 +58,13 @@ public class BuildshipImportAdapterFactory
    @Override
    public boolean isFactoryForType(Object object)
    {
-      if (object == modelPackage) {
+      if (object == modelPackage)
+      {
          return true;
       }
-      if (object instanceof EObject) {
-         return ((EObject) object).eClass().getEPackage() == modelPackage;
+      if (object instanceof EObject)
+      {
+         return ((EObject)object).eClass().getEPackage() == modelPackage;
       }
       return false;
    }
@@ -73,31 +76,28 @@ public class BuildshipImportAdapterFactory
     * @generated
     */
    protected BuildshipImportSwitch<Adapter> modelSwitch = new BuildshipImportSwitch<Adapter>()
-   {
-      @Override
-      public Adapter caseBuildshipImportTask(BuildshipImportTask object)
       {
-         return createBuildshipImportTaskAdapter();
-      }
-
-      @Override
-      public Adapter caseModelElement(ModelElement object)
-      {
-         return createModelElementAdapter();
-      }
-
-      @Override
-      public Adapter caseSetupTask(SetupTask object)
-      {
-         return createSetupTaskAdapter();
-      }
-
-      @Override
-      public Adapter defaultCase(EObject object)
-      {
-         return createEObjectAdapter();
-      }
-   };
+         @Override
+         public Adapter caseBuildshipImportTask(BuildshipImportTask object)
+         {
+            return createBuildshipImportTaskAdapter();
+         }
+         @Override
+         public Adapter caseModelElement(ModelElement object)
+         {
+            return createModelElementAdapter();
+         }
+         @Override
+         public Adapter caseSetupTask(SetupTask object)
+         {
+            return createSetupTaskAdapter();
+         }
+         @Override
+         public Adapter defaultCase(EObject object)
+         {
+            return createEObjectAdapter();
+         }
+      };
 
    /**
     * Creates an adapter for the <code>target</code>.
@@ -110,7 +110,7 @@ public class BuildshipImportAdapterFactory
    @Override
    public Adapter createAdapter(Notifier target)
    {
-      return modelSwitch.doSwitch((EObject) target);
+      return modelSwitch.doSwitch((EObject)target);
    }
 
 

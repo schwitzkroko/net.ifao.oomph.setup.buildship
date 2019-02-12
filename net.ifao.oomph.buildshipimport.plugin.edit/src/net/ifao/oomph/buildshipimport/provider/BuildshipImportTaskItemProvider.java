@@ -18,7 +18,9 @@ import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.ResourceLocator;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
 import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
+import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ViewerNotification;
 import org.eclipse.oomph.resources.ResourcesFactory;
 import org.eclipse.oomph.setup.provider.SetupTaskItemProvider;
@@ -28,7 +30,7 @@ import net.ifao.oomph.buildshipimport.BuildshipImportTask;
 
 
 /**
- * This is the item provider adapter for a {@link BuildshipImportTask} object.
+ * This is the item provider adapter for a {@link net.ifao.oomph.buildshipimport.BuildshipImportTask} object.
  * <!-- begin-user-doc -->
  * <!-- end-user-doc -->
  * @generated
@@ -37,55 +39,81 @@ public class BuildshipImportTaskItemProvider
    extends SetupTaskItemProvider
 {
    /**
-   * This constructs an instance from a factory and a notifier.
-   * <!-- begin-user-doc -->
+    * This constructs an instance from a factory and a notifier.
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    public BuildshipImportTaskItemProvider(AdapterFactory adapterFactory)
    {
       super(adapterFactory);
    }
 
    /**
-   * This returns the property descriptors for the adapted class.
-   * <!-- begin-user-doc -->
+    * This returns the property descriptors for the adapted class.
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    @Override
    public List<IItemPropertyDescriptor> getPropertyDescriptors(Object object)
    {
-      if (this.itemPropertyDescriptors == null) {
+      if (itemPropertyDescriptors == null)
+      {
          super.getPropertyDescriptors(object);
 
+         addGradleTaskPropertyDescriptor(object);
       }
-      return this.itemPropertyDescriptors;
+      return itemPropertyDescriptors;
    }
 
    /**
-   * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an
-   * {@link org.eclipse.emf.edit.command.AddCommand}, {@link org.eclipse.emf.edit.command.RemoveCommand} or
-   * {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}.
-   * <!-- begin-user-doc -->
+    * This adds a property descriptor for the Gradle Task feature.
+    * <!-- begin-user-doc -->
+    * <!-- end-user-doc -->
+    * @generated
+    */
+   protected void addGradleTaskPropertyDescriptor(Object object)
+   {
+      itemPropertyDescriptors.add
+         (createItemPropertyDescriptor
+            (((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+             getResourceLocator(),
+             getString("_UI_BuildshipImportTask_gradleTask_feature"),
+             getString("_UI_PropertyDescriptor_description", "_UI_BuildshipImportTask_gradleTask_feature", "_UI_BuildshipImportTask_type"),
+             BuildshipImportPackage.Literals.BUILDSHIP_IMPORT_TASK__GRADLE_TASK,
+             true,
+             false,
+             false,
+             ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+             null,
+             null));
+   }
+
+   /**
+    * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an
+    * {@link org.eclipse.emf.edit.command.AddCommand}, {@link org.eclipse.emf.edit.command.RemoveCommand} or
+    * {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}.
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    @Override
    public Collection<? extends EStructuralFeature> getChildrenFeatures(Object object)
    {
-      if (this.childrenFeatures == null) {
+      if (childrenFeatures == null)
+      {
          super.getChildrenFeatures(object);
-         this.childrenFeatures.add(BuildshipImportPackage.Literals.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS);
+         childrenFeatures.add(BuildshipImportPackage.Literals.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS);
       }
-      return this.childrenFeatures;
+      return childrenFeatures;
    }
 
    /**
-   * <!-- begin-user-doc -->
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    @Override
    protected EStructuralFeature getChildFeature(Object object, Object child)
    {
@@ -96,11 +124,11 @@ public class BuildshipImportTaskItemProvider
    }
 
    /**
-   * This returns BuildshipImportTask.gif.
-   * <!-- begin-user-doc -->
+    * This returns BuildshipImportTask.gif.
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    @Override
    public Object getImage(Object object)
    {
@@ -108,10 +136,10 @@ public class BuildshipImportTaskItemProvider
    }
 
    /**
-   * <!-- begin-user-doc -->
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    @Override
    protected boolean shouldComposeCreationImage()
    {
@@ -131,18 +159,22 @@ public class BuildshipImportTaskItemProvider
    }
 
    /**
-   * This handles model notifications by calling {@link #updateChildren} to update any cached
-   * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-   * <!-- begin-user-doc -->
+    * This handles model notifications by calling {@link #updateChildren} to update any cached
+    * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    @Override
    public void notifyChanged(Notification notification)
    {
       updateChildren(notification);
 
-      switch (notification.getFeatureID(BuildshipImportTask.class)) {
+      switch (notification.getFeatureID(BuildshipImportTask.class))
+      {
+         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__GRADLE_TASK:
+            fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
+            return;
          case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS:
             fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
             return;
@@ -151,27 +183,29 @@ public class BuildshipImportTaskItemProvider
    }
 
    /**
-   * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-   * that can be created under this object.
-   * <!-- begin-user-doc -->
+    * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
+    * that can be created under this object.
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    @Override
    protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object)
    {
       super.collectNewChildDescriptors(newChildDescriptors, object);
 
-      newChildDescriptors.add(createChildParameter(BuildshipImportPackage.Literals.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS,
-            ResourcesFactory.eINSTANCE.createSourceLocator()));
+      newChildDescriptors.add
+         (createChildParameter
+            (BuildshipImportPackage.Literals.BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS,
+             ResourcesFactory.eINSTANCE.createSourceLocator()));
    }
 
    /**
-   * Return the resource locator for this item provider's resources.
-   * <!-- begin-user-doc -->
+    * Return the resource locator for this item provider's resources.
+    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @generated
-   */
+    * @generated
+    */
    @Override
    public ResourceLocator getResourceLocator()
    {

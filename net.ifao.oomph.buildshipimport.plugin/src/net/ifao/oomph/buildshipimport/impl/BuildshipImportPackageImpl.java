@@ -3,6 +3,7 @@
 package net.ifao.oomph.buildshipimport.impl;
 
 
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
@@ -135,6 +136,17 @@ public class BuildshipImportPackageImpl
     * @generated
     */
    @Override
+   public EAttribute getBuildshipImportTask_GradleTask()
+   {
+      return (EAttribute) buildshipImportTaskEClass.getEStructuralFeatures().get(1);
+   }
+
+   /**
+    * <!-- begin-user-doc -->
+    * <!-- end-user-doc -->
+    * @generated
+    */
+   @Override
    public BuildshipImportFactory getBuildshipImportFactory()
    {
       return (BuildshipImportFactory) getEFactoryInstance();
@@ -164,6 +176,7 @@ public class BuildshipImportPackageImpl
       // Create classes and their features
       buildshipImportTaskEClass = createEClass(BUILDSHIP_IMPORT_TASK);
       createEReference(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__SOURCE_LOCATORS);
+      createEAttribute(buildshipImportTaskEClass, BUILDSHIP_IMPORT_TASK__GRADLE_TASK);
    }
 
    /**
@@ -209,6 +222,9 @@ public class BuildshipImportPackageImpl
       initEReference(getBuildshipImportTask_SourceLocators(), theResourcesPackage.getSourceLocator(), null, "sourceLocators",
             null, 1, -1, BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES,
             !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+      initEAttribute(getBuildshipImportTask_GradleTask(), ecorePackage.getEString(), "gradleTask", null, 0, 1,
+            BuildshipImportTask.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED,
+            IS_ORDERED);
 
       // Create resource
       createResource("http://www.ifao.net/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore");

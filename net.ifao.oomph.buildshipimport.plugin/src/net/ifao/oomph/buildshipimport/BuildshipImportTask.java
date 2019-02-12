@@ -18,6 +18,7 @@ import org.eclipse.oomph.setup.SetupTask;
  * </p>
  * <ul>
  *   <li>{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getSourceLocators <em>Source Locators</em>}</li>
+ *   <li>{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}</li>
  * </ul>
  *
  * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask()
@@ -43,5 +44,31 @@ public interface BuildshipImportTask
     * @generated
     */
    EList<SourceLocator> getSourceLocators();
+
+   /**
+    * Returns the value of the '<em><b>Gradle Task</b></em>' attribute.
+    * <!-- begin-user-doc -->
+    * <p>
+    * If the meaning of the '<em>Gradle Task</em>' attribute isn't clear,
+    * there really should be more of a description here...
+    * </p>
+    * <!-- end-user-doc -->
+    * @return the value of the '<em>Gradle Task</em>' attribute.
+    * @see #setGradleTask(String)
+    * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask_GradleTask()
+    * @model
+    * @generated
+    */
+   String getGradleTask();
+
+   /**
+    * Sets the value of the '{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}' attribute.
+    * <!-- begin-user-doc -->
+    * <!-- end-user-doc -->
+    * @param value the new value of the '<em>Gradle Task</em>' attribute.
+    * @see #getGradleTask()
+    * @generated
+    */
+   void setGradleTask(String value);
 
 } // BuildshipImportTask

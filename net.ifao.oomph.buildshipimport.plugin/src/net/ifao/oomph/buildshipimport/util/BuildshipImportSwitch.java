@@ -45,7 +45,8 @@ public class BuildshipImportSwitch<T>
     */
    public BuildshipImportSwitch()
    {
-      if (modelPackage == null) {
+      if (modelPackage == null)
+      {
          modelPackage = BuildshipImportPackage.eINSTANCE;
       }
    }
@@ -74,23 +75,18 @@ public class BuildshipImportSwitch<T>
    @Override
    protected T doSwitch(int classifierID, EObject theEObject)
    {
-      switch (classifierID) {
-         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK: {
-            BuildshipImportTask buildshipImportTask = (BuildshipImportTask) theEObject;
+      switch (classifierID)
+      {
+         case BuildshipImportPackage.BUILDSHIP_IMPORT_TASK:
+         {
+            BuildshipImportTask buildshipImportTask = (BuildshipImportTask)theEObject;
             T result = caseBuildshipImportTask(buildshipImportTask);
-            if (result == null) {
-               result = caseSetupTask(buildshipImportTask);
-            }
-            if (result == null) {
-               result = caseModelElement(buildshipImportTask);
-            }
-            if (result == null) {
-               result = defaultCase(theEObject);
-            }
+            if (result == null) result = caseSetupTask(buildshipImportTask);
+            if (result == null) result = caseModelElement(buildshipImportTask);
+            if (result == null) result = defaultCase(theEObject);
             return result;
          }
-         default:
-            return defaultCase(theEObject);
+         default: return defaultCase(theEObject);
       }
    }
 
