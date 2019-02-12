@@ -21,6 +21,8 @@ task wrapper(type: Wrapper) {
    gradleVersion = '4.10.2'
 }
 
+project.targetPlatformsDir = "${rootDir}/.tooling/eclipse/targetPlatforms"
+
 apply plugin: eclipsebuild.BuildDefinitionPlugin
 apply plugin: 'eclipse'
 
