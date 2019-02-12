@@ -26,3 +26,6 @@ ui/
 
 .project
 /dev.log
+
+# eclipsebuild local tooling dir
+.tooling

@@ -271,6 +271,7 @@ subprojects {
       //     url gradleSnapshotsRepositoryUrl
       // }
 
+      // TODO: from ifao nexus
       maven {
          name = 'gradle-releases'
          url gradleReleasesRepositoryUrl
