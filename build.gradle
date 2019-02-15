@@ -17,11 +17,9 @@ buildscript {
    }
 }
 
-task wrapper(type: Wrapper) {
-   gradleVersion = '4.10.2'
+wrapper {
+   distributionUrl = "${repositoryManagerURL}/ifao-buildtool_gradle-public-raw/gradle-4.10.2-bin.zip"
 }
-
-project.targetPlatformsDir = "${rootDir}/.tooling/eclipse/targetPlatforms"
 
 apply plugin: eclipsebuild.BuildDefinitionPlugin
 apply plugin: 'eclipse'
@@ -277,10 +275,10 @@ subprojects {
       // }
 
       // TODO: from ifao nexus
-      maven {
-         name = 'gradle-releases'
-         url gradleReleasesRepositoryUrl
-      }
+      // maven {
+      //   name = 'gradle-releases'
+      //   url gradleReleasesRepositoryUrl
+      // }
 
       // maven {
       //    name = 'gradle-remote'
