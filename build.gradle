@@ -246,10 +246,12 @@ ext.baseVersion = file('version.txt').text.trim()
 ext.versionQualifier = getVersionQualifier()
 version = baseVersion + '.' + versionQualifier
 
-// ensure that local common repos ('mavenized-target-platform') are created for and used by all project builds
-allprojects {
-   ext.set("targetPlatformsDir", "${rootDir}/.tooling/eclipse/targetPlatforms")
-}
+// TODO: let handle .tooling folder locally in root project root,
+// ensure that local common repos ('mavenized-target-platform') are created for and used by all project builds,
+// currently this approach fails at 'assemble*'...
+// allprojects {
+//    ext.set("targetPlatformsDir", "${rootDir}/.tooling/eclipse/targetPlatforms")
+// }
 
 subprojects {
    version = rootProject.version
@@ -304,6 +306,7 @@ tasks.withType(eclipsebuild.DownloadEclipseSdkTask) {
        // downloadUrl = "${mirrorBase/eclipse-sdk-4.4.2-linux-${arch}.tar.gz"
        downloadUrl = "${mirrorBase}/eclipse-SDK-4.4.2-macosx-cocoa-x86_64.tar.gz"
    }
+   logger.debug("sdk url selected: ${downloadUrl}")
 }
 
 String getVersionQualifier() {
