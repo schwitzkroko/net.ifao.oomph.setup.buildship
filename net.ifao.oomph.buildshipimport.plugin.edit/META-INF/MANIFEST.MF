@@ -12,8 +12,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: net.ifao.oomph.buildshipimport.plugin,
  org.eclipse.core.runtime,
  org.eclipse.emf.edit,
- org.eclipse.oomph.base.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
- org.eclipse.oomph.predicates.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
- org.eclipse.oomph.resources.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport,
- org.eclipse.oomph.setup.edit;bundle-version="[1.9.0,2.0.0)";visibility:=reexport
+ org.eclipse.oomph.base.edit;bundle-version="[1.10.0,2.0.0)";visibility:=reexport,
+ org.eclipse.oomph.predicates.edit;bundle-version="[1.10.0,2.0.0)";visibility:=reexport,
+ org.eclipse.oomph.resources.edit;bundle-version="[1.10.0,2.0.0)";visibility:=reexport,
+ org.eclipse.oomph.setup.edit;bundle-version="[1.10.0,2.0.0)";visibility:=reexport
 Export-Package: net.ifao.oomph.buildshipimport.provider
