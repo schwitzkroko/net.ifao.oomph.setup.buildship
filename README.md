@@ -2,6 +2,15 @@
 
 [TOC]
 
+## Gitflow project
+
+Please note that this is project is handled in a gitflow manner now and primary branch is 'develop'!
+
+| command example | Purpose                           |
+| --------------------------- | --------------------------------- |
+| `git flow release start '1.0.0'`     | create release branch locally |
+| `git flow release publish '1.0.0'`   | push release branch to origin |
+| `git flow release finish '1.0.0'`    | merge to master, tag, backmerge to develop, remove release branch - *PUSH all local branches and tags after!* |
 
 ## Overview
 
@@ -17,12 +26,6 @@ It basically does Buildship´s "Existing Gradle Project" import. The parameters 
 </setupTask>
 ```
 TBC
-
-
-
-### i:FAO version
-
-A first example for this functionality was contributed by
 
 
 
@@ -122,6 +125,17 @@ RCP IDE eclipse... etc TBC
 - mandatory release to community ([EPL 1.0](https://opensource.org/licenses/EPL-1.0)) , preferably in a [GitHub corporate group](https://github.com/AmadeusITGroup)
 
 
+## Deployment
+
+...to (existing) update sites:
+
+1. check root project `version.txt` for the current version
+2. check root project `gradle.properties` property `release.type` (`snapshot` or `release`). This determines the target repo location.
+3. after or with build use the task `uploadUpdateSite` from the `*.site` subproject to upload and modify existing metadata
+
+## TODO
+
+- make semver compliant instead of `version.txt`
 
 
 ## License

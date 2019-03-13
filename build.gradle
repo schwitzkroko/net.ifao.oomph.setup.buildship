@@ -13,7 +13,7 @@ buildscript {
    }
 
    dependencies {
-      classpath "net.ifao.3rdparty.eclipse:gradle_eclipsebuild:1.0.0-SNAPSHOT"
+      classpath "net.ifao.arctic_tools.gradle_plugins:gradle_eclipsebuild:1.0.0"
    }
 }
 

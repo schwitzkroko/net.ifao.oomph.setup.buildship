@@ -9,7 +9,7 @@ for directory in $(LIST_COMMAND) ; do
 done
 
 # define the repository name and the timestamp
-repository='Buildship'
+repository='i:FAO P2 Repository'
 timestamp=$(date +%s)
 
 # create compositeArtifacts.xml
