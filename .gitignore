@@ -29,3 +29,7 @@ ui/
 
 # eclipsebuild local tooling dir
 .tooling
+
+# temporarily remove secrets
+./net.ifao.oomph.buildshipimport.site/build.gradle
+./net.ifao.oomph.buildshipimport.site/gradle.properties
