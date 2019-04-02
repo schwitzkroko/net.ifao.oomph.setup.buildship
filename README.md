@@ -48,6 +48,8 @@ with Oomph, Buildship and the plugin installed:
 - as "New Child" select "Buildship import" to create node
 - on new node use context menue to created one or more "New Child" "Source Locator"
 
+![Screenshot](docs/img/source_locator.png)
+
 
 ### General properties
 
