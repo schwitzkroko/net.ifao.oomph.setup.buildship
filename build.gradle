@@ -1,6 +1,7 @@
 buildscript {
 
    repositories {
+      // local .m2 folder in user directory
       // mavenLocal()
 
       // for all internal and public gradle plug-ins use a NON-PCI-DSS complaint URL (group)
@@ -270,18 +271,14 @@ subprojects {
          name = 'mavenized-target-platform'
          url "${eclipsebuild.Config.on(project).mavenizedTargetPlatformDir}"
       }
-
       // maven {
       //     name = 'gradle-snapshots'
       //     url gradleSnapshotsRepositoryUrl
       // }
-
-      // TODO: from ifao nexus
       // maven {
       //   name = 'gradle-releases'
       //   url gradleReleasesRepositoryUrl
       // }
-
       // maven {
       //    name = 'gradle-remote'
       //     url gradleRemoteRepositoryUrl
@@ -347,6 +344,6 @@ def getBundleVersion(String version) {
 
 eclipse {
    project {
-      name = 'net.ifao.oomph.buildshipimport.ROOT'
+      name = 'net.ifao.oomph.setup.buildship.ROOT'
    }
 }
