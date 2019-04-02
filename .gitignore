@@ -3,18 +3,16 @@
 # Files created by gradle
 .gradle/
 build/
-gradle-app.setting
-.classpath
 
 # Files created by eclipse
 .settings/
 bin/
 ui/
+.project
+.classpath
 
 # Files created by NFS/OS-X etc
 .DS_Store
-
-*.class
 
 # Ignore generated classes
 # *Factory.java
@@ -24,12 +22,8 @@ ui/
 # *Task.java
 # *EditPlugin.java
 
-.project
-/dev.log
+# log created by launcher for local test
+/eclipse_launch/dev.log
 
 # eclipsebuild local tooling dir
-.tooling
-
-# temporarily remove secrets
-./net.ifao.oomph.buildshipimport.site/build.gradle
-./net.ifao.oomph.buildshipimport.site/gradle.properties
+/.tooling
