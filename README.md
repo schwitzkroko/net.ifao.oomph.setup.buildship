@@ -79,8 +79,8 @@ The task ~~provides~~ used to provide the following properties, work-in-progress
 
 ## Credits
 
-- to our employer __[i:FAO](https://www.cytric.net/)__ - an __[amadeus](https://amadeus.com/)__ group company
-- to previous developer user [Hermann Kneissel](https://github.com/herkne/)
+- to employer __[i:FAO](https://www.cytric.net/)__ - an __[amadeus](https://amadeus.com/)__ group company
+- to previous developer GitHub user [Hermann Kneissel](https://github.com/herkne/)
 
 ## License
 
