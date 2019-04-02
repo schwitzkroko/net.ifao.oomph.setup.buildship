@@ -1,16 +1,10 @@
-# An Oomph task for importing gradle projects using Buildship
+# Oomph Buildship import
+
+Gradle project import task for setting up development environments using Eclipse Oomph.
+
+This work is based on code from this older implementation, see: https://github.com/herkne/buildship-import-4-oomph
 
 [TOC]
-
-## Gitflow project
-
-Please note that this is project is handled in a gitflow manner now and primary branch is 'develop'!
-
-| command example | Purpose                           |
-| --------------------------- | --------------------------------- |
-| `git flow release start '1.0.0'`     | create release branch locally |
-| `git flow release publish '1.0.0'`   | push release branch to origin |
-| `git flow release finish '1.0.0'`    | merge to master, tag, backmerge to develop, remove release branch - *PUSH all local branches and tags after!* |
 
 ## Overview
 
@@ -31,8 +25,6 @@ TBC
 
 ### Original documentation
 
-see [https://github.com/herkne/buildship-import-4-oomph](https://github.com/herkne/buildship-import-4-oomph)
-
 These plugins provide an oomph setup task to import gradle projects into eclipse using the buildship project-import wizard.
 
 After the project has been successfully imported an optional gradle task may be executed. The task checks the presence of a file `.settings/gradle.prefs` in the project root directory. The task will be executed if either this file is missing or its contents points to another project location.
@@ -44,8 +36,7 @@ Import the projects into the workspace, use the genmodel file to generate the mo
 
 Add the feature to the workspace you use to edit your setup files and to the workspace in which the task will be executed.
 
-There is a p2 update site here:
-[http://p2.kneissel.mail-und-web.de/update/buildshipimport](http://p2.kneissel.mail-und-web.de/update/buildshipimport)
+There is a p2 update site here: http://p2.kneissel.mail-und-web.de/update/buildshipimport
 
 
 ## Usage
@@ -62,7 +53,7 @@ with Oomph, Buildship and the plugin installed:
 
 The task ~~provides~~ used to provide the following properties, work-in-progress:
 
-| original name          | original docu                                                | change by i:FAO | implementation / priority |
+| original name          | original docu                                                | change | implementation / priority |
 | ---------------------- | ------------------------------------------------------------ | --------------- | ------------------------- |
 | `ProjectRootDirectory` | set this to a file url pointing to the folder containing the gradle project to be imported. | using built-in *sourceLocator* | [x]                       |
 | `JavaHome`             | set this to a file url to be passed on to the buildship import task as the JRE to be used. |                 | [ ] lowest                |
@@ -72,7 +63,7 @@ The task ~~provides~~ used to provide the following properties, work-in-progress
 
 ### Buildship plugin workspace settings override
 
-| original property   | original docu                                                | change by i:FAO | implementation / priority |
+| original property   | original docu                                                | change | implementation / priority |
 | ------------------- | ------------------------------------------------------------ | --------------- | -------------- |
 | `GradleUserHome`    | the file url to be passed on to the buildship import task as the gradle user home directory to be used. |                 | [ ] low        |
 | `BuildScansEnabled` |                                                              |                 | [ ] lowest     |
@@ -81,62 +72,15 @@ The task ~~provides~~ used to provide the following properties, work-in-progress
 
 ### Task execution after import
 
-| original property      | original docu                                                | change by i:FAO | implementation / priority |
+| original property      | original docu                                                | change | implementation / priority |
 | ---------------------- | ------------------------------------------------------------ | --------------- | -------------- |
-| `GradleTask`           | if not empty this is the name of the task to be executed after the project has been imported. The property is preset to "eclipse". |                 | [ ] medium     |
+| `GradleTask`           | If not empty this is the name of the task to be executed after the project has been imported. ~~The property is preset to "eclipse".~~ |                 | [x]     |
 | `GradleBuildDirectory` | the directory from which `GradleTask` will be executed. If not set `ProjectRootDirectory` will be used. |                 | [ ] medium     |
 
+## Credits
 
-## Build
-
-### 'build'
-
-...task in ROOT project to use. The `buildship-eclipsebuild` Gradle plugin is used.
-
-### Update site
-
-The build supports the copying of the generated update sites, internal locations are currently below here:
-[http://polaris.home.ifao.net:8080/eclipse/updates/eclipse_oomph_buildshipimport/](http://polaris.home.ifao.net:8080/eclipse/updates/eclipse_oomph_buildshipimport/)
-
-
-Create a release version and deploy:
-
-```bash
-{ eclipse_oomph_buildshipimport } master » ./gradlew clean build./gradlew clean build -Prelease.type=release
-{ eclipse_oomph_buildshipimport } master » cd net.ifao.oomph.buildshipimport.site/
-{ net.ifao.oomph.buildshipimport.site } master » ../gradlew uploadUpdateSite -Prelease.type=release
-```
-
-For deploying a snapshot skip the last property "release" on each of the above gradle calls.
-
-
-## Develop
-
-RCP IDE eclipse... etc TBC
-
-### TODO
-
-- proper integration into the Oomph task lifecycle, maybe support `ImportWaitTime` to set a timeout
-- support execution of an initial Gradle-Task (one per BuildshipImportTask setupTask-Element)
-- support Buildship workspace settings override
-- introduce a category in generated update site
-- some automated testing using `eclipsebuild.TestBundlePlugin'
-- configure CI build
-- mandatory release to community ([EPL 1.0](https://opensource.org/licenses/EPL-1.0)) , preferably in a [GitHub corporate group](https://github.com/AmadeusITGroup)
-
-
-## Deployment
-
-...to (existing) update sites:
-
-1. check root project `version.txt` for the current version
-2. check root project `gradle.properties` property `release.type` (`snapshot` or `release`). This determines the target repo location.
-3. after or with build use the task `uploadUpdateSite` from the `*.site` subproject to upload and modify existing metadata
-
-## TODO
-
-- make semver compliant instead of `version.txt`
-
+- to our employer __[i:FAO](https://www.cytric.net/)__ - an __[amadeus](https://amadeus.com/)__ group company
+- to previous developer user [Hermann Kneissel](https://github.com/herkne/)
 
 ## License
 
