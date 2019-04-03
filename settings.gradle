@@ -1,3 +1,21 @@
+pluginManagement {
+   repositories {
+      mavenLocal()
+      maven {
+         url gradleRepositoryUrl
+      }
+      jcenter()
+   }
+   resolutionStrategy.eachPlugin {
+      if (requested.id.namespace == 'org.eclipse.buildship.build') {
+         useModule('org.eclipse.buildship.build:gradle-eclipsebuild:1.0.0-SNAPSHOT')
+      }
+//      if (requested.id.id == 'org.hidetake.ssh') {
+//         useModule('org.hidetake:gradle-ssh-plugin:1.1.2')
+//      }
+   }
+}
+
 include ':net.ifao.oomph.buildshipimport.plugin'
 include ':net.ifao.oomph.buildshipimport.plugin.edit'
 include ':net.ifao.oomph.buildshipimport.feature'

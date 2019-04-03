@@ -1,4 +1,6 @@
-apply plugin: eclipsebuild.BundlePlugin
+plugins {
+   id 'org.eclipse.buildship.build.bundle-plugin'
+}
 
 sourceSets {
    main {

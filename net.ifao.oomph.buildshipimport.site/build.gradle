@@ -1,11 +1,6 @@
-apply plugin: eclipsebuild.UpdateSitePlugin
-apply plugin: 'org.hidetake.ssh'
-
-buildscript {
-    repositories { jcenter() }
-    dependencies {
-        classpath 'org.hidetake:gradle-ssh-plugin:1.1.2'
-    }
+plugins {
+   id 'org.eclipse.buildship.build.update-site-plugin'
+   id 'org.hidetake.ssh' version '1.1.2'
 }
 
 dependencies {
@@ -21,17 +16,6 @@ dependencies {
     // signedExternalPlugin withEclipseBundle('com.google.gson')
     // signedExternalPlugin withEclipseBundle('com.google.guava')
 }
-
-
-remotes {
-   polarisHttp {
-       host = POLARIS_HTTP_SFTP_HOST
-       user =  POLARIS_HTTP_SFTP_USER
-       password = POLARIS_HTTP_SFTP_PASSWORD
-       // knownHosts = project.rootProject.file('gradle/ssh/known_hosts')
-   }
-}
-
 
 updateSite {
    siteDescriptor = file('category.xml')
@@ -128,13 +112,21 @@ private void replaceGuavaDependencyRangeInManifest(File jar, String newVersionRa
 }
 
 
+remotes {
+   no_polarisHttp {
+      // host = POLARIS_HTTP_SFTP_HOST
+      // user =  POLARIS_HTTP_SFTP_USER
+      // password = POLARIS_HTTP_SFTP_PASSWORD
+      // knownHosts = project.rootProject.file('gradle/ssh/known_hosts')
+   }
+}
+
 // upload and update
 task uploadUpdateSite(dependsOn : createP2Repository) {
     description = "Uploads the generated update site to the server."
 
     onlyIf { 
-       !['36', '37'].contains(eclipsebuild.Config.on(project).targetPlatform.eclipseVersion) 
-       && remotes.polarisHttp
+       !['36', '37'].contains(eclipsebuild.Config.on(project).targetPlatform.eclipseVersion) && remotes.polarisHttp
        }
 
     doLast {
@@ -172,16 +164,6 @@ task uploadUpdateSite(dependsOn : createP2Repository) {
         }
     }
 }
-
-remotes {
-   no_polarisHttp {
-       host = POLARIS_HTTP_SFTP_HOST
-       user =  POLARIS_HTTP_SFTP_USER
-       password = POLARIS_HTTP_SFTP_PASSWORD
-       // knownHosts = project.rootProject.file('gradle/ssh/known_hosts')
-   }
-}
-
 
 // utility methods
 def releaseTypeFolder(Project project) {

@@ -1,32 +1,15 @@
-buildscript {
-
-   repositories {
-      // local .m2 folder in user directory
-      // mavenLocal()
-
-      // for all internal and public gradle plug-ins use a NON-PCI-DSS complaint URL (group)
-      maven {
-         url "${repositoryManagerURL}/ifao-buildtool_gradle-maven2/"
-      }
-      maven {
-         url "${repositoryManagerURL}/ifao-buildtool_gradle-public-maven2/"
-      }
-   }
-
-   dependencies {
-      classpath "net.ifao.arctic_tools.gradle_plugins:gradle_eclipsebuild:1.0.0"
-   }
+plugins {
+   id 'org.eclipse.buildship.build.build-definition-plugin'
+   id 'eclipse'
+   id "com.gradle.build-scan" version "2.2.1"
 }
 
 wrapper {
-   distributionUrl = "${repositoryManagerURL}/ifao-buildtool_gradle-public-raw/gradle-4.10.2-bin.zip"
+   distributionUrl = "https://services.gradle.org/distributions/gradle-5.2.1-bin.zip"
 }
 
-apply plugin: eclipsebuild.BuildDefinitionPlugin
-apply plugin: 'eclipse'
-
 // the default version can be overridden through -Peclipse.version=<version>
-// also the target platforms contain 1) the Eclipse SDK 2) the latest junit 3) SWTBot 2.2.1
+// also the target platforms contains 1) the Eclipse SDK 2) the latest junit 3) SWTBot 2.2.1
 eclipseBuild {
 
   defaultEclipseVersion = '410'
@@ -49,11 +32,11 @@ eclipseBuild {
 
   targetPlatform {
     eclipseVersion = '410'
-    targetDefinition = file('tooling-e410.target')
+    targetDefinition = file('e410.target')
 
+    // oomph
     def oomphVersion = '1.10.0'
-    def buildshipVersion = '3.0.0'
-
+    
     def oomphDependencies = [
        'org.eclipse.oomph.base'                     : oomphVersion,
        'org.eclipse.oomph.setup'                    : oomphVersion,
@@ -68,20 +51,13 @@ eclipseBuild {
        'org.eclipse.oomph.setup.edit'               : oomphVersion
     ]
 
+    // buildship
+    def buildshipVersion = '3.0.0'
+    
     def buildshipDependencies = [
        'org.eclipse.buildship.core'                : buildshipVersion,
        'org.eclipse.buildship.ui'                  : buildshipVersion
     ]
-
-   // def gradleToolingApi = [
-   //    'org.gradle.toolingapi'                 : '5.0',
-   // ]
-   // def targetAdditionalDependencies =
-   //    eclipseVersionAgnosticDependencies
-   //    + oomphDependencies
-   //    + oomphEditDependencies
-   //    + buildshipDependencies
-   //    + gradleToolingApi
 
    def targetAdditionalDependencies =
       eclipseVersionAgnosticDependencies +
@@ -90,7 +66,6 @@ eclipseBuild {
       buildshipDependencies
 
    versionMapping = [
-
       'org.eclipse.emf.ecore'                 : '2.15.0',
       'org.eclipse.emf.edit'                  : '2.11.0',
       'org.eclipse.swt'                       : '3.108.100',
@@ -122,123 +97,6 @@ eclipseBuild {
       'org.junit'                             : '4.12.0'
     ] + targetAdditionalDependencies
   }
-
-
-  // legacy dependency management "pre-e49"
-
-  def oomphVersionPreE49 = '1.9.0'
-  def buildshipVersionPreE49 = '2.2.1'
-
-  def oomphDependenciesPreE49 = [
-     'org.eclipse.oomph.base'                     : oomphVersionPreE49,
-     'org.eclipse.oomph.setup'                    : oomphVersionPreE49,
-     'org.eclipse.oomph.setup.core'               : oomphVersionPreE49,
-     'org.eclipse.oomph.resources'                : oomphVersionPreE49
-   ]
-
-  def oomphEditDependenciesPreE49 = [
-     'org.eclipse.oomph.base.edit'                : oomphVersionPreE49,
-     'org.eclipse.oomph.predicates.edit'          : oomphVersionPreE49,
-     'org.eclipse.oomph.resources.edit'           : oomphVersionPreE49,
-     'org.eclipse.oomph.setup.edit'               : oomphVersionPreE49
-  ]
-
-  def buildshipDependenciesPreE49 = [
-     'org.eclipse.buildship.core'                : buildshipVersionPreE49,
-     'org.eclipse.buildship.ui'                  : buildshipVersionPreE49
-  ]
-
-  // define version mapping for the 3rd-party dependencies that are not specific to a particular Eclipse version
-
-  // on from e49 a buildship api has been made available upon the tooling api
-  ext.toolingCommonsBundleVersion = getBundleVersion(toolingCommonsVersion)
-  ext.toolingApiBundleVersion = getBundleVersion(toolingApiVersion)
-
-  def gradleToolingDependencies = [
-      'com.gradleware.tooling.utils'          : toolingCommonsBundleVersion,
-      'com.gradleware.tooling.client'         : toolingCommonsBundleVersion,
-      'com.gradleware.tooling.model'          : toolingCommonsBundleVersion,
-      'org.gradle.toolingapi'                 : toolingApiBundleVersion,
-  ]
-
-  def targetAdditionalDependenciesPreE49 =
-     eclipseVersionAgnosticDependencies +
-     oomphDependenciesPreE49 +
-     oomphEditDependenciesPreE49 +
-     buildshipDependenciesPreE49 +
-     gradleToolingDependencies
-
-  targetPlatform {
-    eclipseVersion = '48'
-    targetDefinition = file('tooling-e48.target')
-    versionMapping = [
-      "$swtPluginId"                          : '3.107.0',
-      'org.eclipse.swt'                       : '3.107.0',
-      'org.eclipse.emf.ecore'                 : '2.14.0',
-      'org.eclipse.emf.edit'                  : '2.13.0',
-      'com.ibm.icu'                           : '58.2.0',
-      'org.eclipse.core.expressions'          : '3.6.100',
-      'org.eclipse.core.filesystem'           : '1.7.100',
-      'org.eclipse.core.net'                  : '1.3.200',
-      'org.eclipse.core.resources'            : '3.13.0',
-      'org.eclipse.core.runtime'              : '3.14.0',
-      'org.eclipse.core.variables'            : '3.4.100',
-      'org.eclipse.debug.core'                : '3.12.0',
-      'org.eclipse.debug.ui'                  : '3.13.0',
-      'org.eclipse.help'                      : '3.8.100',
-      'org.eclipse.jdt.core'                  : '3.14.0',
-      'org.eclipse.jdt.junit.core'            : '3.10.0',
-      'org.eclipse.jdt.launching'             : '3.10.0',
-      'org.eclipse.jdt.ui'                    : '3.14.0',
-      'org.eclipse.jface.databinding'         : '1.8.200',
-      'org.eclipse.jface.text'                : '3.13.0',
-      'org.eclipse.ui'                        : '3.109.100',
-      'org.eclipse.ui.console'                : '3.8.0',
-      'org.eclipse.ui.editors'                : '3.11.100',
-      'org.eclipse.ui.ide'                    : '3.14.0',
-      'org.eclipse.ui.navigator'              : '3.7.100',
-      'org.eclipse.ui.views'                  : '3.9.100',
-      'org.eclipse.ui.workbench'              : '3.111.0',
-      'org.eclipse.ui.workbench.texteditor'   : '3.11.0',
-      'org.junit'                             : '4.12.0'
-    ] + targetAdditionalDependenciesPreE49
-  }
-
-  targetPlatform {
-    eclipseVersion = '47'
-    targetDefinition = file('tooling-e47.target')
-    versionMapping = [
-      "$swtPluginId"                          : '3.106.1',
-      'org.eclipse.swt'                       : '3.106.1',
-      'org.eclipse.emf.ecore'                 : '2.14.0', // UNTESTED
-      'org.eclipse.emf.edit'                  : '2.13.0', // UNTESTED
-      'com.ibm.icu'                           : '58.2.0',
-      'org.eclipse.core.expressions'          : '3.6.0',
-      'org.eclipse.core.filesystem'           : '1.7.0',
-      'org.eclipse.core.net'                  : '1.3.100',
-      'org.eclipse.core.resources'            : '3.12.0',
-      'org.eclipse.core.runtime'              : '3.13.0',
-      'org.eclipse.core.variables'            : '3.4.0',
-      'org.eclipse.debug.core'                : '3.11.0',
-      'org.eclipse.debug.ui'                  : '3.12.50',
-      'org.eclipse.help'                      : '3.8.1',
-      'org.eclipse.jdt.core'                  : '3.11.0',
-      'org.eclipse.jdt.junit.core'            : '3.9.50',
-      'org.eclipse.jdt.launching'             : '3.9.50',
-      'org.eclipse.jdt.ui'                    : '3.13.50',
-      'org.eclipse.jface.databinding'         : '1.8.100',
-      'org.eclipse.jface.text'                : '3.12.0',
-      'org.eclipse.ui'                        : '3.109.0',
-      'org.eclipse.ui.console'                : '3.7.1',
-      'org.eclipse.ui.editors'                : '3.11.0',
-      'org.eclipse.ui.ide'                    : '3.13.1',
-      'org.eclipse.ui.navigator'              : '3.7.0',
-      'org.eclipse.ui.views'                  : '3.9.0',
-      'org.eclipse.ui.workbench'              : '3.10.100', // UNTESTED
-      'org.eclipse.ui.workbench.texteditor'   : '3.10.100',
-      'org.junit'                             : '4.12.0'
-    ] + targetAdditionalDependenciesPreE49
-  }
 }
 
 
@@ -247,7 +105,7 @@ ext.baseVersion = file('version.txt').text.trim()
 ext.versionQualifier = getVersionQualifier()
 version = baseVersion + '.' + versionQualifier
 
-// TODO: let handle .tooling folder locally in root project root,
+// TODO: (schwitzkroko) let handle .tooling folder locally in root project root,
 // ensure that local common repos ('mavenized-target-platform') are created for and used by all project builds,
 // currently this approach fails at 'assemble*'...
 // allprojects {
@@ -255,6 +113,7 @@ version = baseVersion + '.' + versionQualifier
 // }
 
 subprojects {
+   
    version = rootProject.version
 
    apply plugin: 'eclipse'
@@ -292,16 +151,16 @@ tasks.withType(eclipsebuild.DownloadEclipseSdkTask) {
    // dont support 32bit here anymore
    // def arch = System.getProperty("os.arch").contains("64") ? "64" : "32"
    // def mirrorBase = "http://builds.gradle.org:8000/eclipse/sdk
-   def mirrorBase = "http://archive.eclipse.org/eclipse/downloads/drops4/R-4.4.2-201502041700"
+   def mirrorBaseUrl = "http://archive.eclipse.org/eclipse/downloads/drops4/R-4.4.2-201502041700"
    if (os.windows) {
        // downloadUrl = "${mirrorBase}/eclipse-sdk-4.4.2-windows-${arch}.zip"
-       downloadUrl = "${mirrorBase}/eclipse-SDK-4.4.2-win32-x86_64.zip"
+       downloadUrl = "${mirrorBaseUrl}/eclipse-SDK-4.4.2-win32-x86_64.zip"
    } else if (os.macOsX) {
        // downloadUrl = "${mirrorBase}/eclipse-sdk-4.4.2-macosx-${arch}.tar.gz"
-       downloadUrl = "${mirrorBase}/eclipse-SDK-4.4.2-linux-gtk-x86_64.tar.gz"
+       downloadUrl = "${mirrorBaseUrl}/eclipse-SDK-4.4.2-linux-gtk-x86_64.tar.gz"
    } else if (os.linux) {
        // downloadUrl = "${mirrorBase/eclipse-sdk-4.4.2-linux-${arch}.tar.gz"
-       downloadUrl = "${mirrorBase}/eclipse-SDK-4.4.2-macosx-cocoa-x86_64.tar.gz"
+       downloadUrl = "${mirrorBaseUrl}/eclipse-SDK-4.4.2-macosx-cocoa-x86_64.tar.gz"
    }
    logger.debug("sdk url selected: ${downloadUrl}")
 }
@@ -346,4 +205,9 @@ eclipse {
    project {
       name = 'net.ifao.oomph.setup.buildship.ROOT'
    }
+}
+
+buildScan {
+   termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+   termsOfServiceAgree = 'yes'
 }

@@ -2,9 +2,8 @@
 
 Gradle project import task for setting up development environments using Eclipse Oomph.
 
-This work is based on code from this older implementation, see: https://github.com/herkne/buildship-import-4-oomph
+This work is based on code from this older implementation: https://github.com/herkne/buildship-import-4-oomph
 
-[TOC]
 
 ## Overview
 
@@ -20,7 +19,6 @@ It basically does Buildship´s "Existing Gradle Project" import. The parameters 
 </setupTask>
 ```
 TBC
-
 
 
 ### Original documentation
@@ -81,8 +79,10 @@ The task ~~provides~~ used to provide the following properties, work-in-progress
 
 ## Credits
 
-- to employer __[i:FAO](https://www.cytric.net/)__ - an __[amadeus](https://amadeus.com/)__ group company
-- to previous developer GitHub user [Hermann Kneissel](https://github.com/herkne/)
+go to...
+- previous developer GitHub user [Hermann Kneissel](https://github.com/herkne/)
+- our employer __[i:FAO](https://www.cytric.net/)__ - an __[amadeus](https://amadeus.com/)__ group company
+- the Eclipse Foundation, Buildship and Oomph projects
 
 ## License
 
