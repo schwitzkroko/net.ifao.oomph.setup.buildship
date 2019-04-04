@@ -3,5 +3,5 @@
    <feature url="features/net.ifao.oomph.buildshipimport_0.0.0.jar" id="net.ifao.oomph.buildshipimport" version="0.0.0">
       <category name="eclipse_oomph_buildshipimport"/>
    </feature>
-   <category-def name="eclipse_oomph_buildshipimport" label="i:FAO Eclipse Plug-in: Oomph Buildship Import"/>
+   <category-def name="eclipse_oomph_buildshipimport" label="Eclipse Plug-in: Oomph Buildship import"/>
 </site>

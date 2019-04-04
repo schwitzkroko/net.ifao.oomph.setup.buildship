@@ -64,7 +64,7 @@ private void signLocally(File unsignedFolder, File signedFolder) {
 
 private void addExtraPropertiesToArtifactsXml(Node artifactsXml) {
    // modify the artifacts.xml file only when it is deployed to the eclipse.org servers
-   if (POLARIS_HTTP_MIRROR_PATH) {
+   if (false) { // (POLARIS_HTTP_MIRROR_PATH) {
        // https://wiki.eclipse.org/Equinox/p2/p2.mirrorsURL
        // add p2.mirrorsUrl to the properties section
        def mainPropertiesNode = artifactsXml.depthFirst().find { it.parent()?.name() == 'repository' && it.name() == 'properties' }

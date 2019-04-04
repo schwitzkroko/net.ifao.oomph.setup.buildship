@@ -17,3 +17,4 @@ Require-Bundle: net.ifao.oomph.buildshipimport.plugin,
  org.eclipse.oomph.resources.edit;bundle-version="[1.10.0,2.0.0)";visibility:=reexport,
  org.eclipse.oomph.setup.edit;bundle-version="[1.10.0,2.0.0)";visibility:=reexport
 Export-Package: net.ifao.oomph.buildshipimport.provider
+Automatic-Module-Name: net.ifao.oomph.buildshipimport.plugin.edit

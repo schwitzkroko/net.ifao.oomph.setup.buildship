@@ -7,7 +7,7 @@ This work is based on code from this older implementation: https://github.com/he
 
 ## Overview
 
-This Eclipse plug-in leverages functionality of the [Eclipse Buildship plugin](https://projects.eclipse.org/projects/tools.buildship) to realize an [Oomph setup task](https://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.oomph.setup.doc%2Fhtml%2Fconcepts%2FDocTask.html).
+This Eclipse plug-in leverages functionality of the [Eclipse Buildship plugin](https://projects.eclipse.org/projects/tools.buildship) to realize an [Oomph Setup Task](https://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.oomph.setup.doc%2Fhtml%2Fconcepts%2FDocTask.html).
 
 It basically does Buildship´s "Existing Gradle Project" import. The parameters for that import are described as Oomph xml. The Oomph *Setup Editor* supports the configuration.
 
@@ -23,9 +23,9 @@ TBC
 
 ### Original documentation
 
-These plugins provide an oomph setup task to import gradle projects into eclipse using the buildship project-import wizard.
+These plugins provide an Oomph Setup Task to import gradle projects into eclipse using the buildship project-import wizard.
 
-After the project has been successfully imported an optional gradle task may be executed. The task checks the presence of a file `.settings/gradle.prefs` in the project root directory. The task will be executed if either this file is missing or its contents points to another project location.
+After the project has been successfully imported an optional gradle task may be executed. ~~The task checks the presence of a file `.settings/gradle.prefs` in the project root directory.The task will be executed if either this file is missing or its contents points to another project location.~~ 
 
 For the moment consider this to be in alpha state. The task seems to work with all of my setups i tried so far, but problems might still exist.
 
@@ -34,8 +34,9 @@ Import the projects into the workspace, use the genmodel file to generate the mo
 
 Add the feature to the workspace you use to edit your setup files and to the workspace in which the task will be executed.
 
-There is a p2 update site here: http://p2.kneissel.mail-und-web.de/update/buildshipimport
+Legacy version on a p2 update site here: http://p2.kneissel.mail-und-web.de/update/buildshipimport
 
+Current version: TBC
 
 ## Usage
 
@@ -79,7 +80,7 @@ The task ~~provides~~ used to provide the following properties, work-in-progress
 
 ## Credits
 
-go to...
+Credits go to...
 - previous developer GitHub user [Hermann Kneissel](https://github.com/herkne/)
 - our employer __[i:FAO](https://www.cytric.net/)__ - an __[amadeus](https://amadeus.com/)__ group company
 - the Eclipse Foundation, Buildship and Oomph projects

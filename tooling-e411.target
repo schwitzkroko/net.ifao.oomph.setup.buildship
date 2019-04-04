@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target name="Preliminary Eclipse 2019-03 Target Platform" sequenceNumber="1">
+    <locations>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <unit id="org.eclipse.m2e.feature.feature.group" version="1.10.0.20181127-2120"/>
+            <unit id="org.eclipse.sdk.ide" version="4.11.0.I20190109-1800"/>
+            <repository location="https://download.eclipse.org/releases/2019-03/201901181001/"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <unit id="com.google.gson" version="2.7.0.v20170129-0911"/>
+            <unit id="com.google.guava" version="21.0.0.v20170206-1425"/>
+            <unit id="org.junit" version="4.12.0.v201504281640"/>
+            <unit id="org.slf4j.api" version="1.7.2.v20121108-1250"/>
+            <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/repository/"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.2.1.201402241301"/>
+            <unit id="org.eclipse.swtbot.ide.feature.group" version="2.2.1.201402241301"/>
+            <repository location="https://download.eclipse.org/technology/swtbot/releases/2.2.1/"/>
+        </location>
+        <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+          <unit id="org.eclipse.buildship.feature.group" version="3.0.1.v20181217-1554"/>
+          <repository location="http://download.eclipse.org/buildship/updates/e410/releases/3.x"/>
+       </location>
+       <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+          <unit id="org.eclipse.oomph.setup.sdk.feature.group" version="1.12.0.v20190206-0943"/>
+          <repository location="https://download.eclipse.org/oomph/updates/release"/>
+       </location>
+    </locations>
+    <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+    <launcherArgs>
+        <vmArgs>-XX:MaxPermSize=128M</vmArgs>
+    </launcherArgs>
+</target>

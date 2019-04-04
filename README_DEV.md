@@ -18,13 +18,10 @@ Please note that this is project is handled in a gitflow manner now and primary 
 
 ### 'build'
 
-Task 'build' in ROOT - `buildship-eclipsebuild` Gradle plugin is used.
+Task 'build' in ROOT - plugin [gradle-eclipsebuild](https://github.com/schwitzkroko/gradle-eclipsebuild) is used.
+
 
 ### Update site
-
-The build supports the copying of the generated update sites, internal locations are currently below here:
-[http://polaris.home.ifao.net:8080/eclipse/updates/eclipse_oomph_buildshipimport/](http://polaris.home.ifao.net:8080/eclipse/updates/eclipse_oomph_buildshipimport/)
-
 
 Create a release version and deploy:
 
@@ -43,15 +40,17 @@ RCP IDE eclipse... etc TBC
 
 ### TODO
 
-(move this to issues)
+(move this to issues?)
 
-- proper integration into the Oomph task lifecycle, maybe support `ImportWaitTime` to set a timeout
-- support execution of an initial Gradle-Task (one per BuildshipImportTask setupTask-Element)
-- support Buildship workspace settings override
-- introduce a category in generated update site
+- ~~proper integration into the Oomph task lifecycle, maybe support `ImportWaitTime` to set a timeout~~ review?
+- ~~support execution of an initial Gradle-Task (one per BuildshipImportTask setupTask-Element)~~ test
+- support _more_ Buildship workspace settings override
+- ~~introduce a category in generated update site~~ retest
 - some automated testing using `eclipsebuild.TestBundlePlugin'
 - configure CI build
-- mandatory release to community ([EPL 1.0](https://opensource.org/licenses/EPL-1.0)) , preferably in a [GitHub corporate group](https://github.com/AmadeusITGroup)
+- ~~mandatory release to community ([EPL 1.0](https://opensource.org/licenses/EPL-1.0)))~~
+- release in [GitHub AmadeusITGroup group](https://github.com/AmadeusITGroup)?
+- make semantic versioning compliant instead of `version.txt`
 
 
 ## Deployment
@@ -62,9 +61,7 @@ RCP IDE eclipse... etc TBC
 2. check root project `gradle.properties` property `release.type` (`snapshot` or `release`). This determines the target repo location.
 3. after or with build use the task `uploadUpdateSite` from the `*.site` subproject to upload and modify existing metadata
 
-## TODO
 
-- make semantic versioning compliant instead of `version.txt`
 
 
 
