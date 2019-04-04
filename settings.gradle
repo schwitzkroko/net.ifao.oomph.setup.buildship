@@ -1,8 +1,8 @@
 pluginManagement {
    repositories {
-      mavenLocal()
+      // mavenLocal()
       maven {
-         url gradleRepositoryUrl
+         url 'https://dl.bintray.com/schwitzkroko/test/'
       }
       jcenter()
    }
