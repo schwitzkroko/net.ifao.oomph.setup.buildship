@@ -1,6 +1,7 @@
 plugins {
    id 'org.eclipse.buildship.build.update-site-plugin'
    id 'org.hidetake.ssh' version '1.1.2'
+   id 'com.jfrog.bintray' version "1.8.4"
 }
 
 dependencies {
@@ -164,6 +165,32 @@ task uploadUpdateSite(dependsOn : createP2Repository) {
         }
     }
 }
+
+bintray {
+   user = System.getProperty('user', 'undefined_user')
+   key = System.getProperty('key', 'undefined_key')
+   pkg {
+      repo = "eclipse-${releaseTypeFolder(project)}-e${eclipsebuild.Config.on(project).targetPlatform.eclipseVersion}"
+      name = 'net.ifao.oomph.setup.buildship'
+      userOrg = user
+      websiteUrl = 'https://github.com/schwitzkroko/net.ifao.oomph.setup.buildship'
+      vcsUrl = 'https://github.com/schwitzkroko/net.ifao.oomph.setup.buildship'
+      issueTrackerUrl = 'https://github.com/schwitzkroko/net.ifao.oomph.setup.buildship/issues'
+      licenses = ['EPL-1.0']
+      githubRepo = 'schwitzkroko/net.ifao.oomph.setup.buildship'
+      githubReleaseNotesFile = 'README.md'
+      version {
+         name = project.version
+         desc = 'desc_undefined'
+         released  = new Date()
+     }
+     filesSpec {
+        from 'build/repository'
+     }
+  }
+  
+}
+
 
 // utility methods
 def releaseTypeFolder(Project project) {

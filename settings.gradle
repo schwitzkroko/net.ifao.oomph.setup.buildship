@@ -4,11 +4,14 @@ pluginManagement {
       maven {
          url 'https://dl.bintray.com/schwitzkroko/test/'
       }
+      maven {
+         url gradleRepositoryUrl
+      }
       jcenter()
    }
    resolutionStrategy.eachPlugin {
       if (requested.id.namespace == 'org.eclipse.buildship.build') {
-         useModule('org.eclipse.buildship.build:gradle-eclipsebuild:1.0.0-SNAPSHOT')
+         useModule('org.eclipse.buildship.build:gradle-eclipsebuild:0.0.9')
       }
 //      if (requested.id.id == 'org.hidetake.ssh') {
 //         useModule('org.hidetake:gradle-ssh-plugin:1.1.2')

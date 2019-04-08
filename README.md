@@ -78,6 +78,17 @@ The task ~~provides~~ used to provide the following properties, work-in-progress
 | `GradleTask`           | If not empty this is the name of the task to be executed after the project has been imported. ~~The property is preset to "eclipse".~~ |                 | [x]     |
 | `GradleBuildDirectory` | the directory from which `GradleTask` will be executed. If not set `ProjectRootDirectory` will be used. |                 | [ ] medium     |
 
+
+## Building/deployin this Gradle plugin
+
+```
+$ ./gradlew clean build
+```
+
+```
+$ ./gradlew build bintrayUpload -Duser=<bintray_user> -Dkey=<bintray_key>
+```
+
 ## Credits
 
 Credits go to...

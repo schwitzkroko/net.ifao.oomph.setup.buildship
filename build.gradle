@@ -1,7 +1,7 @@
 plugins {
    id 'org.eclipse.buildship.build.build-definition-plugin'
    id 'eclipse'
-   id "com.gradle.build-scan" version "2.2.1"
+   id 'com.gradle.build-scan' version '2.2.1'
 }
 
 wrapper {
@@ -222,8 +222,7 @@ tasks.withType(eclipsebuild.DownloadEclipseSdkTask) {
    def os = org.gradle.internal.os.OperatingSystem.current()
    // dont support 32bit here anymore
    // def arch = System.getProperty("os.arch").contains("64") ? "64" : "32"
-   // def mirrorBase = "http://builds.gradle.org:8000/eclipse/sdk
-   def mirrorBaseUrl = "http://archive.eclipse.org/eclipse/downloads/drops4/R-4.4.2-201502041700"
+   def mirrorBaseUrl = toolingEclipseSdkBaseUrl?: "http://builds.gradle.org:8000/eclipse/sdk"
    if (os.windows) {
        // downloadUrl = "${mirrorBase}/eclipse-sdk-4.4.2-windows-${arch}.zip"
        downloadUrl = "${mirrorBaseUrl}/eclipse-SDK-4.4.2-win32-x86_64.zip"
