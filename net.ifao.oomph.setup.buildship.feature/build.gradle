@@ -1,0 +1,11 @@
+plugins {
+   id 'org.eclipse.buildship.build.feature-plugin'
+}
+   
+eclipse {
+  project {
+    natures = ['org.eclipse.pde.FeatureNature']
+
+    buildCommand 'org.eclipse.pde.FeatureBuilder'
+  }  
+}

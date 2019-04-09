@@ -1,0 +1,27 @@
+plugins {
+   id 'org.eclipse.buildship.build.bundle-plugin'
+}
+
+sourceSets {
+   main {
+      java { srcDirs = ['src'] }
+   }
+}
+
+eclipse {
+
+    project {
+
+        natures = ['org.eclipse.pde.PluginNature']
+
+        buildCommand 'org.eclipse.pde.ManifestBuilder'
+        buildCommand 'org.eclipse.pde.SchemaBuilder'
+    }
+
+    classpath {
+
+       downloadJavadoc = true
+       downloadSources = true
+        // containers 'org.eclipse.pde.core.requiredPlugins'
+    }
+}
