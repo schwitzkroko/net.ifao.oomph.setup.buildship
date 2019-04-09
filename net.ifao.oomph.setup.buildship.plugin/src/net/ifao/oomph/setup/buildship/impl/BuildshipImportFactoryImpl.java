@@ -1,18 +1,15 @@
 /**
  */
-package net.ifao.oomph.buildshipimport.impl;
+package net.ifao.oomph.setup.buildship.impl;
 
 
-import net.ifao.oomph.buildshipimport.*;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
 import org.eclipse.emf.ecore.plugin.EcorePlugin;
 
-import net.ifao.oomph.buildshipimport.BuildshipImportFactory;
-import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
-import net.ifao.oomph.buildshipimport.BuildshipImportTask;
+import net.ifao.oomph.setup.buildship.*;
 
 
 /**

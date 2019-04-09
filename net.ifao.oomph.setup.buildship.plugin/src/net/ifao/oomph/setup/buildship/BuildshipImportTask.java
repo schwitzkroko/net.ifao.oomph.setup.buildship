@@ -1,6 +1,6 @@
 /**
  */
-package net.ifao.oomph.buildshipimport;
+package net.ifao.oomph.setup.buildship;
 
 
 import org.eclipse.emf.common.util.EList;
@@ -17,11 +17,11 @@ import org.eclipse.oomph.setup.SetupTask;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getSourceLocators <em>Source Locators</em>}</li>
- *   <li>{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}</li>
+ *   <li>{@link net.ifao.oomph.setup.buildship.BuildshipImportTask#getSourceLocators <em>Source Locators</em>}</li>
+ *   <li>{@link net.ifao.oomph.setup.buildship.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}</li>
  * </ul>
  *
- * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask()
+ * @see net.ifao.oomph.setup.buildship.BuildshipImportPackage#getBuildshipImportTask()
  * @model annotation="http://www.eclipse.org/oomph/setup/ValidTriggers triggers='STARTUP MANUAL'"
  * @generated
  */
@@ -38,7 +38,7 @@ public interface BuildshipImportTask
     * </p>
     * <!-- end-user-doc -->
     * @return the value of the '<em>Source Locators</em>' containment reference list.
-    * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask_SourceLocators()
+    * @see net.ifao.oomph.setup.buildship.BuildshipImportPackage#getBuildshipImportTask_SourceLocators()
     * @model containment="true" required="true"
     *        extendedMetaData="name='sourceLocator'"
     * @generated
@@ -55,14 +55,14 @@ public interface BuildshipImportTask
     * <!-- end-user-doc -->
     * @return the value of the '<em>Gradle Task</em>' attribute.
     * @see #setGradleTask(String)
-    * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage#getBuildshipImportTask_GradleTask()
+    * @see net.ifao.oomph.setup.buildship.BuildshipImportPackage#getBuildshipImportTask_GradleTask()
     * @model
     * @generated
     */
    String getGradleTask();
 
    /**
-    * Sets the value of the '{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}' attribute.
+    * Sets the value of the '{@link net.ifao.oomph.setup.buildship.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}' attribute.
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
     * @param value the new value of the '<em>Gradle Task</em>' attribute.

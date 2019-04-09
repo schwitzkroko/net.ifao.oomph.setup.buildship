@@ -1,6 +1,6 @@
 /**
  */
-package net.ifao.oomph.buildshipimport.util;
+package net.ifao.oomph.setup.buildship.util;
 
 
 import org.eclipse.emf.common.notify.Adapter;
@@ -10,8 +10,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.oomph.base.ModelElement;
 import org.eclipse.oomph.setup.SetupTask;
 
-import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
-import net.ifao.oomph.buildshipimport.BuildshipImportTask;
+import net.ifao.oomph.setup.buildship.BuildshipImportPackage;
+import net.ifao.oomph.setup.buildship.BuildshipImportTask;
 
 
 /**
@@ -19,7 +19,7 @@ import net.ifao.oomph.buildshipimport.BuildshipImportTask;
  * The <b>Adapter Factory</b> for the model.
  * It provides an adapter <code>createXXX</code> method for each class of the model.
  * <!-- end-user-doc -->
- * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage
+ * @see net.ifao.oomph.setup.buildship.BuildshipImportPackage
  * @generated
  */
 public class BuildshipImportAdapterFactory
@@ -115,13 +115,13 @@ public class BuildshipImportAdapterFactory
 
 
    /**
-    * Creates a new adapter for an object of class '{@link net.ifao.oomph.buildshipimport.BuildshipImportTask <em>Task</em>}'.
+    * Creates a new adapter for an object of class '{@link net.ifao.oomph.setup.buildship.BuildshipImportTask <em>Task</em>}'.
     * <!-- begin-user-doc -->
     * This default implementation returns null so that we can easily ignore cases;
     * it's useful to ignore a case when inheritance will catch all the cases anyway.
     * <!-- end-user-doc -->
     * @return the new adapter.
-    * @see net.ifao.oomph.buildshipimport.BuildshipImportTask
+    * @see net.ifao.oomph.setup.buildship.BuildshipImportTask
     * @generated
     */
    public Adapter createBuildshipImportTaskAdapter()

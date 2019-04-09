@@ -1,7 +1,7 @@
 /**
  *
  */
-package net.ifao.oomph.buildshipimport.util;
+package net.ifao.oomph.setup.buildship.util;
 
 
 import java.io.ByteArrayInputStream;
@@ -30,7 +30,7 @@ import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.ifao.oomph.buildshipimport.BuildshipImportPlugin;
+import net.ifao.oomph.setup.buildship.BuildshipImportPlugin;
 
 
 /**

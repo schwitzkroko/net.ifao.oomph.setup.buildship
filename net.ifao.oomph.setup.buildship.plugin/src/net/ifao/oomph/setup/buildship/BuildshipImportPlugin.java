@@ -8,7 +8,7 @@
  * Contributors:
  *    Eike Stepper - initial API and implementation
  */
-package net.ifao.oomph.buildshipimport;
+package net.ifao.oomph.setup.buildship;
 
 import org.eclipse.oomph.util.OomphPlugin;
 

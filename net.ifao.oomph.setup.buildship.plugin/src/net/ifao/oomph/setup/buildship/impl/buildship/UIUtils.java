@@ -1,4 +1,4 @@
-package net.ifao.oomph.buildshipimport.impl.buildship;
+package net.ifao.oomph.setup.buildship.impl.buildship;
 
 
 import java.util.List;

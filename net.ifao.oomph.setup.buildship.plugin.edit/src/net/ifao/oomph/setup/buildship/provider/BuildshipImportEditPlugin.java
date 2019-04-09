@@ -1,4 +1,4 @@
-package net.ifao.oomph.buildshipimport.provider;
+package net.ifao.oomph.setup.buildship.provider;
 
 
 import org.eclipse.emf.common.EMFPlugin;

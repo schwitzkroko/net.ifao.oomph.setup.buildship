@@ -8,7 +8,7 @@
  * Contributors:
  *    Eike Stepper - initial API and implementation
  */
-package net.ifao.oomph.buildshipimport.provider;
+package net.ifao.oomph.setup.buildship.provider;
 
 
 import java.util.Collection;
@@ -25,12 +25,12 @@ import org.eclipse.emf.edit.provider.ViewerNotification;
 import org.eclipse.oomph.resources.ResourcesFactory;
 import org.eclipse.oomph.setup.provider.SetupTaskItemProvider;
 
-import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
-import net.ifao.oomph.buildshipimport.BuildshipImportTask;
+import net.ifao.oomph.setup.buildship.BuildshipImportPackage;
+import net.ifao.oomph.setup.buildship.BuildshipImportTask;
 
 
 /**
- * This is the item provider adapter for a {@link net.ifao.oomph.buildshipimport.BuildshipImportTask} object.
+ * This is the item provider adapter for a {@link net.ifao.oomph.setup.buildship.BuildshipImportTask} object.
  * <!-- begin-user-doc -->
  * <!-- end-user-doc -->
  * @generated

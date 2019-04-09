@@ -1,6 +1,6 @@
 /**
  */
-package net.ifao.oomph.buildshipimport.impl;
+package net.ifao.oomph.setup.buildship.impl;
 
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -13,9 +13,9 @@ import org.eclipse.oomph.predicates.PredicatesPackage;
 import org.eclipse.oomph.resources.ResourcesPackage;
 import org.eclipse.oomph.setup.SetupPackage;
 
-import net.ifao.oomph.buildshipimport.BuildshipImportFactory;
-import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
-import net.ifao.oomph.buildshipimport.BuildshipImportTask;
+import net.ifao.oomph.setup.buildship.BuildshipImportFactory;
+import net.ifao.oomph.setup.buildship.BuildshipImportPackage;
+import net.ifao.oomph.setup.buildship.BuildshipImportTask;
 
 
 /**
@@ -46,7 +46,7 @@ public class BuildshipImportPackageImpl
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
     * @see org.eclipse.emf.ecore.EPackage.Registry
-    * @see net.ifao.oomph.buildshipimport.BuildshipImportPackage#eNS_URI
+    * @see net.ifao.oomph.setup.buildship.BuildshipImportPackage#eNS_URI
     * @see #init()
     * @generated
     */
@@ -265,7 +265,7 @@ public class BuildshipImportPackageImpl
    {
       String source = "http://www.eclipse.org/oomph/setup/Enablement";
       addAnnotation(this, source, new String[]{ "variableName", "setup.projects.p2", "repository", "${oomph.update.url}",
-            "installableUnits", "net.ifao.oomph.buildshipimport.feature.group" });
+            "installableUnits", "net.ifao.oomph.setup.buildship.feature.group" });
    }
 
    /**
@@ -278,7 +278,7 @@ public class BuildshipImportPackageImpl
    {
       String source = "http://www.eclipse.org/oomph/base/LabelProvider";
       addAnnotation(this, source, new String[]{ "imageBaseURI",
-            "http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/net.ifao.oomph.buildshipimport.edit/icons/full/obj16" });
+            "http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/net.ifao.oomph.setup.buildship.edit/icons/full/obj16" });
    }
 
    /**

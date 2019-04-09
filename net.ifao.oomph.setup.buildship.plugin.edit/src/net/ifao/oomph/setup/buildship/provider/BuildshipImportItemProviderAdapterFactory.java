@@ -1,4 +1,4 @@
-package net.ifao.oomph.buildshipimport.provider;
+package net.ifao.oomph.setup.buildship.provider;
 
 
 import java.util.ArrayList;
@@ -32,8 +32,8 @@ import org.eclipse.oomph.setup.SetupPackage;
 import org.eclipse.oomph.setup.SetupTaskContainer;
 import org.eclipse.oomph.setup.util.SetupSwitch;
 
-import net.ifao.oomph.buildshipimport.BuildshipImportFactory;
-import net.ifao.oomph.buildshipimport.util.BuildshipImportAdapterFactory;
+import net.ifao.oomph.setup.buildship.BuildshipImportFactory;
+import net.ifao.oomph.setup.buildship.util.BuildshipImportAdapterFactory;
 
 
 public class BuildshipImportItemProviderAdapterFactory

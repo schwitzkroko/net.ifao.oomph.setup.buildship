@@ -1,6 +1,6 @@
 /**
  */
-package net.ifao.oomph.buildshipimport;
+package net.ifao.oomph.setup.buildship;
 
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -21,11 +21,11 @@ import org.eclipse.oomph.setup.SetupPackage;
  *   <li>and each data type</li>
  * </ul>
  * <!-- end-user-doc -->
- * @see net.ifao.oomph.buildshipimport.BuildshipImportFactory
+ * @see net.ifao.oomph.setup.buildship.BuildshipImportFactory
  * @model kind="package"
  *        annotation="http://www.eclipse.org/emf/2002/Ecore schemaLocation='http://www.ifao.net/oomph/buildshipimport/schemas/Buildshipimport-1.0.ecore'"
- *        annotation="http://www.eclipse.org/oomph/setup/Enablement variableName='setup.projects.p2' repository='${oomph.update.url}' installableUnits='net.ifao.oomph.buildshipimport.feature.group'"
- *        annotation="http://www.eclipse.org/oomph/base/LabelProvider imageBaseURI='http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/net.ifao.oomph.buildshipimport.edit/icons/full/obj16'"
+ *        annotation="http://www.eclipse.org/oomph/setup/Enablement variableName='setup.projects.p2' repository='${oomph.update.url}' installableUnits='net.ifao.oomph.setup.buildship.feature.group'"
+ *        annotation="http://www.eclipse.org/oomph/base/LabelProvider imageBaseURI='http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/plugins/net.ifao.oomph.setup.buildship.edit/icons/full/obj16'"
  * @generated
  */
 public interface BuildshipImportPackage
@@ -61,14 +61,14 @@ public interface BuildshipImportPackage
     * <!-- end-user-doc -->
     * @generated
     */
-   BuildshipImportPackage eINSTANCE = net.ifao.oomph.buildshipimport.impl.BuildshipImportPackageImpl.init();
+   BuildshipImportPackage eINSTANCE = net.ifao.oomph.setup.buildship.impl.BuildshipImportPackageImpl.init();
 
    /**
-    * The meta object id for the '{@link net.ifao.oomph.buildshipimport.impl.BuildshipImportTaskImpl <em>Task</em>}' class.
+    * The meta object id for the '{@link net.ifao.oomph.setup.buildship.impl.BuildshipImportTaskImpl <em>Task</em>}' class.
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
-    * @see net.ifao.oomph.buildshipimport.impl.BuildshipImportTaskImpl
-    * @see net.ifao.oomph.buildshipimport.impl.BuildshipImportPackageImpl#getBuildshipImportTask()
+    * @see net.ifao.oomph.setup.buildship.impl.BuildshipImportTaskImpl
+    * @see net.ifao.oomph.setup.buildship.impl.BuildshipImportPackageImpl#getBuildshipImportTask()
     * @generated
     */
    int BUILDSHIP_IMPORT_TASK = 0;
@@ -192,32 +192,32 @@ public interface BuildshipImportPackage
 
 
    /**
-    * Returns the meta object for class '{@link net.ifao.oomph.buildshipimport.BuildshipImportTask <em>Task</em>}'.
+    * Returns the meta object for class '{@link net.ifao.oomph.setup.buildship.BuildshipImportTask <em>Task</em>}'.
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
     * @return the meta object for class '<em>Task</em>'.
-    * @see net.ifao.oomph.buildshipimport.BuildshipImportTask
+    * @see net.ifao.oomph.setup.buildship.BuildshipImportTask
     * @generated
     */
    EClass getBuildshipImportTask();
 
    /**
-    * Returns the meta object for the containment reference list '{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getSourceLocators <em>Source Locators</em>}'.
+    * Returns the meta object for the containment reference list '{@link net.ifao.oomph.setup.buildship.BuildshipImportTask#getSourceLocators <em>Source Locators</em>}'.
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
     * @return the meta object for the containment reference list '<em>Source Locators</em>'.
-    * @see net.ifao.oomph.buildshipimport.BuildshipImportTask#getSourceLocators()
+    * @see net.ifao.oomph.setup.buildship.BuildshipImportTask#getSourceLocators()
     * @see #getBuildshipImportTask()
     * @generated
     */
    EReference getBuildshipImportTask_SourceLocators();
 
    /**
-    * Returns the meta object for the attribute '{@link net.ifao.oomph.buildshipimport.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}'.
+    * Returns the meta object for the attribute '{@link net.ifao.oomph.setup.buildship.BuildshipImportTask#getGradleTask <em>Gradle Task</em>}'.
     * <!-- begin-user-doc -->
     * <!-- end-user-doc -->
     * @return the meta object for the attribute '<em>Gradle Task</em>'.
-    * @see net.ifao.oomph.buildshipimport.BuildshipImportTask#getGradleTask()
+    * @see net.ifao.oomph.setup.buildship.BuildshipImportTask#getGradleTask()
     * @see #getBuildshipImportTask()
     * @generated
     */
@@ -247,11 +247,11 @@ public interface BuildshipImportPackage
    interface Literals
    {
       /**
-       * The meta object literal for the '{@link net.ifao.oomph.buildshipimport.impl.BuildshipImportTaskImpl <em>Task</em>}' class.
+       * The meta object literal for the '{@link net.ifao.oomph.setup.buildship.impl.BuildshipImportTaskImpl <em>Task</em>}' class.
        * <!-- begin-user-doc -->
        * <!-- end-user-doc -->
-       * @see net.ifao.oomph.buildshipimport.impl.BuildshipImportTaskImpl
-       * @see net.ifao.oomph.buildshipimport.impl.BuildshipImportPackageImpl#getBuildshipImportTask()
+       * @see net.ifao.oomph.setup.buildship.impl.BuildshipImportTaskImpl
+       * @see net.ifao.oomph.setup.buildship.impl.BuildshipImportPackageImpl#getBuildshipImportTask()
        * @generated
        */
       EClass BUILDSHIP_IMPORT_TASK = eINSTANCE.getBuildshipImportTask();

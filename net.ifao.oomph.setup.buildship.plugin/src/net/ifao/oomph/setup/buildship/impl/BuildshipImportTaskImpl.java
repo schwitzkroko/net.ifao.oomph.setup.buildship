@@ -1,4 +1,4 @@
-package net.ifao.oomph.buildshipimport.impl;
+package net.ifao.oomph.setup.buildship.impl;
 
 
 import java.io.File;
@@ -36,11 +36,11 @@ import org.gradle.tooling.model.eclipse.EclipseProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.ifao.oomph.buildshipimport.BuildshipImportPackage;
-import net.ifao.oomph.buildshipimport.BuildshipImportPlugin;
-import net.ifao.oomph.buildshipimport.BuildshipImportTask;
-import net.ifao.oomph.buildshipimport.impl.buildship.UIUtils;
-import net.ifao.oomph.buildshipimport.util.HistoryUtil;
+import net.ifao.oomph.setup.buildship.BuildshipImportPackage;
+import net.ifao.oomph.setup.buildship.BuildshipImportPlugin;
+import net.ifao.oomph.setup.buildship.BuildshipImportTask;
+import net.ifao.oomph.setup.buildship.impl.buildship.UIUtils;
+import net.ifao.oomph.setup.buildship.util.HistoryUtil;
 
 
 /**
@@ -51,8 +51,8 @@ import net.ifao.oomph.buildshipimport.util.HistoryUtil;
  * The following features are implemented:
  * </p>
  * <ul>
- *   <li>{@link net.ifao.oomph.buildshipimport.impl.BuildshipImportTaskImpl#getSourceLocators <em>Source Locators</em>}</li>
- *   <li>{@link net.ifao.oomph.buildshipimport.impl.BuildshipImportTaskImpl#getGradleTask <em>Gradle Task</em>}</li>
+ *   <li>{@link net.ifao.oomph.setup.buildship.impl.BuildshipImportTaskImpl#getSourceLocators <em>Source Locators</em>}</li>
+ *   <li>{@link net.ifao.oomph.setup.buildship.impl.BuildshipImportTaskImpl#getGradleTask <em>Gradle Task</em>}</li>
  * </ul>
  *
  * @generated
